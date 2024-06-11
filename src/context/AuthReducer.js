@@ -15,7 +15,7 @@ const AuthReducer = (state, action) => {
         currentUser: null,
       };
     }
-    case "DELETE ACCOUNT": {
+    case "DELETE": {
       return {
         currentUser: null,
       };

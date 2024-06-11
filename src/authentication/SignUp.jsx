@@ -1,12 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { BiPlus, BiPlusCircle } from "react-icons/bi";
+import { BsEye, BsEyeSlash, BsPlusCircleDotted } from "react-icons/bs";
 
 const SignUp = () => {
+  const imageRef = useRef();
+
   const [data, setData] = useState({
     name: "",
     email: "",
@@ -16,11 +20,26 @@ const SignUp = () => {
   });
   const [file, setFile] = useState("");
   const { dispatch } = useContext(AuthContext);
-  const navigate= useNavigate()
+  const navigate = useNavigate();
+  const [passwordType, setPasswordType] = useState("password");
+
+  const handleTogglePasswordType = () => {
+    if (passwordType === "password") {
+      setPasswordType("text");
+    } else {
+      setPasswordType("password");
+    }
+  };
+  const handleImageOnChange = (e) => {
+    imageRef.current.click();
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
 
   useEffect(() => {
     const handleUploadFile = () => {
-      const name = new Date().getTime() + '_' + file.name;
+      const name = new Date().getTime() + "_" + file.name;
       const storageRef = ref(storage, name); // Create a reference with the desired file path
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -79,10 +98,10 @@ const SignUp = () => {
         mobileNumber: "",
         address: "",
       });
-      setFile("")
-      dispatch({ type: "SIGNUP", payload: response.user});
+      setFile("");
+      dispatch({ type: "SIGNUP", payload: response.user });
       console.log(response.user, data);
-      navigate("/userProfile")
+      navigate("/userProfile");
     } catch (error) {
       console.error(error);
     }
@@ -90,38 +109,46 @@ const SignUp = () => {
 
   return (
     <>
-      <div>
+      <div className="flex items-center h-[100vh] w-full bg-gradient-to-br from-slate-800 to-slate-600 text-white">
         <form
           onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: "fit-content",
-            margin: "0px auto",
-          }}
+          className="flex flex-col w-fit mx-auto justify-center h-[98vh] shadow-lg shadow-slate-900 rounded-md items-center"
         >
-          <h2>Create Account</h2>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              width: "fit-content",
-              margin: "0px auto",
-            }}
-          >
+          <h2 className="my-4 text-4xl font-bold font-serif bg-gradient-to-r from-red-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text">
+            vibeHub
+          </h2>
+          <p className="w-3/4 mb-8 text-sm text-center text-gray-200">
+            Sign up to see photos and videos from your friends
+          </p>
+          <div className="flex flex-col items-center w-full space-y-4">
+            <div className="flex justify-center w-3/4">
+              {!file ? (
+                <div
+                  onClick={handleImageOnChange}
+                  className="flex flex-col items-center justify-center space-y-1"
+                >
+                  <BsPlusCircleDotted size={45} />
+                  <span className="font-thin">Choose a photo</span>
+                </div>
+              ) : (
+                <div>
+                  <img
+                    className="h-16 w-16 rounded-full"
+                    src={data.img}
+                    alt=""
+                  />
+                </div>
+              )}
+              <input
+                name="image"
+                className="hidden"
+                ref={imageRef}
+                type="file"
+                onChange={(e) => setFile(e.target.files[0])} // Corrected this line
+              />
+            </div>
             <input
-              style={{
-                margin: "4px auto",
-                width: "fit-content",
-                border: "2px solid black",
-              }}
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])} // Corrected this line
-            />
-            <input
-              style={{ margin: "4px auto" }}
+              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
               type="text"
               name="name"
               id="name"
@@ -130,7 +157,7 @@ const SignUp = () => {
               onChange={onChange}
             />
             <input
-              style={{ margin: "4px auto" }}
+              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
               type="email"
               name="email"
               id="email"
@@ -138,17 +165,22 @@ const SignUp = () => {
               value={data.email}
               onChange={onChange}
             />
+            <div className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2">
+              <input
+                className="focus:placeholder:text-gray-300 focus:outline-none"
+                type={passwordType}
+                name="password"
+                id="password"
+                placeholder="password"
+                value={data.password}
+                onChange={onChange}
+              />
+              <span onClick={handleTogglePasswordType}>
+                {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
+              </span>
+            </div>
             <input
-              style={{ margin: "4px auto" }}
-              type="password"
-              name="password"
-              id="password"
-              placeholder="password"
-              value={data.password}
-              onChange={onChange}
-            />
-            <input
-              style={{ margin: "4px auto" }}
+              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
               type="text"
               name="address"
               id="address"
@@ -157,7 +189,7 @@ const SignUp = () => {
               onChange={onChange}
             />
             <input
-              style={{ margin: "4px auto" }}
+              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
               type="phone"
               name="mobileNumber"
               id="mobileNumber"
@@ -166,9 +198,20 @@ const SignUp = () => {
               onChange={onChange}
             />
           </div>
-          <button style={{ margin: "10px auto" }} type="submit">
+          <button
+            className="mx-auto px-4 py-2 w-3/4 border-[1px] border-white rounded-md mt-5 bg-slate-500 hover:bg-slate-600 duration-200"
+            type="submit"
+          >
             Submit
           </button>
+          <div className="mt-5">
+            <div>
+              <span>Already registered ?</span>{" "}
+              <Link className="text-blue-400 font-medium" to="/login">
+                Log In
+              </Link>
+            </div>
+          </div>
         </form>
       </div>
     </>
