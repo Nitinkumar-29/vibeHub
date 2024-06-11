@@ -38,6 +38,7 @@ const UserProfile = () => {
       <button onClick={handleFetchUserData}>Fetch</button>
       {fetchedUserData && (
         <div>
+          <img src={fetchedUserData.img} className="h-20 w-20 rounded-full border-2 border-black" alt="" />
           <h3>User Data:</h3>
           <p>Name: {fetchedUserData.name}</p>
           <p>Email: {fetchedUserData.email}</p>
