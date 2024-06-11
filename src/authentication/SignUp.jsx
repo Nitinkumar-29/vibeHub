@@ -165,9 +165,9 @@ const SignUp = () => {
               value={data.email}
               onChange={onChange}
             />
-            <div className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2">
+            <div className="flex items-center justify-between w-3/4 border-[1px] border-white rounded-md text-sm">
               <input
-                className="focus:placeholder:text-gray-300 focus:outline-none"
+                className="bg-transparent  focus:placeholder:text-gray-300 focus:outline-none p-2"
                 type={passwordType}
                 name="password"
                 id="password"
@@ -175,7 +175,7 @@ const SignUp = () => {
                 value={data.password}
                 onChange={onChange}
               />
-              <span onClick={handleTogglePasswordType}>
+              <span className="mx-2" onClick={handleTogglePasswordType}>
                 {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
               </span>
             </div>
