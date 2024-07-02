@@ -1,5 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
@@ -107,7 +110,8 @@ const SignUp = () => {
       setFile("");
       dispatch({ type: "SIGNUP", payload: response.user });
       console.log(response.user, data);
-      navigate("/profile");
+      await sendEmailVerification(response.user);
+      navigate("/userProfile");
     } catch (error) {
       console.error(error);
       setError("Email already in use");

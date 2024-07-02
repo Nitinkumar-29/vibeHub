@@ -4,13 +4,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Home from "./pages/Home";
+import Main from "./pages/Main";
 import Login from "./authentication/Login";
 import SignUp from "./authentication/SignUp";
 import { AuthContext } from "./context/AuthContext";
 import { useContext } from "react";
 import UserProfile from "./pages/UserProfile";
 import { Toaster } from "react-hot-toast";
+import Home from "./pages/Home";
+import CreatePost from "./components/CreatePost";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -28,20 +30,23 @@ function App() {
             path="/"
             element={
               <RequireAuth>
-                <Home />
+                <Main />
               </RequireAuth>
             }
-          />
-          <Route path="/signup" element={<SignUp />} />
+          >
+            <Route path="/" element={<Home />} />
+            <Route path="/createPost" element={<CreatePost />} />
+            <Route
+              path="/userProfile"
+              element={
+                <RequireAuth>
+                  <UserProfile />
+                </RequireAuth>
+              }
+            />
+          </Route>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/profile"
-            element={
-              <RequireAuth>
-                <UserProfile />
-              </RequireAuth>
-            }
-          />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </Router>
     </>
