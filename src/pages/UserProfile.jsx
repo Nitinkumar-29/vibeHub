@@ -171,7 +171,7 @@ const UserProfile = () => {
   }, [file]);
 
   return (
-    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white h-[100vh] w-screen max-w-[430px] py-2">
+    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white min-h-screen w-screen max-w-[430px] py-2">
       <div className="flex w-[95%] items-center justify-between shadow-sm rounded-md shadow-blue-900 border-[1px] border-blue-900 p-2">
         <TfiArrowCircleLeft
           onClick={() => {

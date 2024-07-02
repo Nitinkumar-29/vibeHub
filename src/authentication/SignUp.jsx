@@ -116,7 +116,7 @@ const SignUp = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center h-[100vh] w-screen max-w-[430px] text-white bg-neutral-900 space-y-3">
+      <div className="flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] text-white bg-neutral-900 space-y-3">
         <h1 className="text-2xl font-semibold my-3">Create Account</h1>
         <form
           onSubmit={handleSubmit}
