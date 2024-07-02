@@ -10,6 +10,7 @@ import SignUp from "./authentication/SignUp";
 import { AuthContext } from "./context/AuthContext";
 import { useContext } from "react";
 import UserProfile from "./pages/UserProfile";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -20,6 +21,7 @@ function App() {
   return (
     <>
       <Router>
+        <Toaster position="top-left" />
         <Routes>
           <Route
             exact

@@ -107,7 +107,7 @@ const SignUp = () => {
       setFile("");
       dispatch({ type: "SIGNUP", payload: response.user });
       console.log(response.user, data);
-      navigate("/userProfile");
+      navigate("/profile");
     } catch (error) {
       console.error(error);
       setError("Email already in use");
@@ -116,7 +116,7 @@ const SignUp = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center h-[100vh] w-full text-white bg-neutral-900 space-y-3">
+      <div className="flex flex-col items-center justify-center h-[100vh] w-screen max-w-[430px] text-white bg-neutral-900 space-y-3">
         <h1 className="text-2xl font-semibold my-3">Create Account</h1>
         <form
           onSubmit={handleSubmit}
@@ -166,7 +166,10 @@ const SignUp = () => {
               value={data.password}
               onChange={onChange}
             />
-            <span className="mx-2" onClick={handleTogglePasswordType}>
+            <span
+              className="mx-2 cursor-pointer"
+              onClick={handleTogglePasswordType}
+            >
               {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
             </span>
           </div>

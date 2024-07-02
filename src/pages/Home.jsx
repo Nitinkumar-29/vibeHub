@@ -1,17 +1,12 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 
-
 const Home = () => {
-  
-    return (
-    <>
-      <div>
-        <span>home page</span>
-        <Link to="/profile">user profile</Link>
-      </div>
-   
-    </>
+  return (
+    <div className="w-screen max-w-[430px] p-4">
+      <span>home page</span>
+      <Link to="/profile">user profile</Link>
+    </div>
   );
 };
 

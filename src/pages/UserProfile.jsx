@@ -24,33 +24,16 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
 } from "firebase/auth";
-import {
-  FaAlignRight,
-  FaBackspace,
-  FaBackward,
-  FaEdit,
-  FaLess,
-  FaStepBackward,
-  FaUserPlus,
-} from "react-icons/fa";
-import {
-  FaArrowLeft,
-  FaArrowRight,
-  FaBackwardFast,
-  FaDeleteLeft,
-  FaPencil,
-} from "react-icons/fa6";
+import { FaEdit, FaUserPlus } from "react-icons/fa";
+import { FaPencil } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
 import {
   TfiArrowCircleLeft,
   TfiEmail,
-  TfiLocationArrow,
   TfiLocationPin,
   TfiMobile,
 } from "react-icons/tfi";
 import { CiSettings } from "react-icons/ci";
-import { MdDeleteForever, MdEmail } from "react-icons/md";
-import { LuLogOut } from "react-icons/lu";
 import { BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
 
@@ -188,7 +171,7 @@ const UserProfile = () => {
   }, [file]);
 
   return (
-    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white h-[100vh] w-full py-2">
+    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white h-[100vh] w-screen max-w-[430px] py-2">
       <div className="flex w-[95%] items-center justify-between shadow-sm rounded-md shadow-blue-900 border-[1px] border-blue-900 p-2">
         <TfiArrowCircleLeft
           onClick={() => {
