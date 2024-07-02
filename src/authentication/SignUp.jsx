@@ -5,8 +5,9 @@ import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import { BiPlus, BiPlusCircle } from "react-icons/bi";
-import { BsEye, BsEyeSlash, BsPlusCircleDotted } from "react-icons/bs";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
+import { FaUserPlus } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const SignUp = () => {
   const imageRef = useRef();
@@ -18,10 +19,12 @@ const SignUp = () => {
     mobileNumber: "",
     address: "",
   });
+  const [error, setError] = useState("");
   const [file, setFile] = useState("");
   const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
+  const [loading, setLoading] = useState(true);
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -63,6 +66,7 @@ const SignUp = () => {
         },
         (error) => {
           console.log(error);
+          // setError(error);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -81,6 +85,7 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(false);
     try {
       const response = await createUserWithEmailAndPassword(
         auth,
@@ -98,120 +103,107 @@ const SignUp = () => {
         mobileNumber: "",
         address: "",
       });
+      setLoading(true);
       setFile("");
       dispatch({ type: "SIGNUP", payload: response.user });
       console.log(response.user, data);
       navigate("/userProfile");
     } catch (error) {
       console.error(error);
+      setError("Email already in use");
     }
   };
 
   return (
     <>
-      <div className="flex items-center h-[100vh] w-full bg-gradient-to-br from-slate-800 to-slate-600 text-white">
+      <div className="flex flex-col items-center justify-center h-[100vh] w-full text-white bg-neutral-900 space-y-3">
+        <h1 className="text-2xl font-semibold my-3">Create Account</h1>
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col w-fit mx-auto justify-center h-[98vh] shadow-lg shadow-slate-900 rounded-md items-center"
+          className="flex flex-col justify-center space-y-4"
         >
-          <h2 className="my-4 text-4xl font-bold font-serif bg-gradient-to-r from-red-600 via-green-500 to-indigo-400 inline-block text-transparent bg-clip-text">
-            vibeHub
-          </h2>
-          <p className="w-3/4 mb-8 text-sm text-center text-gray-200">
-            Sign up to see photos and videos from your friends
-          </p>
-          <div className="flex flex-col items-center w-full space-y-4">
-            <div className="flex justify-center w-3/4">
-              {!file ? (
-                <div
-                  onClick={handleImageOnChange}
-                  className="flex flex-col items-center justify-center space-y-1"
-                >
-                  <BsPlusCircleDotted size={45} />
-                  <span className="font-thin">Choose a photo</span>
-                </div>
-              ) : (
-                <div>
-                  <img
-                    className="h-16 w-16 rounded-full"
-                    src={data.img}
-                    alt=""
-                  />
-                </div>
-              )}
-              <input
-                name="image"
-                className="hidden"
-                ref={imageRef}
-                type="file"
-                onChange={(e) => setFile(e.target.files[0])} // Corrected this line
-              />
-            </div>
-            <input
-              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
-              type="text"
-              name="name"
-              id="name"
-              placeholder="name"
-              value={data.name}
-              onChange={onChange}
-            />
-            <input
-              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
-              type="email"
-              name="email"
-              id="email"
-              placeholder="email"
-              value={data.email}
-              onChange={onChange}
-            />
-            <div className="flex items-center justify-between w-3/4 border-[1px] border-white rounded-md text-sm">
-              <input
-                className="bg-transparent  focus:placeholder:text-gray-300 focus:outline-none p-2"
-                type={passwordType}
-                name="password"
-                id="password"
-                placeholder="password"
-                value={data.password}
-                onChange={onChange}
-              />
-              <span className="mx-2" onClick={handleTogglePasswordType}>
-                {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
-              </span>
-            </div>
-            <input
-              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
-              type="text"
-              name="address"
-              id="address"
-              placeholder="address"
-              value={data.address}
-              onChange={onChange}
-            />
-            <input
-              className="bg-transparent w-3/4 border-[1px] border-white rounded-md py-2 text-sm px-2 focus:placeholder:text-gray-300 focus:outline-none"
-              type="phone"
-              name="mobileNumber"
-              id="mobileNumber"
-              placeholder="mobile number"
-              value={data.mobileNumber}
-              onChange={onChange}
-            />
+          <div className="flex justify-center w-72">
+            {!file ? (
+              <div>
+                <FaUserPlus onClick={handleImageOnChange} size={45} />
+                <input
+                  name="image"
+                  className="hidden"
+                  ref={imageRef}
+                  type="file"
+                  onChange={(e) => setFile(e.target.files[0])} // Corrected this line
+                />
+              </div>
+            ) : (
+              <img className="h-16 w-16 rounded-full" src={data.img} alt="" />
+            )}
           </div>
+          <input
+            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            type="text"
+            name="name"
+            id="name"
+            placeholder="Name"
+            value={data.name}
+            onChange={onChange}
+          />
+          <input
+            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            type="email"
+            name="email"
+            id="email"
+            placeholder="Email"
+            value={data.email}
+            onChange={onChange}
+          />
+          <div className="flex justify-between items-center border-[1px] rounded-md w-72 p-2 bg-inherit">
+            <input
+              className="bg-inherit focus:placeholder:text-gray-300 focus:outline-none"
+              type={passwordType}
+              name="password"
+              id="password"
+              placeholder="Password"
+              value={data.password}
+              onChange={onChange}
+            />
+            <span className="mx-2" onClick={handleTogglePasswordType}>
+              {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
+            </span>
+          </div>
+          <input
+            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            type="text"
+            name="address"
+            id="address"
+            placeholder="Address"
+            value={data.address}
+            onChange={onChange}
+          />
+          <input
+            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            type="phone"
+            name="mobileNumber"
+            id="mobileNumber"
+            placeholder="Mobile Number"
+            value={data.mobileNumber}
+            onChange={onChange}
+          />
           <button
-            className="mx-auto px-4 py-2 w-3/4 border-[1px] border-white rounded-md mt-5 bg-slate-500 hover:bg-slate-600 duration-200"
+            className="border-[1px] flex justify-center rounded-md w-72 p-2"
             type="submit"
           >
-            Submit
+            {loading ? (
+              "Submit"
+            ) : (
+              <AiOutlineLoading3Quarters className="animate-spin my-1" />
+            )}
           </button>
-          <div className="mt-5">
-            <div>
-              <span>Already registered ?</span>{" "}
-              <Link className="text-blue-400 font-medium" to="/login">
-                Log In
-              </Link>
-            </div>
-          </div>
+          <span>
+            Already Registered? &nbsp;
+            <Link className="text-blue-500 font-medium" to="/login">
+              Log In
+            </Link>
+          </span>
         </form>
       </div>
     </>

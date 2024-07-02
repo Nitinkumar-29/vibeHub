@@ -30,10 +30,10 @@ function App() {
               </RequireAuth>
             }
           />
-          <Route path="/signUp" element={<SignUp />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/userProfile"
+            path="/profile"
             element={
               <RequireAuth>
                 <UserProfile />
