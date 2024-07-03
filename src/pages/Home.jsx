@@ -96,9 +96,11 @@ const Home = () => {
                   transitionTime={5}
                   infiniteLoop={true}
                   showStatus={false}
-                  swipeable={true}
                   emulateTouch={true}
+                  verticalSwipe="natural"
                   useKeyboardArrows={true}
+                  preventMovementUntilSwipeScrollTolerance={true}
+                  swipeScrollTolerance={100}
                 >
                   {post.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative mx-1">
