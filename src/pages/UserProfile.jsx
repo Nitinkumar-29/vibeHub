@@ -44,7 +44,8 @@ const UserProfile = () => {
   const [fetchedUserData, setFetchedUserData] = useState(null);
   const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleImageOnChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,7 +59,7 @@ const UserProfile = () => {
     const name = new Date().getTime() + "_" + file.name;
     const storageRef = ref(storage, name);
     const uploadTask = uploadBytesResumable(storageRef, file);
-    setIsLoading(true);
+
     uploadTask.on(
       "state_changed",
       (snapshot) => {
@@ -79,13 +80,20 @@ const UserProfile = () => {
       },
       (error) => {
         console.log(error);
+        setError("File upload failed. Please try again.");
+        setIsLoading(false);
       },
       async () => {
-        setIsLoading(true);
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        console.log("File available at", downloadURL);
-        await updateUserData({ img: downloadURL });
-        setIsLoading(false);
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log("File available at", downloadURL);
+          await updateUserData({ img: downloadURL });
+          setIsLoading(false);
+        } catch (err) {
+          console.error(err);
+          setError("Failed to update user data. Please try again.");
+          setIsLoading(false);
+        }
       }
     );
   };
@@ -97,6 +105,7 @@ const UserProfile = () => {
       setFetchedUserData((prevData) => ({ ...prevData, ...updatedData }));
     } catch (error) {
       console.error("Error updating user data:", error);
+      setError("Failed to update user data. Please try again.");
     }
   };
 
@@ -109,9 +118,10 @@ const UserProfile = () => {
       })
       .catch((error) => {
         console.error(error);
+        setError("Logout failed. Please try again.");
       });
   };
-
+  
   const handleDeleteAccount = async () => {
     try {
       const user = auth.currentUser;
@@ -122,17 +132,42 @@ const UserProfile = () => {
 
       await reauthenticateWithCredential(user, credential);
 
+      // Delete user document from Firestore
       const userDocRef = doc(db, "users", currentUser.uid);
       await deleteDoc(userDocRef);
 
+      // Delete all files in the user's storage directory
       const userStorageRef = ref(storage, `users/${currentUser.uid}`);
-      const listResult = await listAll(userStorageRef);
+      const userListResult = await listAll(userStorageRef);
 
-      const deletePromises = listResult.items.map((itemRef) => {
+      const userDeletePromises = userListResult.items.map((itemRef) => {
         return deleteObject(itemRef);
       });
-      await Promise.all(deletePromises);
+      await Promise.all(userDeletePromises);
 
+      // Delete all files in the user's posts directory
+      const postStorageRef = ref(storage, `posts/${currentUser.uid}`);
+      const postListResult = await listAll(postStorageRef);
+
+      const postDeletePromises = postListResult.items.map((itemRef) => {
+        return deleteObject(itemRef);
+      });
+      await Promise.all(postDeletePromises);
+
+      // Delete posts from Firestore
+      const postsCollectionRef = collection(db, "posts");
+      const postsQuery = query(
+        postsCollectionRef,
+        where("userId", "==", currentUser.uid)
+      );
+      const postsSnapshot = await getDocs(postsQuery);
+
+      const postDeleteDocPromises = postsSnapshot.docs.map((doc) => {
+        return deleteDoc(doc.ref);
+      });
+      await Promise.all(postDeleteDocPromises);
+
+      // Delete user account from Firebase Auth
       await deleteUser(user);
 
       dispatch({ type: "DELETE" });
@@ -140,6 +175,7 @@ const UserProfile = () => {
       navigate("/login");
     } catch (error) {
       console.error("Error deleting user:", error);
+      setError("Failed to delete account. Please try again.");
     }
   };
 
@@ -162,11 +198,12 @@ const UserProfile = () => {
     if (currentUser) {
       handleFetchUserData();
     }
-    // eslin-disable-next-line
   }, [currentUser]);
 
   useEffect(() => {
-    handleUploadFile();
+    if (file) {
+      handleUploadFile();
+    }
     // eslint-disable-next-line
   }, [file]);
 
@@ -187,21 +224,19 @@ const UserProfile = () => {
           {fetchedUserData.img ? (
             <div className="flex flex-col items-center space-y-4">
               <div className="flex justify-center relative w-fit">
-                {!isLoading === true && (
+                {!isLoading && (
                   <img
                     src={fetchedUserData.img}
                     className="h-20 w-20 hover:h-32 hover:w-32 duration-200 rounded-full border-[1px] border-blue-800"
                     alt=""
                   />
                 )}
-                {!isLoading === false && (
-                  <VscLoading className="animate-spin" size={60} />
-                )}
+                {isLoading && <VscLoading className="animate-spin" size={60} />}
                 <span
                   onClick={() => imageRef.current.click()}
-                  className="absolute top-[60%] right-0 rounded-full p-2 bg-white h-fit w-fit"
+                  className="absolute top-[60%] right-0 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
                 >
-                  <FaPencil className="" color="black" size={12} />
+                  <FaPencil color="black" size={12} />
                 </span>
               </div>
               <span className="text-2xl">{fetchedUserData.name}</span>
@@ -250,7 +285,6 @@ const UserProfile = () => {
               <CgUserRemove size={25} />
             </button>
           </div>
-
           <input
             type="file"
             ref={imageRef}
@@ -259,6 +293,7 @@ const UserProfile = () => {
           />
         </div>
       )}
+      {error && <div className="text-red-500">{error}</div>}
     </div>
   );
 };

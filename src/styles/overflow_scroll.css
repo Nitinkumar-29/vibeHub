@@ -1,0 +1,29 @@
+.horizontal-scrollbar{
+    display: flex;
+    height: fit-content;
+    width: 340px;
+    overflow-x: auto;
+}
+
+/* For Chrome, Safari, and newer versions of Edge */
+.hide-scrollbar {
+    display: hidden;
+    scrollbar-width: 0px;
+    overflow-y: auto;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #0a2244; /* Color of the scrollbar track */
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: rgb(46, 45, 45); /* Color of the scrollbar handle */
+    border-radius: 8px; /* Border radius for the scrollbar handle */
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(43, 43, 42); /* Color of the scrollbar handle on hover */
+  }

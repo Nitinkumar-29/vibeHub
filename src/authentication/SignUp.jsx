@@ -106,12 +106,12 @@ const SignUp = () => {
         mobileNumber: "",
         address: "",
       });
-      setLoading(true);
       setFile("");
+      setLoading(true);
       dispatch({ type: "SIGNUP", payload: response.user });
+      navigate("/userProfile");
       console.log(response.user, data);
       await sendEmailVerification(response.user);
-      navigate("/userProfile");
     } catch (error) {
       console.error(error);
       setError("Email already in use");

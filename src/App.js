@@ -13,6 +13,7 @@ import UserProfile from "./pages/UserProfile";
 import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import CreatePost from "./components/CreatePost";
+import { PostProvider } from "./context/PostContext/PostContext";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -23,31 +24,33 @@ function App() {
   return (
     <>
       <Router>
-        <Toaster position="top-left" />
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={
-              <RequireAuth>
-                <Main />
-              </RequireAuth>
-            }
-          >
-            <Route path="/" element={<Home />} />
-            <Route path="/createPost" element={<CreatePost />} />
+        <PostProvider>
+          <Toaster position="top-left" />
+          <Routes>
             <Route
-              path="/userProfile"
+              exact
+              path="/"
               element={
                 <RequireAuth>
-                  <UserProfile />
+                  <Main />
                 </RequireAuth>
               }
-            />
-          </Route>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-        </Routes>
+            >
+              <Route path="/" element={<Home />} />
+              <Route path="/createPost" element={<CreatePost />} />
+              <Route
+                path="/userProfile"
+                element={
+                  <RequireAuth>
+                    <UserProfile />
+                  </RequireAuth>
+                }
+              />
+            </Route>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Routes>
+        </PostProvider>
       </Router>
     </>
   );
