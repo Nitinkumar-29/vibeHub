@@ -48,3 +48,19 @@
   background-color: #4a5568;
   border-radius: 10px;
 }
+
+.carousel {
+  display: flex;
+  /* height: fit-content; */
+  /* width: fit-content; */
+  position: relative;
+}
+.carousel::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background: black;
+  opacity: 0.01;
+  z-index: 1;
+}
