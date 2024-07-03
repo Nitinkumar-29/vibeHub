@@ -60,9 +60,9 @@
 .carousel::after {
   content: "";
   position: absolute;
-  height: 20%;
-  width: 20%;
-  background: transparent;
+  height: 30%;
+  width: 30%;
+  background: black;
   opacity: 0.50;
   z-index: 1;
 }
