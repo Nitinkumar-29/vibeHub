@@ -79,7 +79,7 @@ const Home = () => {
                   key={index}
                   className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
                 >
-                  <div className="h-fit flex space-x-4 w-full justify-start p-3">
+                  <div className="h-16 flex items-center border-[1px] border-blue-900 rounded-md space-x-4 w-full justify-start p-3">
                     {post?.userProfileImage ? (
                       <img
                         src={post?.userProfileImage}
@@ -91,7 +91,7 @@ const Home = () => {
                     )}
                     <div className="flex flex-col space-y-1">
                       <span className="font-medium">{post?.name}</span>
-                      <span>{post?.email}</span>
+                      {/* <span>{post?.email}</span> */}
                     </div>
                   </div>
                   <div className="w-full h-full space-y-1">
@@ -131,7 +131,10 @@ const Home = () => {
                       <div className="flex items-center space-x-6">
                         <SlHeart size={20} />
                         <Link to={`/post/${post.id}`}>
-                          <SlBubble size={20} />
+                          <div className="flex items-center space-x-1">
+                            <SlBubble size={20} />
+                            <span>{post.commentsCount}</span>
+                          </div>
                         </Link>
                         <SlPaperPlane size={20} />
                       </div>

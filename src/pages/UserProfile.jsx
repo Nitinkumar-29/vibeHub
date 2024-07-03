@@ -114,6 +114,7 @@ const UserProfile = () => {
       .then(() => {
         dispatch({ type: "LOGOUT" });
         localStorage.removeItem("user");
+        localStorage.removeItem("loggedInUserData");
         navigate("/login");
       })
       .catch((error) => {
@@ -191,6 +192,10 @@ const UserProfile = () => {
         const userData = doc.data();
         console.log({ userData, uid: currentUser.uid });
         setFetchedUserData(userData, currentUser.uid);
+        localStorage.setItem(
+          "loggedInUserData",
+          JSON.stringify(userData, currentUser.uid)
+        );
       });
     }
   };

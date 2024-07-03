@@ -4,8 +4,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
@@ -29,7 +31,9 @@ const Post = () => {
   const [postComment, setPostComment] = useState({ commentText: "" });
   const [postComments, setPostComments] = useState([]);
   const [isPublished, setIsPublished] = useState(true);
+  const userData = JSON.parse(localStorage.getItem("loggedInUserData"));
 
+  userData && console.log(userData);
   useEffect(() => {
     const fetchPostById = async (id) => {
       try {
@@ -70,15 +74,19 @@ const Post = () => {
     try {
       const docRef = await addDoc(collection(db, "postComments"), {
         comment: commentText,
-        name: postData.name,
-        userId: postData.userId,
-        email: postData.email,
+        name: userData.name,
+        userId: currentUser.uid,
+        email: userData.email,
         postId: id,
         timestamp: serverTimestamp(),
-        userProfileImage: postData.userProfileImage,
+        userProfileImage: userData.img,
       });
       console.log("comment posted", docRef);
-
+      // Increment the comment count in the corresponding post document
+      const postRef = doc(db, "posts", id);
+      await updateDoc(postRef, {
+        commentsCount: increment(1),
+      });
       // Reset the comment text input
       setPostComment({
         commentText: "",
@@ -138,7 +146,7 @@ const Post = () => {
           <div className="flex flex-col items-center space-y-2 py-2">
             {postData?.userId && (
               <div className="flex flex-col space-y-3 w-[95%] h-fit border-[1px] rounded-md border-blue-950 bg-zinc-900">
-                <div className="h-fit flex space-x-4 w-full justify-start p-3">
+                <div className="h-16 border-[1px] border-blue-900 rounded-md flex items-center space-x-4 w-full justify-start p-2">
                   {postData?.userProfileImage ? (
                     <img
                       src={postData?.userProfileImage}
@@ -150,7 +158,7 @@ const Post = () => {
                   )}
                   <div className="flex flex-col space-y-1 w-full">
                     <span className="font-medium">{postData?.name}</span>
-                    <span>{postData?.email}</span>
+                    {/* <span>{postData?.email}</span> */}
                   </div>
                 </div>
                 <p className="p-2">{postData.postCaption}</p>
@@ -172,7 +180,7 @@ const Post = () => {
                         {fileURL.endsWith(".mp4") ? (
                           <video
                             controls
-                            className="h-[10rem] w-[10rem] object-cover rounded-md border-[1px] border-blue-950"
+                            className="h-[10rem] w-[10rem] object-none rounded-md border-[1px] border-blue-950"
                           >
                             <source src={fileURL} type="video/mp4" />
                           </video>
@@ -189,7 +197,10 @@ const Post = () => {
                 <div className="flex items-center justify-between h-10 p-2">
                   <div className="flex items-center space-x-6">
                     <SlHeart size={20} />
-                    <SlBubble size={20} />
+                    <div className="flex items-center space-x-1">
+                      <SlBubble size={20} />
+                      <span> {postData.commentsCount}</span>
+                    </div>
                     <SlPaperPlane size={20} />
                   </div>
                   <span className="text-sm text-zinc-400">
