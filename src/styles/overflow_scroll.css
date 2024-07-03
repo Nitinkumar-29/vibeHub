@@ -51,29 +51,19 @@
 
 .carousel {
   display: flex;
-  /* height: fit-content; */
-  /* width: fit-content; */
   position: relative;
 }
 .carousel::after {
   content: "";
   position: absolute;
   height: 100%;
-  width: 100%;
-  background: transparent;
+  border: 2px solid red;
+  width: 80%;
+  background: black;
   opacity: 0.01;
   z-index: 1;
 }
-
-.carousel.carousel-active {
-  z-index: 2; /* Higher z-index when active */
-}
-
-.carousel.carousel-inactive {
-  z-index: 1; /* Lower z-index when inactive */
-}
-
 .carousel .carousel .control-dots {
-  margin-top: 10px; /* Add space above dots */
   z-index: 10;
 }
+

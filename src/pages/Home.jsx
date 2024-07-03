@@ -13,7 +13,6 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
   const { currentUser } = useContext(AuthContext);
   const [currentUserData, setCurrentUserData] = useState([]);
-  const [zIndex, setZIndex] = useState(1); // State to control z-index
 
   const fetchAllPosts = async () => {
     const querySnapshot = await getDocs(collection(db, "posts"));
@@ -57,14 +56,6 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser]);
 
-  const handleSwipeStart = () => {
-    setZIndex(2); // Set a higher z-index when swiping starts
-  };
-
-  const handleSwipeEnd = () => {
-    setZIndex(1); // Reset z-index when swiping ends
-  };
-
   return (
     <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
       <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
@@ -107,8 +98,6 @@ const Home = () => {
                   emulateTouch={true}
                   verticalSwipe="standard"
                   useKeyboardArrows={true}
-                  onSwipeStart={handleSwipeStart}
-                  onSwipeEnd={handleSwipeEnd}
                 >
                   {post.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative mx-1">
