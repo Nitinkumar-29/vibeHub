@@ -5,9 +5,9 @@ import { AuthContext } from "../context/AuthContext";
 import { FaComment, FaHeart } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 import { BiShareAlt } from "react-icons/bi";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import "../styles/overflow_scroll.css"; // Import the CSS file
+import "../styles/overflow_scroll.css";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -25,6 +25,7 @@ const Home = () => {
         timeStamp: postData.timeStamp?.toDate(), // Convert Firestore timestamp to JS Date
       });
     });
+    // Sort posts by timestamp in descending order
     postsArray.sort((a, b) => b.timeStamp - a.timeStamp);
     setPosts(postsArray);
     console.log(postsArray);
@@ -56,6 +57,7 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser]);
 
+  
   return (
     <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
       <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
@@ -90,34 +92,33 @@ const Home = () => {
               <div className="w-full h-full p-2 space-y-2">
                 <p>{post.postCaption}</p>
                 <Carousel
+                  className="carousel"
                   showThumbs={false}
                   autoPlay={false}
-                  transitionTime={500}
                   infiniteLoop={true}
                   showStatus={false}
                   emulateTouch={true}
-                  verticalSwipe="standard"
                   useKeyboardArrows={true}
+                  swipeable={true}
+                  showArrows={true}
+                  showIndicators={true}
                 >
                   {post.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative mx-1">
-                      {fileURL.endsWith(".mp4") ||
-                      fileURL.endsWith(".webm") ||
-                      fileURL.endsWith(".ogg") ? (
+                    <div key={index} className="relative px-2">
+                      {fileURL ? (
+                        <img
+                          src={fileURL}
+                          alt="post media"
+                          className={`min-h-[20rem] min-w-[20rem] object-cover rounded-md border-[1px] border-blue-950`}
+                        />
+                      ) : fileURL ? (
                         <video
                           controls
                           className="h-[10rem] w-[10rem] object-cover rounded-md border-[1px] border-blue-950"
                         >
-                          <source src={fileURL} type="video/mp4" />
-                          Your browser does not support the video tag.
+                          <source src={fileURL} type="video" />
                         </video>
-                      ) : (
-                        <img
-                          src={fileURL}
-                          alt="post media"
-                          className="min-h-[20rem] min-w-[20rem] object-cover rounded-md border-[1px] border-blue-950"
-                        />
-                      )}
+                      ) : null}
                     </div>
                   ))}
                 </Carousel>

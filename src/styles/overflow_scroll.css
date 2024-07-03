@@ -52,18 +52,20 @@
 .carousel {
   display: flex;
   position: relative;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
 }
 .carousel::after {
   content: "";
   position: absolute;
-  height: 100%;
-  border: 2px solid red;
-  width: 80%;
-  background: black;
-  opacity: 0.01;
+  height: 20%;
+  width: 20%;
+  background: transparent;
+  opacity: 0.50;
   z-index: 1;
 }
 .carousel .carousel .control-dots {
   z-index: 10;
 }
-
