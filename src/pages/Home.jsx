@@ -10,11 +10,12 @@ import { Carousel } from "react-responsive-carousel";
 import "../styles/overflow_scroll.css";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BiSolidHomeHeart } from "react-icons/bi";
+import { BsSave, BsSaveFill } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
   const { currentUser } = useContext(AuthContext);
-  const [currentUserData, setCurrentUserData] = useState([]);
 
   const fetchAllPosts = async () => {
     const querySnapshot = await getDocs(collection(db, "posts"));
@@ -47,7 +48,6 @@ const Home = () => {
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
         console.log(userData);
-        setCurrentUserData(userData);
       });
     }
   };
@@ -60,90 +60,102 @@ const Home = () => {
   }, [currentUser]);
 
   return (
-    <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
-      <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
-        <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
-          <span>Home</span>
-          <span>Posts: {posts.length}</span>
+    <div
+      // style={{ height: "calc(100% - 64px)" }}
+      className="overflow-y-auto h-screen"
+    >
+      <div className="flex flex-col items-center mb-16">
+        <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
+          <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
+            <span>Home</span>
+            <span>Posts: {posts.length}</span>
+          </div>
         </div>
-      </div>
-      <div
-        style={{ height: "calc(100% - 128px)" }}
-        className="flex justify-center w-[95%] h-full py-2 hide-scrollbar"
-      >
-        <div className="flex flex-col space-y-3 w-full h-fit">
-          {posts.map((post, index) => (
-            <div
-              key={index}
-              className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
-            >
-              <div className="h-fit flex space-x-4 w-full justify-start p-3">
-                {post?.userProfileImage ? (
-                  <img
-                    src={post?.userProfileImage}
-                    className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-800"
-                    alt=""
-                  />
-                ) : (
-                  <FaUser size={48} />
-                )}
-                <div className="flex flex-col space-y-1">
-                  <span className="font-medium">{post?.name}</span>
-                  <span>{post?.email}</span>
-                </div>
-              </div>
-              <div className="w-full h-full space-y-2">
-                <p className="p-2">{post.postCaption}</p>
-                <Carousel
-                  className="carousel"
-                  showThumbs={false}
-                  autoPlay={false}
-                  infiniteLoop={true}
-                  showStatus={false}
-                  emulateTouch={true}
-                  useKeyboardArrows={true}
-                  swipeable={true}
-                  showArrows={true}
-                  showIndicators={true}
+        {posts.length > 0 ? (
+          <div className="flex justify-center w-[95%] h-full py-2">
+            <div className="flex flex-col space-y-3 w-full h-fit">
+              {posts.map((post, index) => (
+                <div
+                  key={index}
+                  className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
                 >
-                  {post.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative px-2">
-                      {fileURL ? (
-                        <img
-                          src={fileURL}
-                          alt="post media"
-                          className={`min-h-[20rem] min-w-[20rem] object-cover rounded-md border-[1px] border-blue-950`}
-                        />
-                      ) : fileURL ? (
-                        <video
-                          controls
-                          className="h-[10rem] w-[10rem] object-cover rounded-md border-[1px] border-blue-950"
-                        >
-                          <source src={fileURL} type="video" />
-                        </video>
-                      ) : null}
+                  <div className="h-fit flex space-x-4 w-full justify-start p-3">
+                    {post?.userProfileImage ? (
+                      <img
+                        src={post?.userProfileImage}
+                        className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-900"
+                        alt=""
+                      />
+                    ) : (
+                      <FaUser size={48} />
+                    )}
+                    <div className="flex flex-col space-y-1">
+                      <span className="font-medium">{post?.name}</span>
+                      <span>{post?.email}</span>
                     </div>
-                  ))}
-                </Carousel>
-                <div className="flex items-center justify-between h-10 p-2">
-                  <div className="flex items-center space-x-3 ">
-                    <SlHeart size={20} />
-                    <SlBubble size={20} />
-                    <SlPaperPlane size={20} />
                   </div>
-                  <span className="text-sm text-zinc-400">
-                    {post.timeStamp
-                      ? formatTime(post.timeStamp, "PPpp")
-                      : "not provided"}
-                  </span>
-                  <div className="text-blue-700">
-                    <FaRegSave size={20} />
+                  <div className="w-full h-full space-y-1">
+                    <p className="p-2">{post.postCaption}</p>
+                    <Carousel
+                      className="carousel"
+                      showThumbs={false}
+                      autoPlay={false}
+                      infiniteLoop={true}
+                      showStatus={false}
+                      emulateTouch={true}
+                      useKeyboardArrows={true}
+                      swipeable={true}
+                      showArrows={true}
+                      showIndicators={true}
+                    >
+                      {post.fileURLs.map((fileURL, index) => (
+                        <div key={index} className="relative px-2">
+                          {fileURL ? (
+                            <img
+                              src={fileURL}
+                              alt="post media"
+                              className={`h-[18rem] w-[18rem] object-cover rounded-md border-[1px] border-blue-950`}
+                            />
+                          ) : fileURL ? (
+                            <video
+                              controls
+                              className="h-[10rem] w-[10rem] object-cover rounded-md border-[1px] border-blue-950"
+                            >
+                              <source src={fileURL} type="video" />
+                            </video>
+                          ) : null}
+                        </div>
+                      ))}
+                    </Carousel>
+                    <div className="flex items-center justify-between h-10 p-2">
+                      <div className="flex items-center space-x-6">
+                        <SlHeart size={20} />
+                        <Link to={`/post/${post.id}`}>
+                          <SlBubble size={20} />
+                        </Link>
+                        <SlPaperPlane size={20} />
+                      </div>
+                      <span className="text-sm text-zinc-400">
+                        {post.timeStamp
+                          ? formatTime(post.timeStamp, "PPpp")
+                          : "not provided"}
+                      </span>
+                      <div className="">
+                        <BsSave size={20} />
+                        {/* <BsSaveFill size={20} /> */}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="flex flex-col justify-center items-center h-fit space-y-2">
+            <span>0 posts or may be server error</span>
+            <span>Please try again later</span>
+          </div>
+        )}
       </div>
     </div>
   );

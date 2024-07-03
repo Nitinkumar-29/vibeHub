@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import CreatePost from "./components/CreatePost";
 import { PostProvider } from "./context/PostContext/PostContext";
+import Post from "./components/Post";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -46,6 +47,7 @@ function App() {
                   </RequireAuth>
                 }
               />
+              <Route path="/post/:id" element={<Post />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />

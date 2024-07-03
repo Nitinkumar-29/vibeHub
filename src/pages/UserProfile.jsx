@@ -186,6 +186,7 @@ const UserProfile = () => {
         where("email", "==", currentUser.email)
       );
       const querySnapshot = await getDocs(q);
+      console.log(querySnapshot);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
         console.log({ userData, uid: currentUser.uid });

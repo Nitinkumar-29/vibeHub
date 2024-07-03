@@ -21,7 +21,6 @@ import PostContext from "../context/PostContext/PostContext";
 
 const CreatePost = () => {
   const inputRef = useRef();
-  const profileImageInputRef = useRef(); // Add reference for profile image input
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
@@ -43,11 +42,6 @@ const CreatePost = () => {
     setFiles((prevFiles) =>
       prevFiles.filter((_, index) => index !== indexToRemove)
     );
-  };
-
-  const handleProfileImageChange = (e) => {
-    const file = e.target.files[0];
-    setUserProfileImage(file);
   };
 
   const onChange = (e) => {
