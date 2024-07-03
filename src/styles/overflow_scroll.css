@@ -62,7 +62,7 @@
   position: absolute;
   height: 30%;
   width: 30%;
-  background: transparent;
+  background: black;
   opacity: 0.50;
   z-index: 1;
 }
