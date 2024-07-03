@@ -58,7 +58,7 @@ const Home = () => {
   }, [currentUser]);
 
   return (
-    <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen ">
+    <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
       <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
         <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
           <span>Home</span>
@@ -67,8 +67,7 @@ const Home = () => {
       </div>
       <div
         style={{ height: "calc(100% - 128px)" }}
-        className="flex justify-center w-[95%] h-full py-2 hide-scrollbar {
-"
+        className="flex justify-center w-[95%] h-full py-2 hide-scrollbar"
       >
         <div className="flex flex-col space-y-3 w-full h-fit">
           {posts.map((post, index) => (
@@ -89,10 +88,9 @@ const Home = () => {
                   <span>{post?.email}</span>
                 </div>
               </div>
-              <div className="w-full h-full p-2">
+              <div className="w-full h-full p-2 space-y-2">
                 <p>{post.postCaption}</p>
                 <Carousel
-                  className="flex h-full py-1 w-full"
                   showThumbs={false}
                   autoPlay={false}
                   transitionTime={5}
@@ -102,9 +100,8 @@ const Home = () => {
                   emulateTouch={true}
                   useKeyboardArrows={true}
                 >
-                  {/* <div className=""> */}
                   {post.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative mx-1">
                       {fileURL ? (
                         <img
                           src={fileURL}
@@ -121,7 +118,6 @@ const Home = () => {
                       ) : null}
                     </div>
                   ))}
-                  {/* </div> */}
                 </Carousel>
                 <div className="flex items-center justify-between h-8 border-t-[1px] border-blue-950 mt-2">
                   <div className="flex items-center space-x-3">
