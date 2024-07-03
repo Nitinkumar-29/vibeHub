@@ -57,6 +57,22 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser]);
 
+  // Prevent vertical scrolling on touch events within the carousel
+  const preventVerticalScroll = (e) => {
+    if (e.target.closest(".carousel-root")) {
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("touchmove", preventVerticalScroll, {
+      passive: false,
+    });
+    return () => {
+      window.removeEventListener("touchmove", preventVerticalScroll);
+    };
+  }, []);
+
   return (
     <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
       <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
@@ -93,14 +109,13 @@ const Home = () => {
                 <Carousel
                   showThumbs={false}
                   autoPlay={false}
-                  transitionTime={5}
                   infiniteLoop={true}
                   showStatus={false}
                   emulateTouch={true}
-                  verticalSwipe="natural"
                   useKeyboardArrows={true}
-                  preventMovementUntilSwipeScrollTolerance={true}
-                  swipeScrollTolerance={100}
+                  showArrows={true}
+                  showIndicators={true}
+                  swipeScrollTolerance={5}
                 >
                   {post.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative mx-1">
