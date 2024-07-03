@@ -2,12 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
-import { FaComment, FaHeart } from "react-icons/fa";
+import { FaRegSave, FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
-import { BiShareAlt } from "react-icons/bi";
+
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import "../styles/overflow_scroll.css";
+import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
+import { BiSolidHomeHeart } from "react-icons/bi";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -57,7 +59,6 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser]);
 
-  
   return (
     <div className="text-white flex flex-col items-center w-screen max-w-[430px] bg-zinc-950 h-screen">
       <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
@@ -77,20 +78,22 @@ const Home = () => {
               className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
             >
               <div className="h-fit flex space-x-4 w-full justify-start p-3">
-                {currentUserData?.img && (
+                {post?.userProfileImage ? (
                   <img
-                    src={currentUserData.img}
+                    src={post?.userProfileImage}
                     className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-800"
                     alt=""
                   />
+                ) : (
+                  <FaUser size={48} />
                 )}
                 <div className="flex flex-col space-y-1">
                   <span className="font-medium">{post?.name}</span>
                   <span>{post?.email}</span>
                 </div>
               </div>
-              <div className="w-full h-full p-2 space-y-2">
-                <p>{post.postCaption}</p>
+              <div className="w-full h-full space-y-2">
+                <p className="p-2">{post.postCaption}</p>
                 <Carousel
                   className="carousel"
                   showThumbs={false}
@@ -122,17 +125,20 @@ const Home = () => {
                     </div>
                   ))}
                 </Carousel>
-                <div className="flex items-center justify-between h-8 border-t-[1px] border-blue-950 mt-2">
-                  <div className="flex items-center space-x-3">
-                    <FaHeart />
-                    <FaComment />
-                    <BiShareAlt />
+                <div className="flex items-center justify-between h-10 p-2">
+                  <div className="flex items-center space-x-3 ">
+                    <SlHeart size={20} />
+                    <SlBubble size={20} />
+                    <SlPaperPlane size={20} />
                   </div>
                   <span className="text-sm text-zinc-400">
                     {post.timeStamp
                       ? formatTime(post.timeStamp, "PPpp")
                       : "not provided"}
                   </span>
+                  <div className="text-blue-700">
+                    <FaRegSave size={20} />
+                  </div>
                 </div>
               </div>
             </div>

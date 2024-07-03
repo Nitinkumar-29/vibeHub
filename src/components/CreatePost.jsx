@@ -21,6 +21,7 @@ import PostContext from "../context/PostContext/PostContext";
 
 const CreatePost = () => {
   const inputRef = useRef();
+  const profileImageInputRef = useRef(); // Add reference for profile image input
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
@@ -31,6 +32,7 @@ const CreatePost = () => {
     email: "",
     postCaption: "",
   });
+  const [userProfileImage, setUserProfileImage] = useState("");
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -41,6 +43,11 @@ const CreatePost = () => {
     setFiles((prevFiles) =>
       prevFiles.filter((_, index) => index !== indexToRemove)
     );
+  };
+
+  const handleProfileImageChange = (e) => {
+    const file = e.target.files[0];
+    setUserProfileImage(file);
   };
 
   const onChange = (e) => {
@@ -58,6 +65,7 @@ const CreatePost = () => {
         const userData = doc.data();
         console.log(userData);
         setCurrentUserData(userData);
+        setUserProfileImage(userData.img); // Set existing image URL
       });
     }
   };
@@ -111,28 +119,76 @@ const CreatePost = () => {
     return Promise.all(uploadPromises);
   };
 
+  const handleUploadUserProfileImage = async () => {
+    if (!userProfileImage || typeof userProfileImage === "string")
+      return userProfileImage; // Return existing URL if not a new file
+
+    const name = new Date().getTime() + "_" + userProfileImage.name;
+    const storageRef = ref(storage, name);
+    const uploadTask = uploadBytesResumable(storageRef, userProfileImage);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+            default:
+              break;
+          }
+        },
+        (error) => {
+          console.log(error);
+          reject(error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          console.log("File available at", downloadURL);
+          resolve(downloadURL);
+        }
+      );
+    });
+  };
+
   const handleSavePost = async () => {
     setIsPublished(false);
     const fileURLs = await handleUploadFiles();
+    const userProfileImageURL = await handleUploadUserProfileImage();
     const { postCaption } = newPostData;
     const name = currentUserData?.name;
     const email = currentUserData?.email;
 
     try {
       setIsPublished(false);
-
       const postPublished = await addDoc(collection(db, "posts"), {
         name: name,
         email: email,
         postCaption: postCaption,
         fileURLs: fileURLs,
+        userId: currentUser.uid,
+        userProfileImage: userProfileImageURL,
         timeStamp: serverTimestamp(),
       });
-      console.log("post created and published", postPublished.id);
+      console.log("Post created and published", postPublished.id);
+      console.log(postPublished);
       setIsPublished(true);
+
       toast.success("Post published");
       navigate("/");
-      setNewPostData({ name: "", email: "", postCaption: "" });
+      setNewPostData({
+        name: "",
+        email: "",
+        postCaption: "",
+      });
       setFiles([]);
     } catch (error) {
       setIsPublished(false);
@@ -173,6 +229,7 @@ const CreatePost = () => {
                   src={currentUserData.img}
                   className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-800"
                   alt=""
+                  value={currentUserData.userProfileImage}
                 />
               )}
               <div className="flex flex-col space-y-1">
@@ -221,7 +278,7 @@ const CreatePost = () => {
                           onMouseDown={BiZoomIn}
                           src={URL.createObjectURL(file)}
                           alt="preview"
-                          className="w-full h-full object-cover rounded-md"
+                          className="w-[10rem] h-[10rem] object-cover rounded-md"
                         />
                         <span
                           onClick={() => removeFile(index)}

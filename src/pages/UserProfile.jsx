@@ -121,7 +121,7 @@ const UserProfile = () => {
         setError("Logout failed. Please try again.");
       });
   };
-  
+
   const handleDeleteAccount = async () => {
     try {
       const user = auth.currentUser;
@@ -188,8 +188,8 @@ const UserProfile = () => {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log(userData);
-        setFetchedUserData(userData);
+        console.log({ userData, uid: currentUser.uid });
+        setFetchedUserData(userData, currentUser.uid);
       });
     }
   };
