@@ -115,7 +115,7 @@ const Home = () => {
                   useKeyboardArrows={true}
                   showArrows={true}
                   showIndicators={true}
-                  swipeScrollTolerance={5}
+                  swipeScrollTolerance={60}
                 >
                   {post.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative mx-1">
