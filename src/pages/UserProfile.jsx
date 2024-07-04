@@ -24,7 +24,7 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
 } from "firebase/auth";
-import { FaEdit, FaUserPlus } from "react-icons/fa";
+import { FaEdit, FaPencilAlt, FaUserPlus } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
 import {
@@ -204,6 +204,7 @@ const UserProfile = () => {
     if (currentUser) {
       handleFetchUserData();
     }
+    // eslint-disable-next-line
   }, [currentUser]);
 
   useEffect(() => {
@@ -227,25 +228,48 @@ const UserProfile = () => {
       </div>
       {fetchedUserData && (
         <div className="flex flex-col items-center w-[95%] p-2 space-y-4 h-full">
-          {fetchedUserData.img ? (
-            <div className="flex flex-col items-center space-y-4">
-              <div className="flex justify-center relative w-fit">
-                {!isLoading && (
-                  <img
-                    src={fetchedUserData.img}
-                    className="h-20 w-20 hover:h-32 hover:w-32 duration-200 rounded-full border-[1px] border-blue-800"
-                    alt=""
-                  />
-                )}
-                {isLoading && <VscLoading className="animate-spin" size={60} />}
-                <span
-                  onClick={() => imageRef.current.click()}
-                  className="absolute top-[60%] right-0 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
-                >
-                  <FaPencil color="black" size={12} />
-                </span>
+          {fetchedUserData?.img ? (
+            <div
+              className={`flex flex-col items-center space-y-12 h-64 w-full`}
+            >
+              <div className="relative w-full ">
+                <div className="relative h-40 border-[1px] border-blue-900 rounded-md">
+                  {fetchedUserData?.bgImg && (
+                    <img
+                      src={fetchedUserData?.img}
+                      className="w-full bg-center h-40 rounded-md object-cover"
+                      alt=""
+                    />
+                  )}
+                  <span
+                    onClick={() => imageRef.current.click()}
+                    className="absolute top-[20%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
+                  >
+                    <FaPencilAlt color="black" size={12} />
+                  </span>{" "}
+                </div>
+                <div className="absolute -bottom-24 flex flex-col items-center justify-center w-full space-y-3">
+                  <div className="relative ">
+                    {!isLoading && (
+                      <img
+                        src={fetchedUserData.img}
+                        className="h-36 w-36 duration-200 rounded-full object-right-top border-[1px] border-blue-800"
+                        alt=""
+                      />
+                    )}
+                    {isLoading && (
+                      <VscLoading className="animate-spin h-36 w-36" />
+                    )}
+                    <span
+                      onClick={() => imageRef.current.click()}
+                      className="absolute top-[80%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
+                    >
+                      <FaPencil color="black" size={12} />
+                    </span>
+                  </div>
+                  <span className="text-2xl">{fetchedUserData.name}</span>
+                </div>
               </div>
-              <span className="text-2xl">{fetchedUserData.name}</span>
             </div>
           ) : (
             <FaUserPlus size={45} />

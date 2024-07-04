@@ -40,7 +40,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await signInWithEmailAndPassword(auth, email, password)
+    const loginData = await signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
         console.log(user);
@@ -57,6 +57,8 @@ const Login = () => {
         setLoading(false);
         setError("Invalid credentials");
       });
+    const loggedInResponse = loginData;
+    console.log(loggedInResponse);
   };
 
   // reset user password
@@ -93,7 +95,10 @@ const Login = () => {
               type={passwordType}
               placeholder="Password"
             />
-            <span className="mx-4 cursor-pointer" onClick={handleTogglePasswordType}>
+            <span
+              className="mx-4 cursor-pointer"
+              onClick={handleTogglePasswordType}
+            >
               {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
             </span>{" "}
           </div>

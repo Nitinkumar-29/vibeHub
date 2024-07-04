@@ -1,236 +1,46 @@
-import {
-  addDoc,
-  arrayRemove,
-  arrayUnion,
-  collection,
-  deleteDoc,
-  doc,
-  getDoc,
-  getDocs,
-  increment,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { FaUser } from "react-icons/fa";
 import { TfiArrowCircleLeft } from "react-icons/tfi";
 import { Carousel } from "react-responsive-carousel";
-import { useNavigate, useParams } from "react-router-dom";
-import { db } from "../firebase";
-import { AuthContext } from "../context/AuthContext";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { formatDistanceToNow } from "date-fns";
 import { BsHeartFill, BsSave } from "react-icons/bs";
 import { RxPaperPlane } from "react-icons/rx";
 import { BiLoader } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
+import PostContext from "../context/PostContext/PostContext";
+import { useParams } from "react-router-dom";
 
 const Post = () => {
-  const [postData, setPostData] = useState([]);
+  const {
+    postData,
+    navigate,
+    postComment,
+    setPostComment,
+    postComments,
+    isPublished,
+    formatDate,
+    handleDeleteComment,
+    handleLikeComment,
+    handleLikePost,
+    handlePostComment,
+    currentUser,
+    fetchPostById,
+    fetchPostComments,
+  } = useContext(PostContext);
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { currentUser } = useContext(AuthContext);
-  const [postComment, setPostComment] = useState({ commentText: "" });
-  const [postComments, setPostComments] = useState([]);
-  const [isPublished, setIsPublished] = useState(true);
-  const userData = JSON.parse(localStorage.getItem("loggedInUserData"));
 
-  const fetchPostById = async (id) => {
-    try {
-      const postRef = doc(db, "posts", id);
-      const postSnapShot = await getDoc(postRef);
-
-      if (postSnapShot.exists()) {
-        const postData = postSnapShot.data();
-        console.log("Post data: ", postData);
-        // You can set the post data to state if needed
-        setPostData(postData);
-      } else {
-        console.log("No such document!");
-      }
-    } catch (error) {
-      console.error("Error fetching post: ", error);
-    }
-  };
-
-  const formatDate = (timestamp) => {
-    const date = new Date(
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
-    );
-    return formatDistanceToNow(date, { addSuffix: true });
-  };
-  const fetchPostComments = async () => {
-    try {
-      const q = query(
-        collection(db, "postComments"),
-        where("postId", "==", id)
-      );
-      const querySnapshot = await getDocs(q);
-      const comments = [];
-      querySnapshot.forEach((doc) => {
-        comments.push({ id: doc.id, ...doc.data() });
-        console.log(comments);
-      });
-      // Sort comments by timestamp
-      comments.sort((a, b) => {
-        if (a.timestamp && b.timestamp) {
-          return b.timestamp.seconds - a.timestamp.seconds;
-        } else {
-          return 0; // Handle cases where timestamp might be missing
-        }
-      });
-      setPostComments(comments);
-    } catch (error) {
-      console.error("Error fetching comments: ", error);
-    }
-  };
-
-  const handlePostComment = async (e) => {
+  const postCommentById = (e) => {
     e.preventDefault();
-    setIsPublished(false);
-    const { commentText } = postComment;
-
-    try {
-      const docRef = await addDoc(collection(db, "postComments"), {
-        comment: commentText,
-        name: userData.name,
-        userId: currentUser.uid,
-        email: userData.email,
-        postId: id,
-        timestamp: serverTimestamp(),
-        userProfileImage: userData.img,
-      });
-      console.log("comment posted", docRef);
-      // Increment the comment count in the corresponding post document
-      const postRef = doc(db, "posts", id);
-      await updateDoc(postRef, {
-        commentsCount: increment(1),
-      });
-      // Reset the comment text input
-      setPostComment({
-        commentText: "",
-      });
-
-      setIsPublished(true);
-    } catch (error) {
-      console.error(error);
-      setIsPublished(false);
-    }
-    fetchPostById(id);
-    fetchPostComments();
-    setPostData({
-      commentsCount: postComment.length,
-    });
+    handlePostComment(id);
   };
-
-  const handleDeleteComment = async (commentId) => {
-    try {
-      const commentRef = doc(db, "postComments", commentId);
-      await deleteDoc(commentRef);
-      fetchPostComments();
-      console.log(`Comment with ID ${commentId} deleted`);
-      // Increment the comment count in the corresponding post document
-      const postRef = doc(db, "posts", id);
-      await updateDoc(postRef, {
-        commentsCount: increment(-1),
-      });
-      fetchPostById(id);
-    } catch (error) {
-      console.error("Error deleting comment: ", error);
-    }
-  };
-  const handleLikePost = async () => {
-    try {
-      const postRef = doc(db, "posts", id);
-      const postSnap = await getDoc(postRef);
-      console.log(postSnap);
-      if (postSnap.exists()) {
-        const postData = postSnap.data();
-
-        // Ensure postData.likes is initialized properly
-        const likes = postData.likes || [];
-
-        if (likes.includes(currentUser.uid)) {
-          await updateDoc(postRef, {
-            likes: arrayRemove(currentUser.uid),
-            likesCount: increment(-1),
-          });
-          setPostData((prevData) => ({
-            ...prevData,
-            likes: prevData.likes.filter((uid) => uid !== currentUser.uid),
-            likesCount: prevData.likesCount - 1,
-          }));
-          console.log("post disliked");
-          fetchPostById(id);
-        } else {
-          await updateDoc(postRef, {
-            likes: arrayUnion(currentUser.uid),
-            likesCount: increment(1),
-          });
-          setPostData((prevData) => ({
-            ...prevData,
-            likes: [...prevData.likes, currentUser.uid],
-            likesCount: prevData.likesCount + 1,
-          }));
-          console.log("post liked");
-
-          fetchPostById(id);
-        }
-      }
-    } catch (error) {
-      console.error("Error liking post: ", error);
-    }
-  };
-
-  const handleLikeComment = async (commentId) => {
-    try {
-      const commentRef = doc(db, "postComments", commentId);
-      const commentSnap = await getDoc(commentRef);
-
-      if (commentSnap.exists()) {
-        const postData = commentSnap.data();
-        if (postData.likes.includes?.(currentUser.uid)) {
-          await updateDoc(commentRef, {
-            likes: arrayRemove(currentUser.uid),
-            likesCount: increment(-1),
-          });
-          setPostData((prevData) => ({
-            ...prevData,
-            likes: [...prevData.likes, currentUser.uid],
-            likesCount: prevData.likesCount - 1,
-          }));
-        } else {
-          await updateDoc(commentRef, {
-            likes: arrayUnion(currentUser.uid),
-            likesCount: increment(1),
-          });
-          setPostData((prevData) => ({
-            ...prevData,
-            likes: [...prevData.likes, currentUser.uid],
-            likesCount: prevData.likesCount + 1,
-          }));
-          await fetchPostComments();
-        }
-      }
-    } catch (error) {
-      console.error("Error liking post: ", error);
-    }
-  };
-
   useEffect(() => {
-    fetchPostComments();
+    fetchPostById(id);
     // eslint-disable-next-line
   }, [id]);
 
   useEffect(() => {
-    if (currentUser?.uid) {
-      fetchPostById(id);
-    }
-    // eslint-disable-next-line
-  }, [id, currentUser?.uid]);
-
+    fetchPostComments(id);
+  }, [id]);
   return (
     <div
       // style={{ height: "calc(100% - 64px)" }}
@@ -306,18 +116,14 @@ const Post = () => {
                 <div className="flex items-center justify-between h-10 p-2">
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-1">
-                      <span onClick={handleLikePost}>
+                      <span onClick={() => handleLikePost(id)}>
                         {postData.likes.includes(currentUser.uid) ? (
                           <BsHeartFill
                             size={20}
                             className="text-red-600 cursor-pointer"
                           />
                         ) : (
-                          <SlHeart
-                            cursor={PointerEvent}
-                            className="cursor-pointer"
-                            size={20}
-                          />
+                          <SlHeart className="cursor-pointer" size={20} />
                         )}
                       </span>
                       {postData.likes.length >= 0 && (
@@ -326,9 +132,9 @@ const Post = () => {
                     </div>
                     <div className="flex items-center space-x-1">
                       <SlBubble size={20} />
-                      {postComments.length >= 0 && (
-                        <span>{postComments.length}</span>
-                      )}
+                      <span>
+                        {postComments.length !== 0 && postComments.length}
+                      </span>
                     </div>
                     <SlPaperPlane size={20} />
                   </div>
@@ -347,9 +153,9 @@ const Post = () => {
             {postData?.userId && (
               <div className="flex flex-col items-center space-y-4 w-[95%] bg-zinc-900 rounded-md border-blue-950 border-[1px] p-2">
                 <span className="w-full">
-                  Comments: &nbsp;{postComments.length}
+                  Comments: &nbsp;{postData.commentCounts}
                 </span>
-                <form onSubmit={handlePostComment} className="w-full ">
+                <form onSubmit={postCommentById} className="w-full ">
                   <textarea
                     type="text"
                     placeholder="Post a comment"
@@ -376,7 +182,7 @@ const Post = () => {
                   </button>
                 </form>
                 <div className="flex flex-col space-y-2 w-full">
-                  {postComments.map((comment) => {
+                  {postComments?.map((comment) => {
                     return (
                       <div
                         key={comment.id}
@@ -416,7 +222,9 @@ const Post = () => {
                             currentUser.uid === comment.userId) && (
                             <FiTrash2
                               className="cursor-pointer"
-                              onClick={() => handleDeleteComment(comment.id)}
+                              onClick={() =>
+                                handleDeleteComment(comment.id, id)
+                              }
                             />
                           )}
                         </div>
@@ -424,11 +232,18 @@ const Post = () => {
                           {comment.comment}
                         </div>
                         <div className="flex items-center w-full space-x-4">
-                          <SlHeart
-                            onClick={() => handleLikeComment(comment.id)}
-                            className="cursor-pointer"
-                            size={15}
-                          />
+                          <div
+                            onClick={() => handleLikeComment(comment.id, id)}
+                          >
+                            {comment?.likes?.includes?.(currentUser.uid) ? (
+                              <BsHeartFill
+                                className="text-red-600 cursor-pointer"
+                                size={15}
+                              />
+                            ) : (
+                              <SlHeart className="cursor-pointer" size={15} />
+                            )}
+                          </div>
                           <SlBubble size={15} />
                         </div>
                       </div>

@@ -3,7 +3,7 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
@@ -24,10 +24,11 @@ const SignUp = () => {
   });
   const [error, setError] = useState("");
   const [file, setFile] = useState("");
-  const { dispatch } = useContext(AuthContext);
+  const { dispatch,currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
   const [loading, setLoading] = useState(true);
+  const [userData,setUserData]=useState([])
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -109,6 +110,23 @@ const SignUp = () => {
       setFile("");
       setLoading(true);
       dispatch({ type: "SIGNUP", payload: response.user });
+      if (currentUser && currentUser.email) {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", currentUser.email)
+        );
+        const querySnapshot = await getDocs(q);
+        console.log(querySnapshot);
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          console.log({ data, uid: currentUser.uid });
+          setUserData(data, currentUser.uid);
+          localStorage.setItem(
+            "loggedInUserData",
+            JSON.stringify(userData, currentUser.uid)
+          );
+        });
+      }
       navigate("/userProfile");
       console.log(response.user, data);
       await sendEmailVerification(response.user);
@@ -147,6 +165,7 @@ const SignUp = () => {
             type="text"
             name="name"
             id="name"
+            required
             placeholder="Name"
             value={data.name}
             onChange={onChange}
@@ -156,6 +175,7 @@ const SignUp = () => {
             type="email"
             name="email"
             id="email"
+            required
             placeholder="Email"
             value={data.email}
             onChange={onChange}
@@ -166,6 +186,7 @@ const SignUp = () => {
               type={passwordType}
               name="password"
               id="password"
+              required
               placeholder="Password"
               value={data.password}
               onChange={onChange}
@@ -182,6 +203,7 @@ const SignUp = () => {
             type="text"
             name="address"
             id="address"
+            required
             placeholder="Address"
             value={data.address}
             onChange={onChange}
@@ -191,6 +213,7 @@ const SignUp = () => {
             type="phone"
             name="mobileNumber"
             id="mobileNumber"
+            required
             placeholder="Mobile Number"
             value={data.mobileNumber}
             onChange={onChange}

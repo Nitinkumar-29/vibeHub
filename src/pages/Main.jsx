@@ -7,7 +7,7 @@ import { db } from "../firebase";
 
 const Home = () => {
   const { currentUser } = useContext(AuthContext);
-  const [loggedInUserData,setLoggedInUserData]=useState({})
+  const [loggedInUserData, setLoggedInUserData] = useState({});
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
       const q = query(
@@ -15,7 +15,7 @@ const Home = () => {
         where("email", "==", currentUser.email)
       );
       const querySnapshot = await getDocs(q);
-      console.log(querySnapshot)
+      console.log(querySnapshot);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
         console.log({ userData, uid: currentUser.uid });
@@ -23,13 +23,15 @@ const Home = () => {
       });
     }
   };
-  useEffect(()=>{
-    currentUser.uid&&handleFetchUserData()
+  useEffect(() => {
+    currentUser.uid && handleFetchUserData();
     // eslint-disable-next-line
-  },[currentUser.uid])
+  }, [currentUser.uid]);
   return (
     <div className="relative w-screen max-w-[430px] h-fit bg-zinc-950 text-white">
-      <Outlet />
+      <div className="w-full h-screen overflow-y-auto">
+        <Outlet />
+      </div>
       <div className="z-10 text-white absolute bottom-0 h-16 w-full bg-zinc-950 p-2 ">
         <div className="flex justify-between items-center h-full p-2 rounded-md w-full border-[1px] border-blue-700 bg-inherit">
           <span>

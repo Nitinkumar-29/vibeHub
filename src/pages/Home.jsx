@@ -1,41 +1,24 @@
 import React, { useContext, useEffect, useState } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
-import { AuthContext } from "../context/AuthContext";
-import { FaRegSave, FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import "../styles/overflow_scroll.css";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { BiSolidHomeHeart } from "react-icons/bi";
-import { BsSave, BsSaveFill } from "react-icons/bs";
+import { BsHeartFill, BsSave, BsSaveFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
+import PostContext from "../context/PostContext/PostContext";
+import { FaUser } from "react-icons/fa";
 
 const Home = () => {
-  const [posts, setPosts] = useState([]);
-  const { currentUser } = useContext(AuthContext);
-
-  const fetchAllPosts = async () => {
-    const querySnapshot = await getDocs(collection(db, "posts"));
-    const postsArray = [];
-    querySnapshot.forEach((doc) => {
-      const postData = doc.data();
-      postsArray.push({
-        id: doc.id,
-        ...postData,
-        timeStamp: postData.timeStamp?.toDate(), // Convert Firestore timestamp to JS Date
-      });
-    });
-    // Sort posts by timestamp in descending order
-    postsArray.sort((a, b) => b.timeStamp - a.timeStamp);
-    setPosts(postsArray);
-    console.log(postsArray);
-  };
+  const { handleLikePost, currentUser, posts, fetchAllPosts } =
+    useContext(PostContext);
 
   useEffect(() => {
     fetchAllPosts();
+    // eslint-disable-next-line
   }, []);
 
   const handleFetchUserData = async () => {
@@ -68,13 +51,13 @@ const Home = () => {
         <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
           <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
             <span>Home</span>
-            <span>Posts: {posts.length}</span>
+            <span>Posts: {posts?.length}</span>
           </div>
         </div>
-        {posts.length > 0 ? (
+        {posts?.length > 0 ? (
           <div className="flex justify-center w-[95%] h-full py-2">
             <div className="flex flex-col space-y-3 w-full h-fit">
-              {posts.map((post, index) => (
+              {posts?.map((post, index) => (
                 <div
                   key={index}
                   className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
@@ -95,7 +78,7 @@ const Home = () => {
                     </div>
                   </div>
                   <div className="w-full h-full space-y-1">
-                    <p className="p-2">{post.postCaption}</p>
+                    <p className="p-2">{post?.postCaption}</p>
                     <Carousel
                       className="carousel"
                       showThumbs={false}
@@ -108,7 +91,7 @@ const Home = () => {
                       showArrows={true}
                       showIndicators={true}
                     >
-                      {post.fileURLs.map((fileURL, index) => (
+                      {post?.fileURLs?.map((fileURL, index) => (
                         <div key={index} className="relative px-2">
                           {fileURL ? (
                             <img
@@ -129,18 +112,37 @@ const Home = () => {
                     </Carousel>
                     <div className="flex items-center justify-between h-10 p-2">
                       <div className="flex items-center space-x-6">
-                        <SlHeart size={20} />
-                        <Link to={`/post/${post.id}`}>
+                        <div
+                          className="flex space-x-1 items-center cursor-pointer"
+                          onClick={() =>
+                            handleLikePost(post?.id, currentUser?.uid)
+                          }
+                        >
+                          {post.likes?.includes(currentUser?.uid) ? (
+                            <BsHeartFill
+                              size={20}
+                              className="text-red-600 cursor-pointer"
+                            />
+                          ) : (
+                            <SlHeart size={20} />
+                          )}
+                          {post?.likes?.length !== 0 && (
+                            <span>{post?.likes?.length}</span>
+                          )}
+                        </div>
+                        <Link to={`/post/${post?.id}`}>
                           <div className="flex items-center space-x-1">
                             <SlBubble size={20} />
-                            <span>{post.commentsCount}</span>
+                            <span>
+                              {post?.commentsCount !== 0 && post?.commentsCount}
+                            </span>
                           </div>
                         </Link>
                         <SlPaperPlane size={20} />
                       </div>
                       <span className="text-sm text-zinc-400">
-                        {post.timeStamp
-                          ? formatTime(post.timeStamp, "PPpp")
+                        {post?.timeStamp
+                          ? formatTime(post?.timeStamp, "PPpp")
                           : "not provided"}
                       </span>
                       <div className="">

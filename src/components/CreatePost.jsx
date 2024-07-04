@@ -24,7 +24,7 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
-  const { files, setFiles } = useContext(PostContext);
+  const [ files, setFiles ] = useState([]);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [newPostData, setNewPostData] = useState({
     name: "",
@@ -153,7 +153,8 @@ const CreatePost = () => {
     });
   };
 
-  const handleSavePost = async () => {
+  const handleSavePost = async (e) => {
+    e.preventDefault()
     setIsPublished(false);
     const fileURLs = await handleUploadFiles();
     const userProfileImageURL = await handleUploadUserProfileImage();
@@ -192,30 +193,11 @@ const CreatePost = () => {
 
   return (
     <div className="text-white flex justify-center w-screen max-w-[430px] bg-zinc-950 h-screen">
-      <div className="relative flex flex-col items-center justify-center space-y-1 w-full min-h-[90%] max-h-screen">
-        <div className="z-10 top-2 absolute  bg-zinc-900 w-[95%]">
-          <div className="flex justify-between items-center w-full rounded-md h-12 p-2 border-[1px] border-blue-800">
-            <span
-              onClick={() => {
-                navigate(-1);
-              }}
-              className="p-1 rounded-md duration-200 cursor-pointer"
-            >
-              <TfiArrowCircleLeft size={25} />
-            </span>
-            <span>Create Post</span>
-            <button
-              className="p-1 rounded-md duration-200 cursor-pointer"
-              onClick={handleSavePost}
-            >
-              {isPublished === null && "Publish"}
-              {isPublished === false && (
-                <BiLoader size={25} className="animate-spin" />
-              )}
-            </button>
-          </div>
+      <div className="flex flex-col items-center justify-center w-full min-h-[90%] max-h-screen">
+        <div className="bg-zinc-900 w-[95%]">
+          
         </div>
-        <div className="h-[80%] w-[95%] bg-zinc-900 rounded-md py-2">
+        <div className="h-[95%] w-[95%] bg-zinc-900 rounded-md py-2">
           <form className="relative w-full h-full overflow-y-auto">
             <div className="h-fit flex space-x-4 w-full justify-start p-3">
               {currentUserData?.img && (
@@ -251,7 +233,6 @@ const CreatePost = () => {
                 onChange={handleFileChange}
               />
               <div className="flex items-center justify-between mb-2 p-2 rounded-md bg-zinc-950 w-full">
-                <span>Add media</span>
                 <div className="flex items-center space-x-2">
                   <TiAttachmentOutline
                     onClick={() => {
@@ -262,9 +243,18 @@ const CreatePost = () => {
                   />
                   <VscMention size={25} className="cursor-pointer" />
                 </div>
+                <button
+                  className="p-1 rounded-md duration-200 cursor-pointer"
+                  onClick={handleSavePost}
+                >
+                  {isPublished === null && "Publish"}
+                  {isPublished === false && (
+                    <BiLoader size={25} className="animate-spin" />
+                  )}
+                </button>{" "}
               </div>
               <div className="grid grid-cols-2 gap-3 h-fit py-2 w-full overflow-y-auto mx-auto">
-                {files.map((file, index) => (
+                {files?.map((file, index) => (
                   <div key={index} className="relative">
                     {file.type.startsWith("image/") && (
                       <div className="w-fit relative">
