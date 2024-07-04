@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   addDoc,
   arrayRemove,
@@ -29,6 +29,7 @@ export const PostProvider = ({ children }) => {
   const [isPublished, setIsPublished] = useState(true);
   const userData = JSON.parse(localStorage.getItem("loggedInUserData"));
   const { currentUser } = useContext(AuthContext);
+  const [postsLoading, setPostsLoading] = useState(false);
 
   const fetchPostById = async (id) => {
     try {
@@ -224,6 +225,7 @@ export const PostProvider = ({ children }) => {
   };
 
   const fetchAllPosts = async () => {
+    setPostsLoading(true)
     try {
       const querySnapshot = await getDocs(collection(db, "posts"));
       // Use Promise.all to fetch user data concurrently
@@ -249,6 +251,7 @@ export const PostProvider = ({ children }) => {
 
       // Sort posts by timestamp in descending order
       postsWithUserData.sort((a, b) => b.timeStamp - a.timeStamp);
+      setPostsLoading(false)
       setPosts(postsWithUserData);
       console.log(postsWithUserData);
     } catch (error) {
@@ -282,6 +285,7 @@ export const PostProvider = ({ children }) => {
         currentUser,
         fetchAllPosts,
         posts,
+        postsLoading
       }}
     >
       {children}

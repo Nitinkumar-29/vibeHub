@@ -3,7 +3,7 @@ import { FaUser } from "react-icons/fa";
 import { TfiArrowCircleLeft } from "react-icons/tfi";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { BsHeartFill, BsSave } from "react-icons/bs";
+import { BsHeartFill } from "react-icons/bs";
 import { RxBookmarkFilled, RxPaperPlane } from "react-icons/rx";
 import { BiCopy, BiLoader } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
