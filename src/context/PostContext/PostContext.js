@@ -21,7 +21,6 @@ import { AuthContext } from "../AuthContext";
 
 const PostContext = createContext();
 export const PostProvider = ({ children }) => {
-  const [files, setFiles] = useState([]);
   const [posts, setPosts] = useState([]);
   const [postData, setPostData] = useState([]);
   const navigate = useNavigate();
@@ -176,12 +175,12 @@ export const PostProvider = ({ children }) => {
           // }));
           // // Update local state (posts) for the specific post
           setPosts((prevPosts) =>
-            prevPosts.map((post) =>
+            prevPosts?.map((post) =>
               post?.id === id
                 ? {
                     ...post,
-                    likes: [...post?.likes, currentUser.uid],
-                    likesCount: post.likesCount + 1,
+                    likes: [...post?.likes, currentUser?.uid],
+                    likesCount: post?.likesCount + 1,
                   }
                 : post
             )
@@ -225,20 +224,36 @@ export const PostProvider = ({ children }) => {
   };
 
   const fetchAllPosts = async () => {
-    const querySnapshot = await getDocs(collection(db, "posts"));
-    const postsArray = [];
-    querySnapshot.forEach((doc) => {
-      const postData = doc.data();
-      postsArray.push({
-        id: doc.id,
-        ...postData,
-        timeStamp: postData.timeStamp?.toDate(), // Convert Firestore timestamp to JS Date
-      });
-    });
-    // Sort posts by timestamp in descending order
-    postsArray.sort((a, b) => b.timeStamp - a.timeStamp);
-    setPosts(postsArray);
-    console.log(postsArray);
+    try {
+      const querySnapshot = await getDocs(collection(db, "posts"));
+      // Use Promise.all to fetch user data concurrently
+      const postsWithUserData = await Promise.all(
+        querySnapshot.docs.map(async (docSnapshot) => {
+          const postData = docSnapshot.data();
+          const userDocRef = doc(db, "users", postData.userId);
+          const userDocSnap = await getDoc(userDocRef);
+
+          let userData = {};
+          if (userDocSnap.exists()) {
+            userData = userDocSnap.data();
+          }
+
+          return {
+            id: docSnapshot.id,
+            ...postData,
+            userData,
+            timeStamp: postData.timeStamp?.toDate(), // Convert Firestore timestamp to JS Date
+          };
+        })
+      );
+
+      // Sort posts by timestamp in descending order
+      postsWithUserData.sort((a, b) => b.timeStamp - a.timeStamp);
+      setPosts(postsWithUserData);
+      console.log(postsWithUserData);
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+    }
   };
 
   useEffect(() => {

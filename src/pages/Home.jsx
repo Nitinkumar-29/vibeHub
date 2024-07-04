@@ -1,16 +1,18 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { formatTime } from "../utils/FormatTime";
-
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import "../styles/overflow_scroll.css";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { BsHeartFill, BsSave, BsSaveFill } from "react-icons/bs";
+import { BsHeartFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import PostContext from "../context/PostContext/PostContext";
 import { FaUser } from "react-icons/fa";
+import { PiBookmarkSimpleThin } from "react-icons/pi";
+import { RxBookmarkFilled } from "react-icons/rx";
+import { HiDotsVertical } from "react-icons/hi";
 
 const Home = () => {
   const { handleLikePost, currentUser, posts, fetchAllPosts } =
@@ -48,36 +50,37 @@ const Home = () => {
       className="overflow-y-auto h-screen"
     >
       <div className="flex flex-col items-center mb-16">
-        <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
-          <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
-            <span>Home</span>
+        <div className="flex items-center justify-center bg-zinc-900 w-full h-16">
+          <div className="flex justify-between items-center h-12 p-3 w-full rounded-md">
+            <img
+              src={`/images/logo.png`}
+              className="h-12 w-12 rounded-md"
+              alt=""
+            />
             <span>Posts: {posts?.length}</span>
           </div>
         </div>
         {posts?.length > 0 ? (
-          <div className="flex justify-center w-[95%] h-full py-2">
-            <div className="flex flex-col space-y-3 w-full h-fit">
+          <div className="flex justify-center w-full h-full py-2">
+            <div className="flex flex-col w-full h-fit">
               {posts?.map((post, index) => (
-                <div
-                  key={index}
-                  className="w-full border-[1px] border-blue-900 rounded-md bg-zinc-900"
-                >
-                  <div className="h-16 flex items-center border-[1px] border-blue-900 rounded-md space-x-4 w-full justify-start p-3">
-                    {post?.userProfileImage ? (
+                <div key={index} className="w-full rounded-md bg-zinc-900">
+                  <div className="h-16 flex items-center border-t-[1px] border-blue-950 rounded-sm space-x-4 w-full justify-start px-3">
+                    {post?.userData?.img ? (
                       <img
-                        src={post?.userProfileImage}
-                        className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-900"
+                        src={post?.userData?.img}
+                        className="w-[3rem] h-[3rem] object-cover duration-200 rounded-full"
                         alt=""
                       />
                     ) : (
                       <FaUser size={48} />
                     )}
-                    <div className="flex flex-col space-y-1">
-                      <span className="font-medium">{post?.name}</span>
-                      {/* <span>{post?.email}</span> */}
+                    <div className="flex w-full justify-between items-center space-y-1">
+                      <span className="font-medium">{post?.userData?.name}</span>
+                      <HiDotsVertical size={25} />
                     </div>
                   </div>
-                  <div className="w-full h-full space-y-1">
+                  <div className="w-full h-full my-2">
                     <p className="p-2">{post?.postCaption}</p>
                     <Carousel
                       className="carousel"
@@ -92,17 +95,20 @@ const Home = () => {
                       showIndicators={true}
                     >
                       {post?.fileURLs?.map((fileURL, index) => (
-                        <div key={index} className="relative px-2">
+                        <div
+                          key={index}
+                          className="relative aspect-w-3 aspect-h-4 mx-[.25px]"
+                        >
                           {fileURL ? (
                             <img
                               src={fileURL}
                               alt="post media"
-                              className={`h-[18rem] w-[18rem] object-cover rounded-md border-[1px] border-blue-950`}
+                              className={`h-full w-full object-scale-down rounded-sm border-[1px] border-blue-950`}
                             />
                           ) : fileURL ? (
                             <video
                               controls
-                              className="h-[10rem] w-[10rem] object-cover rounded-md border-[1px] border-blue-950"
+                              className="h-[10rem] w-[10rem] object-cover rounded-sm border-[1px] border-blue-950"
                             >
                               <source src={fileURL} type="video" />
                             </video>
@@ -110,7 +116,7 @@ const Home = () => {
                         </div>
                       ))}
                     </Carousel>
-                    <div className="flex items-center justify-between h-10 p-2">
+                    <div className="flex items-center justify-between h-12 px-4 pt-2">
                       <div className="flex items-center space-x-6">
                         <div
                           className="flex space-x-1 items-center cursor-pointer"
@@ -140,16 +146,25 @@ const Home = () => {
                         </Link>
                         <SlPaperPlane size={20} />
                       </div>
-                      <span className="text-sm text-zinc-400">
-                        {post?.timeStamp
-                          ? formatTime(post?.timeStamp, "PPpp")
-                          : "not provided"}
-                      </span>
                       <div className="">
-                        <BsSave size={20} />
-                        {/* <BsSaveFill size={20} /> */}
+                        {post?.saved ? (
+                          <RxBookmarkFilled
+                            className="text-red-600 cursor-pointer"
+                            size={28}
+                          />
+                        ) : (
+                          <PiBookmarkSimpleThin
+                            size={28}
+                            className="cursor-pointer"
+                          />
+                        )}
                       </div>
                     </div>
+                    <span className="w-full px-4 text-sm text-zinc-400">
+                      {post?.timeStamp
+                        ? formatTime(post?.timeStamp, "PPpp")
+                        : "not provided"}
+                    </span>
                   </div>
                 </div>
               ))}

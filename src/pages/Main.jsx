@@ -28,12 +28,12 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser.uid]);
   return (
-    <div className="relative w-screen max-w-[430px] h-fit bg-zinc-950 text-white">
-      <div className="w-full h-screen overflow-y-auto">
+    <div className="relative w-full max-w-[430px] h-fit bg-zinc-950 text-white">
+      <div className="w-full h-full">
         <Outlet />
       </div>
-      <div className="z-10 text-white absolute bottom-0 h-16 w-full bg-zinc-950 p-2 ">
-        <div className="flex justify-between items-center h-full p-2 rounded-md w-full border-[1px] border-blue-700 bg-inherit">
+      <div className="z-10 text-white fixed bottom-0 h-16 w-full bg-zinc-950 py-2">
+        <div className="flex justify-between items-center h-full p-2 rounded-md w-full bg-inherit">
           <span>
             <Link to="/">
               <FaHome size={25} />

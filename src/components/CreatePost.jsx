@@ -5,6 +5,8 @@ import { AuthContext } from "../context/AuthContext";
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -17,14 +19,13 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { VscMention } from "react-icons/vsc";
-import PostContext from "../context/PostContext/PostContext";
 
 const CreatePost = () => {
   const inputRef = useRef();
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
-  const [ files, setFiles ] = useState([]);
+  const [files, setFiles] = useState([]);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [newPostData, setNewPostData] = useState({
     name: "",
@@ -113,64 +114,30 @@ const CreatePost = () => {
     return Promise.all(uploadPromises);
   };
 
-  const handleUploadUserProfileImage = async () => {
-    if (!userProfileImage || typeof userProfileImage === "string")
-      return userProfileImage; // Return existing URL if not a new file
-
-    const name = new Date().getTime() + "_" + userProfileImage.name;
-    const storageRef = ref(storage, name);
-    const uploadTask = uploadBytesResumable(storageRef, userProfileImage);
-
-    return new Promise((resolve, reject) => {
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-
-          switch (snapshot.state) {
-            case "paused":
-              console.log("Upload is paused");
-              break;
-            case "running":
-              console.log("Upload is running");
-              break;
-            default:
-              break;
-          }
-        },
-        (error) => {
-          console.log(error);
-          reject(error);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log("File available at", downloadURL);
-          resolve(downloadURL);
-        }
-      );
-    });
+  const handlehashtag = async () => {
+    const docRef = doc(db, "users", currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      console.log("Document data:", docSnap.data());
+    } else {
+      // docSnap.data() will be undefined in this case
+      console.log("No such document!");
+    }
   };
 
   const handleSavePost = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     setIsPublished(false);
     const fileURLs = await handleUploadFiles();
-    const userProfileImageURL = await handleUploadUserProfileImage();
     const { postCaption } = newPostData;
-    const name = currentUserData?.name;
-    const email = currentUserData?.email;
 
     try {
       setIsPublished(false);
       const postPublished = await addDoc(collection(db, "posts"), {
-        name: name,
-        email: email,
         postCaption: postCaption,
         fileURLs: fileURLs,
         userId: currentUser.uid,
-        userProfileImage: userProfileImageURL,
+        // userProfileImage: userProfileImageURL,
         timeStamp: serverTimestamp(),
       });
       console.log("Post created and published", postPublished.id);
@@ -192,13 +159,14 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="text-white flex justify-center w-screen max-w-[430px] bg-zinc-950 h-screen">
-      <div className="flex flex-col items-center justify-center w-full min-h-[90%] max-h-screen">
-        <div className="bg-zinc-900 w-[95%]">
-          
+    <div className="text-white flex justify-center w-full bg-zinc-950 h-full">
+      <div className="flex flex-col items-center justify-center w-full h-full">
+        <div className="grid grid-cols-3 items-center justify-around w-[95%]">
+          <TfiArrowCircleLeft size={25} className="cursor-pointer" />
+          <span className="p-2">Make a post</span>
         </div>
-        <div className="h-[95%] w-[95%] bg-zinc-900 rounded-md py-2">
-          <form className="relative w-full h-full overflow-y-auto">
+        <div className="min-h-screen h-full w-full bg-zinc-900 rounded-md pb-16">
+          <form className="relative w-full h-full hideScrollbar">
             <div className="h-fit flex space-x-4 w-full justify-start p-3">
               {currentUserData?.img && (
                 <img
@@ -213,9 +181,9 @@ const CreatePost = () => {
                 <span>{currentUserData?.email}</span>
               </div>
             </div>
-            <div className="w-full h-fit p-2 border-t-[1px] border-blue-900">
+            <div className="flex flex-col items-center w-full h-fit p-2 border-t-[1px] border-blue-900">
               <textarea
-                type="text"
+                type="textarea"
                 className="w-full focus:outline-none p-2 my-1 bg-zinc-950 rounded-md placeholder:text-zinc-400"
                 placeholder={`What's on your mind, ${currentUserData?.name} ?`}
                 rows={4}
@@ -241,7 +209,11 @@ const CreatePost = () => {
                     size={23}
                     className="cursor-pointer"
                   />
-                  <VscMention size={25} className="cursor-pointer" />
+                  <VscMention
+                    onClick={handlehashtag}
+                    size={25}
+                    className="cursor-pointer"
+                  />
                 </div>
                 <button
                   className="p-1 rounded-md duration-200 cursor-pointer"
@@ -251,18 +223,21 @@ const CreatePost = () => {
                   {isPublished === false && (
                     <BiLoader size={25} className="animate-spin" />
                   )}
-                </button>{" "}
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-3 h-fit py-2 w-full overflow-y-auto mx-auto">
+              <span className="w-full text-zinc-500 pb-2">
+                Please try to post media in 4:3 ratio
+              </span>
+              <div className="grid col-start-auto grid-cols-2 gap-3 w-full">
                 {files?.map((file, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative w-full">
                     {file.type.startsWith("image/") && (
-                      <div className="w-fit relative">
+                      <div className="w-[11.8rem] h-[9rem] relative">
                         <img
                           onMouseDown={BiZoomIn}
                           src={URL.createObjectURL(file)}
                           alt="preview"
-                          className="w-[10rem] h-[10rem] object-cover rounded-md"
+                          className="w-full h-full object-cover rounded-md"
                         />
                         <span
                           onClick={() => removeFile(index)}
@@ -273,10 +248,10 @@ const CreatePost = () => {
                       </div>
                     )}
                     {file.type.startsWith("video/") && (
-                      <div className="relative w-full m-1">
+                      <div className="relative w-[11.8rem] h-[9rem]">
                         <video
                           controls
-                          className="h-[10rem] border-2 w-[10rem] object-cover rounded-md"
+                          className="w-full h-full object-contain rounded-md"
                         >
                           <source
                             src={URL.createObjectURL(file)}

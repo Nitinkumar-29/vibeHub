@@ -4,11 +4,12 @@ import { TfiArrowCircleLeft } from "react-icons/tfi";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill, BsSave } from "react-icons/bs";
-import { RxPaperPlane } from "react-icons/rx";
-import { BiLoader } from "react-icons/bi";
+import { RxBookmarkFilled, RxPaperPlane } from "react-icons/rx";
+import { BiCopy, BiLoader } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
 import PostContext from "../context/PostContext/PostContext";
 import { useParams } from "react-router-dom";
+import { PiBookmarkSimpleThin } from "react-icons/pi";
 
 const Post = () => {
   const {
@@ -43,29 +44,26 @@ const Post = () => {
   }, [id]);
   return (
     <div
-      // style={{ height: "calc(100% - 64px)" }}
       className="overflow-y-auto h-screen"
     >
       <div className="flex flex-col items-center mb-16">
         <div className="flex items-center justify-center bg-zinc-950 w-full h-16">
-          <div className="flex justify-between items-center border-[1px] border-blue-900 h-12 p-2 w-[95%] rounded-md shadow-sm shadow-blue-800">
+          <div className="flex justify-between items-center h-12 p-2 w-full">
             <div className="flex items-center space-x-2">
               <TfiArrowCircleLeft
                 onClick={() => {
                   navigate(-1);
                 }}
-                size={18}
+                size={25}
               />
-              <span>Post</span>
             </div>
-            <span>id: {id}</span>
           </div>
         </div>
         {postData ? (
           <div className="flex flex-col items-center space-y-2 py-2">
             {postData?.userId && (
-              <div className="flex flex-col space-y-3 w-[95%] h-fit border-[1px] rounded-md border-blue-950 bg-zinc-900">
-                <div className="h-16 border-[1px] border-blue-900 rounded-md flex items-center space-x-4 w-full justify-start p-2">
+              <div className="flex flex-col space-y-3 w-full h-fit border-[1px] rounded-md border-blue-950 bg-zinc-900">
+                <div className="h-16 border-y-[1px] border-blue-900 flex items-center space-x-4 w-full justify-start p-2">
                   {postData?.userProfileImage ? (
                     <img
                       src={postData?.userProfileImage}
@@ -75,9 +73,17 @@ const Post = () => {
                   ) : (
                     <FaUser size={48} />
                   )}
-                  <div className="flex flex-col space-y-1 w-full">
+                  <div className="flex justify-between space-x-1 w-full">
                     <span className="font-medium">{postData?.name}</span>
-                    {/* <span>{postData?.email}</span> */}
+                    <span
+                      className="cursor-pointer text-slate-500 hover:text-white duration-200"
+                      onClick={() => {
+                        const fullUrl = window.location.href;
+                        navigator.clipboard.writeText(fullUrl);
+                      }}
+                    >
+                      <BiCopy size={20} />
+                    </span>
                   </div>
                 </div>
                 <p className="p-2">{postData.postCaption}</p>
@@ -101,7 +107,7 @@ const Post = () => {
                             controls
                             className="h-[10rem] w-[10rem] object-none rounded-md border-[1px] border-blue-950"
                           >
-                            <source src={fileURL} type="video/mp4" />
+                            <source src={fileURL} type="video/*" />
                           </video>
                         ) : (
                           <img
@@ -117,7 +123,7 @@ const Post = () => {
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-1">
                       <span onClick={() => handleLikePost(id)}>
-                        {postData.likes.includes(currentUser.uid) ? (
+                        {postData?.likes?.includes(currentUser.uid) ? (
                           <BsHeartFill
                             size={20}
                             className="text-red-600 cursor-pointer"
@@ -126,8 +132,8 @@ const Post = () => {
                           <SlHeart className="cursor-pointer" size={20} />
                         )}
                       </span>
-                      {postData.likes.length >= 0 && (
-                        <span>{postData.likes.length}</span>
+                      {postData?.likes?.length >= 0 && (
+                        <span>{postData?.likes?.length}</span>
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
@@ -144,8 +150,11 @@ const Post = () => {
                       : "not provided"}
                   </span>
                   <div className="">
-                    <BsSave size={20} />
-                    {/* <BsSaveFill size={20} /> */}
+                    {postData?.saved ? (
+                      <RxBookmarkFilled className="text-red-600 cursor-pointer" size={28} />
+                    ) : (
+                      <PiBookmarkSimpleThin size={28} className="cursor-pointer" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -157,7 +166,7 @@ const Post = () => {
                 </span>
                 <form onSubmit={postCommentById} className="w-full ">
                   <textarea
-                    type="text"
+                    type="textarea"
                     placeholder="Post a comment"
                     className="outline-none w-full bg-inherit"
                     rows={3}
@@ -232,19 +241,24 @@ const Post = () => {
                           {comment.comment}
                         </div>
                         <div className="flex items-center w-full space-x-4">
-                          <div
-                            onClick={() => handleLikeComment(comment.id, id)}
-                          >
-                            {comment?.likes?.includes?.(currentUser.uid) ? (
-                              <BsHeartFill
-                                className="text-red-600 cursor-pointer"
-                                size={15}
-                              />
-                            ) : (
-                              <SlHeart className="cursor-pointer" size={15} />
-                            )}
+                          <div className="flex items-center space-x-1">
+                            <div
+                              onClick={() => handleLikeComment(comment.id, id)}
+                            >
+                              {comment?.likes?.includes?.(currentUser.uid) ? (
+                                <BsHeartFill
+                                  className="text-red-600 cursor-pointer"
+                                  size={18}
+                                />
+                              ) : (
+                                <SlHeart className="cursor-pointer" size={18} />
+                              )}
+                            </div>
+                            <span className="text-sm">
+                              {comment.likesCount}
+                            </span>
                           </div>
-                          <SlBubble size={15} />
+                          <SlBubble size={18} />
                         </div>
                       </div>
                     );
