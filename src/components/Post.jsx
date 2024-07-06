@@ -7,7 +7,7 @@ import { RxBookmarkFilled, RxPaperPlane } from "react-icons/rx";
 import { BiCopy, BiLoader } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
 import PostContext from "../context/PostContext/PostContext";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { FaSpinner } from "react-icons/fa6";
@@ -70,9 +70,12 @@ const Post = () => {
                   <FaUser size={30} />
                 )}
                 <div className="flex justify-between space-x-1 w-full">
-                  <span className="font-medium">
-                    {userDataWithPostId?.name}
-                  </span>
+                  <Link
+                    to={`/users/${userDataWithPostId?.user_name}/profile`}
+                    className="font-medium"
+                  >
+                    {userDataWithPostId?.user_name}
+                  </Link>
                   <span
                     className="cursor-pointer text-slate-500 hover:text-white duration-200"
                     onClick={() => {
@@ -108,11 +111,13 @@ const Post = () => {
                           <source src={fileURL} type="video/*" />
                         </video>
                       ) : (
-                        <img
-                          src={fileURL}
-                          alt="post media"
-                          className="h-[18rem] w-[18rem] object-cover rounded-sm border-[1px] border-blue-950"
-                        />
+                        <div className="aspec-w-3 aspect-h-4">
+                          <img
+                            src={fileURL}
+                            alt="post media"
+                            className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                          />
+                        </div>
                       )}
                     </div>
                   ))}
@@ -145,7 +150,7 @@ const Post = () => {
 
                 <div
                   onClick={() => {
-                    handleSavePost(postData.id, currentUser.uid);
+                    handleSavePost(id);
                   }}
                 >
                   {postData?.saves?.includes(currentUser.uid) ? (
@@ -216,14 +221,21 @@ const Post = () => {
                                 <FaUser className="h-8 w-8 border-[1px] rounded-full border-blue-800" />
                               )}
                               {postData.userId === comment.userId ? (
-                                <div className="flex items-center space-x-1">
-                                  <span>{comment?.user?.name}</span>{" "}
+                                <Link
+                                  to={`/users/${comment?.user?.user_name}`}
+                                  className="flex items-center space-x-1"
+                                >
+                                  <span>{comment?.user?.user_name}</span>{" "}
                                   <span className="text-zinc-500">
                                     (author)
                                   </span>
-                                </div>
+                                </Link>
                               ) : (
-                                <span>{comment?.user?.name}</span>
+                                <Link
+                                  to={`/users/${comment?.user?.user_name}/profile`}
+                                >
+                                  {comment?.user?.user_name}
+                                </Link>
                               )}
                             </div>
                             <span>
@@ -249,6 +261,7 @@ const Post = () => {
                       <div className="flex items-center w-full px-2 space-x-4">
                         <div className="flex items-center space-x-1">
                           <div
+                            className="flex space-x-1 items-center"
                             onClick={() => handleLikeComment(comment.id, id)}
                           >
                             {comment?.likes?.includes?.(currentUser.uid) ? (
@@ -259,6 +272,7 @@ const Post = () => {
                             ) : (
                               <SlHeart className="cursor-pointer" size={18} />
                             )}
+                            <span>{comment?.likesCount}</span>
                           </div>
                           <span className="text-sm">
                             {!comment.likesCount === 0 && comment.likesCount}

@@ -21,6 +21,7 @@ import UserPosts from "./components/UserPosts";
 import UserSavedPosts from "./components/UserSavedPosts";
 import Explore from "./pages/Explore";
 import Notfound from "./pages/Notfound";
+import OtherUsersProfile from "./pages/OtherUsersProfile";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -63,7 +64,10 @@ function App() {
                   element={<UserProfileSub />}
                 />
               </Route>
-              {/* <Route path="/users/:id/profile" element={}/> */}
+              <Route
+                path="/users/:user_name/profile"
+                element={<OtherUsersProfile />}
+              />
               <Route path="/explore" element={<Explore />} />
               <Route path="/post/:id" element={<Post />} />
               <Route path="/settings" element={<Settings />} />

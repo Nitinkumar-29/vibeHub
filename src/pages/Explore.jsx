@@ -30,6 +30,8 @@ const Explore = () => {
     }
   };
 
+  const keys = ["name", "email", "user_name"];
+
   useEffect(() => {
     handleFetchUsersData();
   }, []);
@@ -40,60 +42,84 @@ const Explore = () => {
           <div className="fixed top-14 flex justify-between items-center border-y-[1px] border-blue-950 bg-zinc-900 w-full h-16">
             <input
               type="text"
-              className="bg-inherit w-full focus:outline-none text-zinc-500 focus:placeholder:text-white px-4 py-2"
-              placeholder="search @username, name, post,...."
+              className="bg-inherit w-full focus:outline-none placeholder:text-zinc-500 focus:placeholder:text-zinc-300 text-sky-600 px-4 py-2"
+              placeholder="Search @username, name...."
               onChange={(e) => {
                 setQuery(e.target.value);
-                console.log(query);
               }}
             />
             {/* <button className="hover:text-white text-zinc-500 mx-4 rounded-md">Search</button> */}
           </div>
           <div className="flex w-full items-center px-2 pt-20">
-            {allUsers.filter((user) =>
-              user.name.toLowerCase().includes(query?.toLowerCase())
+            {query.length > 1 &&
+            allUsers?.filter((user) =>
+              keys?.some((key) =>
+                user[key]?.toLowerCase()?.includes(query?.trim()?.toLowerCase())
+              )
             ).length > 1
               ? "All Users"
-              : "User"}
+              : ""}
           </div>
           <div className="grid grid-cols-3 gap-1 px-2 pb-2">
-            {allUsers
-              .filter((user) =>
-                user.name.toLowerCase().includes(query.trim(" ").toLowerCase())
-              )
-              .map((user) => {
-                return (
-                  <Link key={user.id} to={`/users/${user.id}/profile`}>
-                    <div className="flex flex-col w-full space-y-2">
-                      {user.img ? (
-                        <img
-                          src={user.img}
-                          className="w-40 border-[1px] border-blue-950 object-cover h-40 rounded-sm"
-                          alt=""
-                        />
-                      ) : (
-                        <FaUser
-                          size={40}
-                          className="w-[134px] h-40 object-cover border-[1px] border-blue-950 rounded-sm"
-                        />
-                      )}
-                      <span className="text-sm w-full text-center">
-                        {user.name}
-                      </span>
-                      {/* <span> {user.email}</span> */}
-                    </div>
-                  </Link>
-                );
-              })}
+            {query.length > 1 &&
+              allUsers
+                ?.filter((user) =>
+                  keys?.some((key) =>
+                    user[key]
+                      ?.toLowerCase()
+                      ?.includes(query.trim().toLowerCase())
+                  )
+                )
+                ?.map((user) => {
+                  return (
+                    <Link
+                      key={user.id}
+                      to={`/users/${user?.user_name}/profile`}
+                    >
+                      <div className="flex flex-col w-full space-y-2">
+                        {user.img ? (
+                          <img
+                            src={user.img}
+                            className="w-40 border-[1px] border-blue-950 object-cover h-40 rounded-sm"
+                            alt=""
+                          />
+                        ) : (
+                          <FaUser
+                            size={40}
+                            className="w-[134px] h-40 object-cover border-[1px] border-blue-950 rounded-sm"
+                          />
+                        )}
+                        <span className="text-sm w-full text-center">
+                          {user?.user_name}
+                        </span>
+                        {/* <span> {user.email}</span> */}
+                      </div>
+                    </Link>
+                  );
+                })}
           </div>
-          <span className="px-2 w-full">All Posts</span>
+          <div className="flex w-full items-center px-2">
+            <span>
+              {posts?.filter((post) =>
+                keys?.some((key) =>
+                  post.userData[key]
+                    ?.toLowerCase()
+                    ?.includes(query?.trim()?.toLowerCase())
+                )
+              ).length > 0
+                ? "All Posts"
+                : ""}
+              &nbsp;
+            </span>
+          </div>
           <div className="grid grid-cols-3 gap-1 px-2">
             {posts
-
               ?.filter((post) =>
-                post.userData?.name
-                  ?.toLowerCase()
-                  .includes(query.trim(" ").toLowerCase())
+                keys?.some((key) =>
+                  post?.userData[key]
+                    ?.toLowerCase()
+                    ?.includes(query?.trim()?.toLowerCase())
+                )
               )
               .map((post) => {
                 return (
@@ -122,7 +148,7 @@ const Explore = () => {
                     )}
                   </Link>
                 );
-              })}
+              }).slice(0,50)}
           </div>
         </div>
       ) : (

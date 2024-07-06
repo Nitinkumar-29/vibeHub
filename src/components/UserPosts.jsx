@@ -49,7 +49,7 @@ const UserPosts = () => {
       setToggleMenu("hidden");
       console.log(toggleMenu);
     }
-    
+
   };
 
   const formatDate = (timestamp) => {
@@ -100,7 +100,7 @@ const UserPosts = () => {
               )}
               <div className="flex w-full justify-between items-center space-x-1">
                 <div>
-                  <span className="font-medium">{currentUserData?.name}</span>
+                  <span className="font-medium">{currentUserData?.user_name}</span>
                   <div className="flex items-center space-x-2">
                     {post?.audio && (
                       <audio

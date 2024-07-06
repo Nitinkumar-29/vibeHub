@@ -14,12 +14,12 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
-// import { TbMusicOff } from "react-icons/tb";
-// import { GiMusicalNotes } from "react-icons/gi";
+import { TbMusicOff } from "react-icons/tb";
+import { GiMusicalNotes } from "react-icons/gi";
 
 const Home = () => {
-  // const audioControl = useRef();
-  // const [isPlaying, setIsPlaying] = useState(true);
+  const audioControl = useRef();
+  const [isPlaying, setIsPlaying] = useState(true);
   const {
     handleLikePost,
     currentUser,
@@ -34,22 +34,22 @@ const Home = () => {
     // eslint-disable-next-line
   }, []);
 
-  // const handlePlay = async () => {
-  //   const audioElement = audioControl.current;
-  //   if (audioElement) {
-  //     await audioElement.play();
-  //     setIsPlaying(true);
-  //   }
-  // };
+  const handlePlay = async () => {
+    const audioElement = audioControl.current;
+    if (audioElement) {
+      await audioElement.play();
+      setIsPlaying(true);
+    }
+  };
 
-  // const handlePause = async () => {
-  //   const audioElement = audioControl.current;
-  //   if (audioElement) {
-  //     await audioElement.play();
-  //     audioElement.pause();
-  //     setIsPlaying(false);
-  //   }
-  // };
+  const handlePause = async () => {
+    const audioElement = audioControl.current;
+    if (audioElement) {
+      await audioElement.play();
+      audioElement.pause();
+      setIsPlaying(false);
+    }
+  };
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -93,10 +93,13 @@ const Home = () => {
                       )}
                       <div className="flex w-full justify-between items-center space-x-1">
                         <div>
-                          <span className="font-medium">
-                            {post?.userData?.name}
-                          </span>
-                          {/* <div className="flex items-center space-x-2">
+                          <Link
+                            to={`/users/${post?.userData?.user_name}/profile`}
+                            className="font-medium"
+                          >
+                            {post?.userData?.user_name}
+                          </Link>
+                          <div className="flex items-center space-x-2">
                             {post?.audio && (
                               <audio
                                 className="border-2 bg-inherit"
@@ -129,7 +132,7 @@ const Home = () => {
                               ""
                             )}
                             <span className="text-xs">{post.audioName}</span>
-                          </div> */}
+                          </div>
                         </div>
                         <div>
                           <HiDotsVertical
@@ -202,7 +205,12 @@ const Home = () => {
                             </span>
                             {/* )} */}
                           </div>
-                          <Link to={`/post/${post?.id}`}>
+                          <Link
+                            to={`/post/${post?.id}`}
+                            onClick={() => {
+                              window.scrollTo(0, 0);
+                            }}
+                          >
                             <div className="flex items-center space-x-1">
                               <SlBubble size={20} />
                               <span className="w-2">
