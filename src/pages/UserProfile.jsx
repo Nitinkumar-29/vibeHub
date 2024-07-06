@@ -28,9 +28,10 @@ import { FaEdit, FaPencilAlt, FaUserPlus } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
 import { TfiEmail, TfiLocationPin, TfiMobile } from "react-icons/tfi";
-import { BiLogOut } from "react-icons/bi";
+import { BiImageAdd, BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
 import PostContext from "../context/PostContext/PostContext";
+import { TbBackground } from "react-icons/tb";
 
 const UserProfile = () => {
   const imageRef = useRef();
@@ -232,16 +233,17 @@ const UserProfile = () => {
         <div className="flex flex-col items-center w-full py-4 space-y-4 h-full">
           {fetchedUserData?.img ? (
             <div
-              className={`flex flex-col items-center space-y-12 h-64 w-full`}
+              className={`flex flex-col items-center space-y-12 h-fit w-full`}
             >
-              <div className="relative w-full ">
-                <div
+              {/* <div className="relative w-full "> */}
+              {/* <div
                   className={`relative h-40 ${
                     !fetchedUserData.bgImg
                       ? "border-y-[1px] border-blue-900"
                       : ""
                   } rounded-sm`}
                 >
+                  <TbBackground size={50} className="w-full h-full" />
                   {fetchedUserData?.bgImg && (
                     <img
                       src={fetchedUserData?.bgImg}
@@ -269,33 +271,33 @@ const UserProfile = () => {
                     style={{ display: "none" }}
                     onChange={handleImageOnChange}
                   />
+                </div> */}
+              <div className=" flex flex-col items-center justify-center w-full space-y-3">
+                <div className="relative">
+                  {!isLoading && (
+                    <img
+                      src={fetchedUserData?.img}
+                      className={`h-36 w-36 hover:rounded-4xl touch-pinch-zoom duration-300 rounded-full object-right-top ${
+                        fetchedUserData?.img
+                          ? "border-[1px] border-blue-900"
+                          : ""
+                      }`}
+                      alt=""
+                    />
+                  )}
+                  {isLoading && (
+                    <VscLoading className="animate-spin h-36 w-36" />
+                  )}
+                  <span
+                    onClick={() => imageRef.current.click()}
+                    className="absolute top-[80%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
+                  >
+                    <FaPencil color="black" size={12} />
+                  </span>
                 </div>
-                <div className="absolute -bottom-24 flex flex-col items-center justify-center w-full space-y-3">
-                  <div className="relative ">
-                    {!isLoading && (
-                      <img
-                        src={fetchedUserData?.img}
-                        className={`h-36 w-36 duration-200 rounded-full object-right-top ${
-                          fetchedUserData?.img
-                            ? "border-[1px] border-blue-900"
-                            : ""
-                        }`}
-                        alt=""
-                      />
-                    )}
-                    {isLoading && (
-                      <VscLoading className="animate-spin h-36 w-36" />
-                    )}
-                    <span
-                      onClick={() => imageRef.current.click()}
-                      className="absolute top-[80%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
-                    >
-                      <FaPencil color="black" size={12} />
-                    </span>
-                  </div>
-                  <span className="text-2xl">{fetchedUserData.name}</span>
-                </div>
+                <span className="text-2xl">{fetchedUserData.name}</span>
               </div>
+              {/* </div> */}
             </div>
           ) : (
             <FaUserPlus size={45} />

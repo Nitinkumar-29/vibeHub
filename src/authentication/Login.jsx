@@ -20,6 +20,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
   const token = localStorage.getItem("token");
+  
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
       setPasswordType("text");

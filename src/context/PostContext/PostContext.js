@@ -15,9 +15,10 @@ import {
   where,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
-import { db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import { AuthContext } from "../AuthContext";
 import toast from "react-hot-toast";
+import { deleteObject, listAll, ref } from "firebase/storage";
 
 const PostContext = createContext();
 export const PostProvider = ({ children }) => {
@@ -162,6 +163,22 @@ export const PostProvider = ({ children }) => {
       console.error("Error deleting comment: ", error);
     }
   };
+
+  const handleFetchUserPosts = async () => {
+    const queryPosts = [];
+    const q = query(
+      collection(db, "posts"),
+      where("userId", "==", currentUser.uid)
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      console.log(doc.id, "=>", doc.data());
+      const allPosts = doc.data();
+      queryPosts.push({ id: doc.id, ...allPosts });
+      console.log({ queryPosts });
+      setUserPosts(queryPosts);
+    });
+  };
   const handleLikePost = async (id) => {
     try {
       const postRef = doc(db, "posts", id);
@@ -189,6 +206,7 @@ export const PostProvider = ({ children }) => {
           });
           toast.dismiss();
           toast.success("Like removed");
+          handleFetchUserPosts();
         } else {
           // Optimistically update UI
           updatedPosts = posts.map((post) =>
@@ -212,6 +230,7 @@ export const PostProvider = ({ children }) => {
 
         // Fetch the latest post data
         fetchPostById(id);
+        handleFetchUserPosts();
       }
     } catch (error) {
       console.error("Error liking post: ", error);
@@ -306,7 +325,6 @@ export const PostProvider = ({ children }) => {
           await updateDoc(postRef, {
             saves: arrayRemove(currentUser?.uid),
           });
-          toast.dismiss();
 
           setPosts((prevPosts) =>
             prevPosts?.map((post) =>
@@ -320,14 +338,15 @@ export const PostProvider = ({ children }) => {
                 : post
             )
           );
+          toast.dismiss();
           toast.success("removed");
+          handleFetchUserPosts();
         } else {
           toast.loading("saving...");
 
           await updateDoc(postRef, {
             saves: arrayUnion(currentUser?.uid),
           });
-          toast.dismiss();
           setPosts((prevPosts) =>
             prevPosts?.map((post) =>
               post?.id === id
@@ -338,7 +357,9 @@ export const PostProvider = ({ children }) => {
                 : post
             )
           );
+          toast.dismiss();
           toast.success("saved");
+          handleFetchUserPosts();
         }
         fetchPostById(id);
       } else {
@@ -347,22 +368,6 @@ export const PostProvider = ({ children }) => {
     } catch (error) {
       console.error("Error saving post: ", error);
     }
-  };
-
-  const handleFetchUserPosts = async () => {
-    const queryPosts = [];
-    const q = query(
-      collection(db, "posts"),
-      where("userId", "==", currentUser.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data());
-      const allPosts = doc.data();
-      queryPosts.push({ id: doc.id, ...allPosts });
-      console.log({ queryPosts });
-      setUserPosts(queryPosts);
-    });
   };
 
   const handleFetchSavedPosts = async () => {
@@ -383,6 +388,30 @@ export const PostProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
     }
+  };
+
+  const handleDeletePost = async (id) => {
+    const postRef = doc(db, "posts", id);
+    const postSnap = await getDoc(postRef);
+    if (postSnap.exists()) {
+      console.log(postSnap.data());
+    }
+    toast.loading("deleting post");
+    // Delete all files in the user's posts directory
+    const postStorageRef = ref(storage, id);
+    const postListResult = await listAll(postStorageRef);
+
+    const postDeletePromises = postListResult.items.map((itemRef) => {
+      return deleteObject(itemRef);
+    });
+    await Promise.all(postDeletePromises);
+    await deleteDoc(postRef);
+    const postCommentsRef = doc(db, "postComments", id);
+    await deleteDoc(postCommentsRef);
+    toast.dismiss();
+    toast.success("Post deleted");
+    handleFetchUserPosts();
+    fetchAllPosts();
   };
 
   useEffect(() => {
@@ -418,6 +447,7 @@ export const PostProvider = ({ children }) => {
         userPosts,
         userSavedPosts,
         handleFetchSavedPosts,
+        handleDeletePost,
       }}
     >
       {children}

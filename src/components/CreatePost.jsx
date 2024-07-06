@@ -154,7 +154,7 @@ const CreatePost = () => {
     e.preventDefault();
     setIsPublished(false);
     let audioURL = "";
-    const name = "audio " + audioFile.name;
+    const name = "audio " + audioFile?.name;
     toast.loading("Publishing your thoughts...");
 
     if (audioFile) {
@@ -216,6 +216,7 @@ const CreatePost = () => {
                     accept="audio/mp3"
                     hidden
                     ref={audioRef}
+                    value={audioFile || ""}
                     onChange={handleAudioFileChange}
                   />
                   {audioFile && (
@@ -279,7 +280,7 @@ const CreatePost = () => {
                 name="postCaption"
                 onChange={onChange}
                 required
-                value={newPostData.postCaption}
+                value={newPostData.postCaption || ""}
               />
               <input
                 ref={inputRef}
@@ -319,7 +320,7 @@ const CreatePost = () => {
               </span>
               <div className="grid col-start-auto grid-cols-2 gap-3 w-full">
                 {files?.map((file, index) => (
-                  <div key={index} className="relative w-full ml-1">
+                  <div key={index} className="relative w-full">
                     {file.type.startsWith("image/") && (
                       <div className="w-[11.8rem] h-[9rem] relative">
                         <img

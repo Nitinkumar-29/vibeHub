@@ -16,12 +16,13 @@ import { TbMusicOff } from "react-icons/tb";
 
 const UserPosts = () => {
   const audioControl = useRef();
-  const { userPosts } = useContext(PostContext);
+  const { userPosts, handleDeletePost } = useContext(PostContext);
   const { sub } = useParams();
   const { currentUser, handleLikePost, handleSavePost } =
     useContext(PostContext);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentUserData, setCurrentUserData] = useState(null);
+  const [toggleMenu, setToggleMenu] = useState("hidden");
 
   const handlePlay = async () => {
     const audioElement = audioControl.current;
@@ -38,6 +39,17 @@ const UserPosts = () => {
       audioElement.pause();
       setIsPlaying(false);
     }
+  };
+
+  const handlePostMenuToggle = () => {
+    if (toggleMenu === "hidden") {
+      setToggleMenu("flex");
+      console.log(toggleMenu);
+    } else {
+      setToggleMenu("hidden");
+      console.log(toggleMenu);
+    }
+    
   };
 
   const formatDate = (timestamp) => {
@@ -119,7 +131,47 @@ const UserPosts = () => {
                     <span className="text-xs">{post.audioName}</span>
                   </div>
                 </div>
-                <HiDotsVertical size={25} />
+                <div className="relative ">
+                  <HiDotsVertical
+                    onClick={handlePostMenuToggle}
+                    className={`cursor-pointer ${
+                      toggleMenu === "flex" ? "text-pink-600" : ""
+                    }`}
+                    size={25}
+                  />
+                  <div
+                    className={`${toggleMenu} ${
+                      toggleMenu === "hidden" ? "duration:300" : ""
+                    }  flex-col items-start right-6 top-0 bg-zinc-900 space-y-4 transition-all z-20 rounded-md p-4 w-[80px] absolute`}
+                  >
+                    <button
+                      onClick={() => {
+                        handleDeletePost(post.id);
+                        handlePostMenuToggle();
+                        console.log(post.id);
+                      }}
+                      className="text-sm"
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDeletePost(post.id);
+                      }}
+                      className="text-sm"
+                    >
+                      Unsave
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleDeletePost(post.id);
+                      }}
+                      className="text-sm"
+                    >
+                      UnLike
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="w-full h-full my-2">
