@@ -7,7 +7,6 @@ import PostContext from "../context/PostContext/PostContext";
 import { FiSettings } from "react-icons/fi";
 import { MdOutlineExplore } from "react-icons/md";
 
-
 const Home = () => {
   const { posts, currentUser, postLoading } = useContext(PostContext);
   const location = useLocation();
@@ -45,16 +44,18 @@ const Home = () => {
         {location.pathname === "/createPost" && (
           <span>Share your thoughts</span>
         )}
-        {location.pathname === "/explore" && (
-          <span>Explore</span>
-        )}
+        {location.pathname === "/explore" && <span>Explore</span>}
         {location.pathname === "/userProfile/yourPosts" && (
           <Link to="settings">
             <FiSettings className="cursor-pointer" size={20} />
           </Link>
         )}
       </div>
-      <div className={`w-full ${postLoading ? "h-screen" : "h-full"} bg-zinc-950 mt-14`}>
+      <div
+        className={`w-full ${
+          postLoading ? "h-screen" : "h-full"
+        } bg-zinc-950 mt-14`}
+      >
         <Outlet />
       </div>
       <div className="z-10 fixed bottom-0 h-12 flex justify-between items-center p-4 w-full max-w-[430px] bg-inherit">
@@ -64,8 +65,13 @@ const Home = () => {
           </Link>
         </span>
         <span>
-          <Link to="/explore">
-            <MdOutlineExplore  size={25} />
+          <Link
+            to="/explore"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            <MdOutlineExplore size={25} />
           </Link>
         </span>
         <span>

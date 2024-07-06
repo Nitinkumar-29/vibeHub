@@ -277,7 +277,7 @@ const UserProfile = () => {
                   {!isLoading && (
                     <img
                       src={fetchedUserData?.img}
-                      className={`h-36 w-36 hover:rounded-4xl touch-pinch-zoom duration-300 rounded-full object-right-top ${
+                      className={`h-36 w-36 hover:h-72 hover:w-72 hover:rounded-4xl touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
                         fetchedUserData?.img
                           ? "border-[1px] border-blue-900"
                           : ""

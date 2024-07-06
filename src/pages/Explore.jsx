@@ -9,7 +9,7 @@ import { GiSpinningSword } from "react-icons/gi";
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
   const { posts } = useContext(PostContext);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(" ");
   const handleFetchUsersData = async () => {
     try {
       const queryUsersData = await getDocs(collection(db, "users"));
@@ -36,27 +36,31 @@ const Explore = () => {
   return (
     <>
       {allUsers && posts ? (
-        <div className="w-full bg-inherit border-t-[1px] border-blue-950 space-y-2 pb-20 min-h-screen">
-          <div className="flex justify-between items-center border-[1px] border-zinc-900 bg-zinc-900 w-full h-16">
+        <div className="relative w-full bg-inherit border-t-[1px] border-blue-950 space-y-2 pb-20 min-h-screen">
+          <div className="fixed top-14 flex justify-between items-center border-y-[1px] border-blue-950 bg-zinc-900 w-full h-16">
             <input
               type="text"
               className="bg-inherit w-full focus:outline-none text-zinc-500 focus:placeholder:text-white px-4 py-2"
               placeholder="search @username, name, post,...."
               onChange={(e) => {
                 setQuery(e.target.value);
+                console.log(query);
               }}
             />
             {/* <button className="hover:text-white text-zinc-500 mx-4 rounded-md">Search</button> */}
           </div>
-          <div className="flex w-full items-center px-2">
-            {allUsers.filter((user) => user.name.toLowerCase().includes(query))
-              .length > 1
+          <div className="flex w-full items-center px-2 pt-20">
+            {allUsers.filter((user) =>
+              user.name.toLowerCase().includes(query?.toLowerCase())
+            ).length > 1
               ? "All Users"
               : "User"}
           </div>
-          <div className="grid grid-cols-3 gap-2 px-2 pb-2">
+          <div className="grid grid-cols-3 gap-1 px-2 pb-2">
             {allUsers
-              .filter((user) => user.name.toLowerCase().includes(query))
+              .filter((user) =>
+                user.name.toLowerCase().includes(query.trim(" ").toLowerCase())
+              )
               .map((user) => {
                 return (
                   <Link key={user.id} to={`/users/${user.id}/profile`}>
@@ -83,11 +87,13 @@ const Explore = () => {
               })}
           </div>
           <span className="px-2 w-full">All Posts</span>
-          <div className="grid grid-cols-3 gap-2 px-2">
+          <div className="grid grid-cols-3 gap-1 px-2">
             {posts
 
               ?.filter((post) =>
-                post.userData?.name?.toLowerCase().includes(query.toLowerCase())
+                post.userData?.name
+                  ?.toLowerCase()
+                  .includes(query.trim(" ").toLowerCase())
               )
               .map((post) => {
                 return (
