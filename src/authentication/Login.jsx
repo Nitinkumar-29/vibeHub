@@ -73,11 +73,14 @@ const Login = () => {
   };
   return (
     <div
-      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] text-white bg-neutral-900 space-y-3`}
+      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] text-white bg-zinc-950 space-y-3`}
     >
-      <span className="font-semibold h-12 fixed my-4 text-3xl bg-gradient-to-tr from-blue-500 via-green-500 to-red-500 bg-clip-text text-transparent top-32">
-        Welcome to VibeHub
-      </span>
+      <div className="flex items-center font-semibold h-12 fixed my-4  space-x-2 top-32">
+        <span className="bg-gradient-to-tr from-red-500 via-blue-500 to-orange-500 text-3xl bg-clip-text text-transparent">
+          Welcome to VibeHub
+        </span>{" "}
+        <img src={`/images/logo.png`} className="h-8 w-8 rounded-md" alt="" />
+      </div>
       <div className="flex flex-col items-center h-fit">
         <h1 className="text-2xl font-semibold my-3">Log In</h1>
         <form onSubmit={handleLogin} className="flex flex-col space-y-4">

@@ -9,25 +9,20 @@
 ::-webkit-scrollbar {
   display: hidden;
   scrollbar-width: 0px;
-  overflow-y: hidden;
+  /* overflow-y: hidden; */
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #0c0c0c; /* Color of the scrollbar track */
+  background: #fbf9f9; /* Color of the scrollbar track */
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: rgb(248, 246, 246); /* Color of the scrollbar handle */
-  border-radius: 4px; /* Border radius for the scrollbar handle */
+  background: rgb(159, 158, 158); /* Color of the scrollbar handle */
+  border-radius: 2px; /* Border radius for the scrollbar handle */
   scrollbar-width: 1px;
   cursor: grabbing;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(43, 43, 42); /* Color of the scrollbar handle on hover */
 }
 
 .scroll-container {

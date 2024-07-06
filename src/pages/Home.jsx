@@ -1,28 +1,55 @@
-import React, { useContext, useEffect } from "react";
+import PostContext from "../context/PostContext/PostContext";
+import "../styles/overflow_scroll.css";
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { formatTime } from "../utils/FormatTime";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import "../styles/overflow_scroll.css";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import PostContext from "../context/PostContext/PostContext";
 import { FaUser } from "react-icons/fa";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
+// import { TbMusicOff } from "react-icons/tb";
+// import { GiMusicalNotes } from "react-icons/gi";
 
 const Home = () => {
-  const { handleLikePost, currentUser, posts, fetchAllPosts, postsLoading } =
-    useContext(PostContext);
+  // const audioControl = useRef();
+  // const [isPlaying, setIsPlaying] = useState(true);
+  const {
+    handleLikePost,
+    currentUser,
+    posts,
+    fetchAllPosts,
+    postsLoading,
+    handleSavePost,
+  } = useContext(PostContext);
 
   useEffect(() => {
     fetchAllPosts();
     // eslint-disable-next-line
   }, []);
+
+  // const handlePlay = async () => {
+  //   const audioElement = audioControl.current;
+  //   if (audioElement) {
+  //     await audioElement.play();
+  //     setIsPlaying(true);
+  //   }
+  // };
+
+  // const handlePause = async () => {
+  //   const audioElement = audioControl.current;
+  //   if (audioElement) {
+  //     await audioElement.play();
+  //     audioElement.pause();
+  //     setIsPlaying(false);
+  //   }
+  // };
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -58,21 +85,67 @@ const Home = () => {
                       {post?.userData?.img ? (
                         <img
                           src={post?.userData?.img}
-                          className="w-[3rem] h-[3rem] object-cover duration-200 rounded-full"
+                          className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
                           alt=""
                         />
                       ) : (
                         <FaUser size={48} />
                       )}
-                      <div className="flex w-full justify-between items-center space-y-1">
-                        <span className="font-medium">
-                          {post?.userData?.name}
-                        </span>
-                        <HiDotsVertical size={25} />
+                      <div className="flex w-full justify-between items-center space-x-1">
+                        <div>
+                          <span className="font-medium">
+                            {post?.userData?.name}
+                          </span>
+                          {/* <div className="flex items-center space-x-2">
+                            {post?.audio && (
+                              <audio
+                                className="border-2 bg-inherit"
+                                autoPlay
+                                onPlay={handlePlay}
+                                onPause={handlePause}
+                                ref={audioControl}
+                              >
+                                <source src={post?.audio} type="audio/*" />
+                                Your browser does not support the audio element.
+                              </audio>
+                            )}
+                            {post?.audio ? (
+                              <div
+                                onClick={isPlaying ? handlePause : handlePlay}
+                              >
+                                {isPlaying === true ? (
+                                  <GiMusicalNotes
+                                    size={15}
+                                    className="animate-pulse cursor-pointer"
+                                  />
+                                ) : (
+                                  <TbMusicOff
+                                    size={15}
+                                    className="cursor-pointer"
+                                  />
+                                )}
+                              </div>
+                            ) : (
+                              ""
+                            )}
+                            <span className="text-xs">{post.audioName}</span>
+                          </div> */}
+                        </div>
+                        <div>
+                          <HiDotsVertical
+                            className="cursor-pointer"
+                            size={25}
+                          />
+                          <div className="hidden">
+                            <span>Edit</span>
+                            <span>Delete</span>
+                            <span></span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className="w-full h-full my-2">
-                      <p className="p-2">{post?.postCaption}</p>
+                      <p className="px-4 py-2">{post?.postCaption}</p>
                       <Carousel
                         className="carousel"
                         showThumbs={false}
@@ -88,13 +161,13 @@ const Home = () => {
                         {post?.fileURLs?.map((fileURL, index) => (
                           <div
                             key={index}
-                            className="relative aspect-w-3 aspect-h-4 mx-[.25px]"
+                            className="relative aspect-w-3 aspect-h-3  mx-[.25px]"
                           >
                             {fileURL ? (
                               <img
                                 src={fileURL}
                                 alt="post media"
-                                className={`h-full w-full object-scale-down rounded-sm border-[1px] border-blue-950`}
+                                className={`h-full w-full object-contain rounded-sm border-[1px] border-blue-950`}
                               />
                             ) : fileURL ? (
                               <video
@@ -115,7 +188,7 @@ const Home = () => {
                               handleLikePost(post?.id, currentUser?.uid)
                             }
                           >
-                            {post.likes?.includes(currentUser?.uid) ? (
+                            {post?.likes?.includes(currentUser?.uid) ? (
                               <BsHeartFill
                                 size={20}
                                 className="text-red-600 cursor-pointer"
@@ -123,14 +196,16 @@ const Home = () => {
                             ) : (
                               <SlHeart size={20} />
                             )}
-                            {post?.likes?.length !== 0 && (
-                              <span>{post?.likes?.length}</span>
-                            )}
+                            {/* {post?.likes?.length !== 0 && ( */}
+                            <span className="w-2">
+                              {post?.likes?.length !== 0 && post?.likes?.length}
+                            </span>
+                            {/* )} */}
                           </div>
                           <Link to={`/post/${post?.id}`}>
                             <div className="flex items-center space-x-1">
                               <SlBubble size={20} />
-                              <span>
+                              <span className="w-2">
                                 {post?.commentsCount !== 0 &&
                                   post?.commentsCount}
                               </span>
@@ -138,10 +213,15 @@ const Home = () => {
                           </Link>
                           <SlPaperPlane size={20} />
                         </div>
-                        <div className="">
-                          {post?.saved ? (
+                        <div
+                          className=""
+                          onClick={() =>
+                            handleSavePost(post?.id, currentUser?.uid)
+                          }
+                        >
+                          {post?.saves?.includes(currentUser?.uid) ? (
                             <RxBookmarkFilled
-                              className="text-red-600 cursor-pointer"
+                              className="text-pink-600 cursor-pointer"
                               size={28}
                             />
                           ) : (
@@ -164,13 +244,16 @@ const Home = () => {
             </div>
           ) : (
             <div className="flex flex-col justify-center items-center h-screen space-y-2">
-              <span>0 posts or may be server error</span>
+              <span className="text-4xl">server error</span>
               <span>Please try again later</span>
             </div>
           )}
         </div>
       ) : (
-        <div className="flex h-screen items-center justify-center">
+        <div
+          style={{ height: `calc(100vh - 90px)` }}
+          className="flex items-center justify-center"
+        >
           <BiLoaderCircle className="animate-ping" size={50} />
         </div>
       )}

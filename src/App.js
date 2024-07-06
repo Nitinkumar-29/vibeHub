@@ -15,6 +15,10 @@ import Home from "./pages/Home";
 import CreatePost from "./components/CreatePost";
 import { PostProvider } from "./context/PostContext/PostContext";
 import Post from "./components/Post";
+import UserProfileSub from "./components/UserPosts";
+import Settings from "./pages/Settings";
+import UserPosts from "./components/UserPosts";
+import UserSavedPosts from "./components/UserSavedPosts";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -46,8 +50,19 @@ function App() {
                     <UserProfile />
                   </RequireAuth>
                 }
-              />
+              >
+                <Route path="/userProfile/yourPosts" element={<UserPosts />} />
+                <Route
+                  path="/userProfile/savedPosts"
+                  element={<UserSavedPosts />}
+                />
+                <Route
+                  path="/userProfile/likedPosts"
+                  element={<UserProfileSub />}
+                />
+              </Route>
               <Route path="/post/:id" element={<Post />} />
+              <Route path="/settings" element={<Settings />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />

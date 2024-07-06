@@ -11,18 +11,18 @@ import {
   getDocs,
   increment,
   query,
-  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
 import { db } from "../../firebase";
 import { AuthContext } from "../AuthContext";
+import toast from "react-hot-toast";
 
 const PostContext = createContext();
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
-  const [postData, setPostData] = useState([]);
+  const [postData, setPostData] = useState();
   const navigate = useNavigate();
   const [postComment, setPostComment] = useState({ commentText: "" });
   const [postComments, setPostComments] = useState([]);
@@ -30,23 +30,21 @@ export const PostProvider = ({ children }) => {
   const userData = JSON.parse(localStorage.getItem("loggedInUserData"));
   const { currentUser } = useContext(AuthContext);
   const [postsLoading, setPostsLoading] = useState(false);
+  const [userDataWithPostId, setUserDataWithPostId] = useState();
+  const [userPosts, setUserPosts] = useState(null);
+  const [userSavedPosts, setUserSavedPosts] = useState(null);
 
   const fetchPostById = async (id) => {
-    try {
-      const postRef = doc(db, "posts", id);
-      const postSnapShot = await getDoc(postRef);
-
-      if (postSnapShot.exists()) {
-        const postData = postSnapShot.data();
-        console.log("Post data: ", postData);
-        // You can set the post data to state if needed
-        setPostData(postData);
-      } else {
-        console.log("No such document!");
-      }
-    } catch (error) {
-      console.error("Error fetching post: ", error);
-    }
+    const postRef = doc(db, "posts", id);
+    const postDocSnap = await getDoc(postRef);
+    const postDataWithId = postDocSnap.data();
+    console.log("postData with id: ", postDataWithId);
+    setPostData(postDataWithId);
+    const userDataWithPostRef = doc(db, "users", postDataWithId.userId);
+    const userDataDocSnap = await getDoc(userDataWithPostRef);
+    const userDataWithPostUserId = userDataDocSnap.data();
+    console.log("userpostdata: ", userDataWithPostUserId);
+    setUserDataWithPostId(userDataWithPostUserId);
   };
 
   const formatDate = (timestamp) => {
@@ -58,16 +56,35 @@ export const PostProvider = ({ children }) => {
 
   const fetchPostComments = async (id) => {
     try {
+      // Query to fetch comments for the specific post
       const q = query(
         collection(db, "postComments"),
         where("postId", "==", id)
       );
+
+      // Fetch comments
       const querySnapshot = await getDocs(q);
       const comments = [];
-      querySnapshot.forEach((doc) => {
-        comments.push({ id: doc.id, ...doc.data() });
-        console.log(comments);
-      });
+
+      // Process each comment
+      for (const docSnap of querySnapshot.docs) {
+        const commentData = docSnap.data();
+        const userId = commentData.userId;
+
+        // Fetch user data for the comment
+        const userDocRef = doc(db, "users", userId);
+        const userDocSnap = await getDoc(userDocRef);
+        const userData = userDocSnap.exists() ? userDocSnap.data() : {};
+        console.log(userData);
+        // Combine comment data with user data
+        comments.push({
+          id: docSnap.id,
+          ...commentData,
+          user: userData,
+        });
+        console.log({ comments });
+      }
+
       // Sort comments by timestamp
       comments.sort((a, b) => {
         if (a.timestamp && b.timestamp) {
@@ -76,6 +93,8 @@ export const PostProvider = ({ children }) => {
           return 0; // Handle cases where timestamp might be missing
         }
       });
+
+      // Update state with combined comments and user data
       setPostComments(comments);
     } catch (error) {
       console.error("Error fetching comments: ", error);
@@ -84,16 +103,21 @@ export const PostProvider = ({ children }) => {
 
   const handlePostComment = async (id) => {
     setIsPublished(false);
+    toast.loading("Processing...");
+
     const { commentText } = postComment;
+    const docRef = doc(db, "users", currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    const docUserData = [];
+    if (docSnap.exists()) {
+      console.log("post userdata", docSnap.data());
+      docUserData.push(docSnap.data());
+    }
     try {
       const docRef = await addDoc(collection(db, "postComments"), {
         comment: commentText,
-        name: userData.name,
         userId: currentUser.uid,
-        email: userData.email,
         postId: id,
-        timestamp: serverTimestamp(),
-        userProfileImage: userData.img,
       });
       console.log("comment posted", docRef);
       // Increment the comment count in the corresponding post document
@@ -101,12 +125,16 @@ export const PostProvider = ({ children }) => {
       await updateDoc(postRef, {
         commentsCount: increment(1),
       });
+      toast.dismiss();
+      toast.success("Comment Posted");
+
       // Reset the comment text input
       setPostComment({
         commentText: "",
       });
       setIsPublished(true);
     } catch (error) {
+      toast.error("server error");
       console.error(error);
       setIsPublished(false);
     }
@@ -116,8 +144,12 @@ export const PostProvider = ({ children }) => {
 
   const handleDeleteComment = async (commentId, id) => {
     try {
+      toast.loading("deleting...");
+
       const commentRef = doc(db, "postComments", commentId);
       await deleteDoc(commentRef);
+      toast.dismiss();
+      toast.success("deleted");
       fetchPostComments(id);
       console.log(`Comment with ID ${commentId} deleted`);
       // Increment the comment count in the corresponding post document
@@ -134,65 +166,60 @@ export const PostProvider = ({ children }) => {
     try {
       const postRef = doc(db, "posts", id);
       const postSnap = await getDoc(postRef);
-      console.log(postSnap);
       if (postSnap.exists()) {
         const postData = postSnap.data();
-
-        // Ensure postData.likes is initialized properly
         const likes = postData.likes || [];
+        let updatedPosts;
 
         if (likes.includes(currentUser.uid)) {
+          // Optimistically update UI
+          updatedPosts = posts.map((post) =>
+            post.id === id
+              ? {
+                  ...post,
+                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                }
+              : post
+          );
+          setPosts(updatedPosts);
+          toast.loading("Removing like...");
+          // Update database
           await updateDoc(postRef, {
             likes: arrayRemove(currentUser.uid),
-            likesCount: increment(-1),
           });
-          // setPostData((prevData) => ({
-          //   ...prevData,
-          //   likes: prevData.likes.filter((uid) => uid !== currentUser.uid),
-          //   likesCount: prevData.likesCount - 1,
-          // }));
-          setPosts((prevPosts) =>
-            prevPosts.map((post) =>
-              post.id === id
-                ? {
-                    ...post,
-                    likes: post.likes.filter((uid) => uid !== currentUser.uid),
-                    likesCount: post.likesCount - 1,
-                  }
-                : post
-            )
-          );
-          console.log("post disliked");
-          fetchPostById(id);
+          toast.dismiss();
+          toast.success("Like removed");
         } else {
+          // Optimistically update UI
+          updatedPosts = posts.map((post) =>
+            post.id === id
+              ? {
+                  ...post,
+                  likes: [...post.likes, currentUser.uid],
+                }
+              : post
+          );
+          setPosts(updatedPosts);
+          toast.loading("Adding like...");
+
+          // Update database
           await updateDoc(postRef, {
             likes: arrayUnion(currentUser.uid),
-            likesCount: increment(1),
           });
-          // setPostData((prevData) => ({
-          //   ...prevData,
-          //   likes: [...postData.likes, currentUser.uid],
-          //   likesCount: prevData.likesCount + 1,
-          // }));
-          // // Update local state (posts) for the specific post
-          setPosts((prevPosts) =>
-            prevPosts?.map((post) =>
-              post?.id === id
-                ? {
-                    ...post,
-                    likes: [...post?.likes, currentUser?.uid],
-                    likesCount: post?.likesCount + 1,
-                  }
-                : post
-            )
-          );
-          console.log("post liked");
-
-          fetchPostById(id);
+          toast.dismiss();
+          toast.success("Liked");
         }
+
+        // Fetch the latest post data
+        fetchPostById(id);
       }
     } catch (error) {
       console.error("Error liking post: ", error);
+      toast.dismiss();
+      toast.error("Could not process.");
+
+      // Revert the optimistic update if there is an error
+      fetchPostById(id);
     }
   };
 
@@ -206,17 +233,23 @@ export const PostProvider = ({ children }) => {
         const commentLikes = commentData.likes || []; // Ensure likes array exists
 
         if (commentLikes.includes(currentUser.uid)) {
+          toast.loading("Removing like...");
           await updateDoc(commentRef, {
             likes: arrayRemove(currentUser.uid),
             likesCount: increment(-1),
           });
           await fetchPostComments(postId); // Update comments list
+          toast.dismiss();
+          toast.success("Like removed");
         } else {
+          toast.loading("Adding like...");
           await updateDoc(commentRef, {
             likes: arrayUnion(currentUser.uid),
             likesCount: increment(1),
           });
           await fetchPostComments(postId); // Update comments list
+          toast.dismiss();
+          toast.success("Liked");
         }
       }
     } catch (error) {
@@ -225,7 +258,7 @@ export const PostProvider = ({ children }) => {
   };
 
   const fetchAllPosts = async () => {
-    setPostsLoading(true)
+    setPostsLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "posts"));
       // Use Promise.all to fetch user data concurrently
@@ -251,11 +284,104 @@ export const PostProvider = ({ children }) => {
 
       // Sort posts by timestamp in descending order
       postsWithUserData.sort((a, b) => b.timeStamp - a.timeStamp);
-      setPostsLoading(false)
+      setPostsLoading(false);
       setPosts(postsWithUserData);
       console.log(postsWithUserData);
     } catch (error) {
       console.error("Error fetching posts: ", error);
+    }
+  };
+
+  const handleSavePost = async (id) => {
+    try {
+      const postRef = doc(db, "posts", id);
+      const postSnap = await getDoc(postRef);
+      if (postSnap.exists()) {
+        const postData = postSnap?.data(); // This is the fetched data
+        const saves = postData?.saves || []; // Initialize saves array from fetched data
+
+        if (saves.includes(currentUser?.uid)) {
+          toast.loading("Removing...");
+
+          await updateDoc(postRef, {
+            saves: arrayRemove(currentUser?.uid),
+          });
+          toast.dismiss();
+
+          setPosts((prevPosts) =>
+            prevPosts?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    saves: post?.saves?.filter(
+                      (uid) => uid !== currentUser?.uid
+                    ),
+                  }
+                : post
+            )
+          );
+          toast.success("removed");
+        } else {
+          toast.loading("saving...");
+
+          await updateDoc(postRef, {
+            saves: arrayUnion(currentUser?.uid),
+          });
+          toast.dismiss();
+          setPosts((prevPosts) =>
+            prevPosts?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    saves: [...post?.saves, currentUser?.uid],
+                  }
+                : post
+            )
+          );
+          toast.success("saved");
+        }
+        fetchPostById(id);
+      } else {
+        console.log("No such post document!");
+      }
+    } catch (error) {
+      console.error("Error saving post: ", error);
+    }
+  };
+
+  const handleFetchUserPosts = async () => {
+    const queryPosts = [];
+    const q = query(
+      collection(db, "posts"),
+      where("userId", "==", currentUser.uid)
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      console.log(doc.id, "=>", doc.data());
+      const allPosts = doc.data();
+      queryPosts.push({ id: doc.id, ...allPosts });
+      console.log({ queryPosts });
+      setUserPosts(queryPosts);
+    });
+  };
+
+  const handleFetchSavedPosts = async () => {
+    try {
+      const q = query(
+        collection(db, "posts"),
+        where("saves", "array-contains", currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const savedPosts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Assuming you have a state to hold these saved posts
+      setUserSavedPosts(savedPosts);
+      console.log("usersavedpost: ", userSavedPosts);
+    } catch (error) {
+      console.error("Error fetching saved posts: ", error);
     }
   };
 
@@ -285,7 +411,13 @@ export const PostProvider = ({ children }) => {
         currentUser,
         fetchAllPosts,
         posts,
-        postsLoading
+        postsLoading,
+        userDataWithPostId,
+        handleSavePost,
+        handleFetchUserPosts,
+        userPosts,
+        userSavedPosts,
+        handleFetchSavedPosts,
       }}
     >
       {children}

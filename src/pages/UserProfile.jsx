@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { auth, db, storage } from "../firebase";
 import {
   collection,
@@ -27,29 +27,36 @@ import {
 import { FaEdit, FaPencilAlt, FaUserPlus } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
-import {
-  TfiArrowCircleLeft,
-  TfiEmail,
-  TfiLocationPin,
-  TfiMobile,
-} from "react-icons/tfi";
-import { CiSettings } from "react-icons/ci";
+import { TfiEmail, TfiLocationPin, TfiMobile } from "react-icons/tfi";
 import { BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
+import PostContext from "../context/PostContext/PostContext";
 
 const UserProfile = () => {
   const imageRef = useRef();
   const [file, setFile] = useState("");
+  const [bgImg, setBgImg] = useState("");
+  const [bgImgPreview, setBgImgPreview] = useState("");
   const { currentUser } = useContext(AuthContext);
   const [fetchedUserData, setFetchedUserData] = useState(null);
   const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { handleFetchUserPosts, userPosts } = useContext(PostContext);
+  const location = useLocation();
+  const bgImgRef = useRef();
 
   const handleImageOnChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handleBgImageOnChange = (e) => {
+    bgImgPreview.current.click();
+    if (e.target.files && e.target.files[0]) {
+      setBgImgPreview(e.target.files[0]);
     }
   };
 
@@ -214,46 +221,65 @@ const UserProfile = () => {
     // eslint-disable-next-line
   }, [file]);
 
+  useEffect(() => {
+    handleFetchUserPosts();
+    // eslint-disable-next-line
+  }, [currentUser.uid]);
+
   return (
-    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white min-h-screen w-screen max-w-[430px] py-2">
-      <div className="flex w-[95%] items-center justify-between shadow-sm rounded-md shadow-blue-900 border-[1px] border-blue-900 p-2">
-        <TfiArrowCircleLeft
-          onClick={() => {
-            navigate(-1);
-          }}
-          size={28}
-        />
-        <div>UserProfile</div>
-        <CiSettings size={32} />
-      </div>
+    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white min-h-screen w-full max-w-[430px] py-1">
       {fetchedUserData && (
-        <div className="flex flex-col items-center w-[95%] p-2 space-y-4 h-full">
+        <div className="flex flex-col items-center w-full py-4 space-y-4 h-full">
           {fetchedUserData?.img ? (
             <div
               className={`flex flex-col items-center space-y-12 h-64 w-full`}
             >
               <div className="relative w-full ">
-                <div className="relative h-40 border-[1px] border-blue-900 rounded-md">
+                <div
+                  className={`relative h-40 ${
+                    !fetchedUserData.bgImg
+                      ? "border-y-[1px] border-blue-900"
+                      : ""
+                  } rounded-sm`}
+                >
                   {fetchedUserData?.bgImg && (
                     <img
-                      src={fetchedUserData?.img}
+                      src={fetchedUserData?.bgImg}
                       className="w-full bg-center h-40 rounded-md object-cover"
                       alt=""
                     />
                   )}
+                  {bgImgPreview && (
+                    <img
+                      src={bgImgPreview}
+                      onChange={handleBgImageOnChange}
+                      alt=""
+                    />
+                  )}
+                  <input type="file" hidden ref={bgImgRef} name="" id="" />
                   <span
-                    onClick={() => imageRef.current.click()}
+                    onClick={() => bgImgRef.current.click()}
                     className="absolute top-[20%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
                   >
                     <FaPencilAlt color="black" size={12} />
-                  </span>{" "}
+                  </span>
+                  <input
+                    type="file"
+                    ref={imageRef}
+                    style={{ display: "none" }}
+                    onChange={handleImageOnChange}
+                  />
                 </div>
                 <div className="absolute -bottom-24 flex flex-col items-center justify-center w-full space-y-3">
                   <div className="relative ">
                     {!isLoading && (
                       <img
-                        src={fetchedUserData.img}
-                        className="h-36 w-36 duration-200 rounded-full object-right-top border-[1px] border-blue-800"
+                        src={fetchedUserData?.img}
+                        className={`h-36 w-36 duration-200 rounded-full object-right-top ${
+                          fetchedUserData?.img
+                            ? "border-[1px] border-blue-900"
+                            : ""
+                        }`}
                         alt=""
                       />
                     )}
@@ -274,11 +300,11 @@ const UserProfile = () => {
           ) : (
             <FaUserPlus size={45} />
           )}
-          <div className="flex justify-between w-full my-4">
+          <div className="flex justify-between w-full my-4 px-4">
             <span>Personal Information</span>
             <FaEdit />
           </div>
-          <div className="flex flex-col w-full space-y-4 rounded-md bg-zinc-900 p-4 text-sm">
+          <div className="flex flex-col w-full space-y-4 rounded-md p-4 text-sm">
             <div className="flex justify-between w-full">
               <div className="flex justify-between items-center space-x-2">
                 <TfiEmail className="text-blue-700" />
@@ -301,28 +327,70 @@ const UserProfile = () => {
               <span>{fetchedUserData.address}</span>
             </div>
           </div>
-          <div className="flex justify-between w-full">
+          <div className="flex justify-between w-full px-4">
             <button
-              className="shadow-sm shadow-blue-800 border-[1px] border-blue-800 p-4 py-2 rounded-md duration-200"
+              className="shadow-sm shadow-blue-800 border-[1px] border-blue-800 px-4 py-2 rounded-md duration-200"
               onClick={handleLogOut}
             >
-              <BiLogOut size={25} />
+              <BiLogOut size={20} />
             </button>
             <button
               className="shadow-sm shadow-blue-800 border-[1px] border-blue-800 px-4 py-2 rounded-md duration-200"
               onClick={handleDeleteAccount}
             >
-              <CgUserRemove size={25} />
+              <CgUserRemove size={20} />
             </button>
           </div>
-          <input
-            type="file"
-            ref={imageRef}
-            style={{ display: "none" }}
-            onChange={handleImageOnChange}
-          />
         </div>
       )}
+      <div className="flex flex-col items-center w-full">
+        <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+          <Link
+            to={`/userProfile/yourPosts`}
+            className={`${
+              location.pathname === "/userProfile/yourPosts"
+                ? "bg-zinc-700"
+                : ""
+            } p-2 w-full flex justify-center text-center`}
+          >
+            <div className="flex items-center justify-center w-fit space-x-2">
+              <span>Posts</span>
+              <span>{userPosts?.length}</span>
+            </div>
+          </Link>
+          <Link
+            to={`/userProfile/savedPosts`}
+            className={`${
+              location.pathname === "/userProfile/savedPosts"
+                ? "bg-zinc-700"
+                : ""
+            } p-2 w-full flex justify-center text-center`}
+          >
+            <div className="flex items-center justify-center w-fit space-x-2">
+              {" "}
+              <span>Saved</span>
+              {/* <span>{userSavedPosts?.length}</span> */}
+            </div>
+          </Link>
+          <Link
+            to={`/userProfile/likedPosts`}
+            className={`${
+              location.pathname === "/userProfile/likedPosts"
+                ? "bg-zinc-700"
+                : ""
+            } p-2 w-full flex justify-center text-center`}
+          >
+            <div className="flex items-center justify-center w-fit space-x-2">
+              {" "}
+              <span>Liked</span>
+              {/* <span>{likedPosts.length}</span> */}
+            </div>
+          </Link>
+        </div>
+        <div className="w-full h-full">
+          <Outlet />
+        </div>
+      </div>
       {error && <div className="text-red-500">{error}</div>}
     </div>
   );

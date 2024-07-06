@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
-import { TfiArrowCircleLeft } from "react-icons/tfi";
 import { AuthContext } from "../context/AuthContext";
 import {
   addDoc,
@@ -19,30 +18,57 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { VscMention } from "react-icons/vsc";
-
+import { PiMusicNotesPlusFill } from "react-icons/pi";
+import { GiMusicalNotes } from "react-icons/gi";
+import { TbMusicOff } from "react-icons/tb";
+import { TbMusicCheck } from "react-icons/tb";
 const CreatePost = () => {
   const inputRef = useRef();
+  const audioRef = useRef();
+  const audioControl = useRef();
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
   const [files, setFiles] = useState([]);
+  const [audioFile, setAudioFile] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(null);
+
   const [newPostData, setNewPostData] = useState({
     name: "",
     email: "",
     postCaption: "",
   });
-  const [userProfileImage, setUserProfileImage] = useState("");
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
   };
 
+  const handleAudioFileChange = (e) => {
+    setAudioFile(e.target.files[0]);
+  };
+
   const removeFile = (indexToRemove) => {
     setFiles((prevFiles) =>
       prevFiles.filter((_, index) => index !== indexToRemove)
     );
+  };
+  const handlePlay = () => {
+    const audioElement = audioControl.current;
+    if (audioElement) {
+      audioElement.play();
+      audioElement.loop = true;
+      setIsPlaying(true);
+    }
+  };
+
+  const handlePause = () => {
+    const audioElement = audioControl.current;
+    if (audioElement) {
+      audioElement.pause();
+      setIsPlaying(false);
+    }
   };
 
   const onChange = (e) => {
@@ -60,7 +86,6 @@ const CreatePost = () => {
         const userData = doc.data();
         console.log(userData);
         setCurrentUserData(userData);
-        setUserProfileImage(userData.img); // Set existing image URL
       });
     }
   };
@@ -125,9 +150,18 @@ const CreatePost = () => {
     }
   };
 
-  const handleSavePost = async (e) => {
+  const handlePublishPost = async (e) => {
     e.preventDefault();
     setIsPublished(false);
+    let audioURL = "";
+    const name = "audio " + audioFile.name;
+    toast.loading("Publishing your thoughts...");
+
+    if (audioFile) {
+      const audioRef = ref(storage, `audio/${name}`);
+      const uploadTask = await uploadBytesResumable(audioRef, audioFile);
+      audioURL = await getDownloadURL(uploadTask.ref);
+    }
     const fileURLs = await handleUploadFiles();
     const { postCaption } = newPostData;
 
@@ -137,13 +171,15 @@ const CreatePost = () => {
         postCaption: postCaption,
         fileURLs: fileURLs,
         userId: currentUser.uid,
-        // userProfileImage: userProfileImageURL,
+        audio: audioURL,
+        audioName: name,
         timeStamp: serverTimestamp(),
+        saves: [],
+        likes: [],
       });
-      console.log("Post created and published", postPublished.id);
       console.log(postPublished);
       setIsPublished(true);
-
+      toast.dismiss();
       toast.success("Post published");
       navigate("/");
       setNewPostData({
@@ -161,32 +197,85 @@ const CreatePost = () => {
   return (
     <div className="text-white flex justify-center w-full bg-zinc-950 h-full">
       <div className="flex flex-col items-center justify-center w-full h-full">
-        <div className="grid grid-cols-3 items-center justify-around w-[95%]">
-          <TfiArrowCircleLeft size={25} className="cursor-pointer" />
-          <span className="p-2">Make a post</span>
-        </div>
-        <div className="min-h-screen h-full w-full bg-zinc-900 rounded-md pb-16">
-          <form className="relative w-full h-full hideScrollbar">
-            <div className="h-fit flex space-x-4 w-full justify-start p-3">
+        <div className="min-h-screen h-full w-full bg-inherit rounded-md pb-16">
+          <form className="relative w-full h-full hideScrollbar mt-2">
+            <div className="h-16 flex space-x-4 w-full justify-start p-3 border-t-[1px] border-blue-950">
               {currentUserData?.img && (
                 <img
                   src={currentUserData.img}
-                  className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-800"
+                  className="h-12 w-12 duration-200 rounded-full"
                   alt=""
                   value={currentUserData.userProfileImage}
                 />
               )}
               <div className="flex flex-col space-y-1">
                 <span className="font-medium">{currentUserData?.name}</span>
-                <span>{currentUserData?.email}</span>
+                <div>
+                  <input
+                    type="file"
+                    accept="audio/mp3"
+                    hidden
+                    ref={audioRef}
+                    onChange={handleAudioFileChange}
+                  />
+                  {audioFile && (
+                    <audio
+                      className="border-2 bg-inherit"
+                      onPlay={handlePlay}
+                      onPause={handlePause}
+                      ref={audioControl}
+                    >
+                      <source
+                        src={URL.createObjectURL(audioFile)}
+                        type={audioFile.type}
+                      />
+                      Your browser does not support the audio element.
+                    </audio>
+                  )}
+                  {!audioFile ? (
+                    <PiMusicNotesPlusFill
+                      size={15}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        audioRef.current.click();
+                      }}
+                    />
+                  ) : (
+                    <div>
+                      {isPlaying === null ? (
+                        <div className="flex items-center space-x-4">
+                          <TbMusicCheck
+                            className="cursor-pointer"
+                            size={15}
+                            onClick={() => {
+                              handlePlay();
+                            }}
+                          />
+                          <span className="text-sm">Click to play</span>
+                        </div>
+                      ) : (
+                        <div onClick={isPlaying ? handlePause : handlePlay}>
+                          {isPlaying ? (
+                            <GiMusicalNotes
+                              size={15}
+                              className="animate-pulse cursor-pointer"
+                            />
+                          ) : (
+                            <TbMusicOff size={20} className="cursor-pointer" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center w-full h-fit p-2 border-t-[1px] border-blue-900">
+            <div className="flex flex-col items-center w-full h-fit p-2">
               <textarea
                 type="textarea"
-                className="w-full focus:outline-none p-2 my-1 bg-zinc-950 rounded-md placeholder:text-zinc-400"
+                className="w-full focus:outline-none p-2 my-1 bg-zinc-900 rounded-md placeholder:text-zinc-400 overflow-y-auto"
                 placeholder={`What's on your mind, ${currentUserData?.name} ?`}
-                rows={4}
+                rows={6}
                 name="postCaption"
                 onChange={onChange}
                 required
@@ -200,7 +289,7 @@ const CreatePost = () => {
                 accept="image/*, video/*"
                 onChange={handleFileChange}
               />
-              <div className="flex items-center justify-between mb-2 p-2 rounded-md bg-zinc-950 w-full">
+              <div className="flex items-center justify-between mb-2 p-2 rounded-md bg-zinc-900 w-full">
                 <div className="flex items-center space-x-2">
                   <TiAttachmentOutline
                     onClick={() => {
@@ -217,7 +306,7 @@ const CreatePost = () => {
                 </div>
                 <button
                   className="p-1 rounded-md duration-200 cursor-pointer"
-                  onClick={handleSavePost}
+                  onClick={handlePublishPost}
                 >
                   {isPublished === null && "Publish"}
                   {isPublished === false && (
@@ -230,7 +319,7 @@ const CreatePost = () => {
               </span>
               <div className="grid col-start-auto grid-cols-2 gap-3 w-full">
                 {files?.map((file, index) => (
-                  <div key={index} className="relative w-full">
+                  <div key={index} className="relative w-full ml-1">
                     {file.type.startsWith("image/") && (
                       <div className="w-[11.8rem] h-[9rem] relative">
                         <img
@@ -248,7 +337,7 @@ const CreatePost = () => {
                       </div>
                     )}
                     {file.type.startsWith("video/") && (
-                      <div className="relative w-[11.8rem] h-[9rem]">
+                      <div className="relative w-[11.8rem] h-[9.1rem]">
                         <video
                           controls
                           className="w-full h-full object-contain rounded-md"

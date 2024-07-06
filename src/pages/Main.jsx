@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
-import { Link, Outlet } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import PostContext from "../context/PostContext/PostContext";
+import { FiSettings } from "react-icons/fi";
 
 const Home = () => {
-  const { posts, currentUser } = useContext(PostContext);
+  const { posts, currentUser, postLoading } = useContext(PostContext);
+  const location = useLocation();
   const [loggedInUserData, setLoggedInUserData] = useState({});
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -30,29 +31,50 @@ const Home = () => {
   }, [currentUser.uid]);
   return (
     <div className="relative w-full max-w-[430px] h-fit bg-zinc-950 text-white">
-      <div className="z-20 fixed top-0 h-14 flex justify-between items-center p-2 w-full max-w-[430px] bg-inherit">
-        <img src={`/images/logo.png`} className="h-10 w-10 rounded-md" alt="" />
-        <span>Posts: {posts?.length}</span>
+      <div className="z-20 fixed top-0 h-14 flex justify-between items-center p-4 w-full max-w-[430px] bg-inherit">
+        <Link to="/">
+          <img
+            src={`/images/logo.png`}
+            className="h-10 w-10 rounded-md"
+            alt=""
+          />
+        </Link>
+        {location.pathname === "/" && <span>Posts: {posts?.length}</span>}
+        {location.pathname === "/createPost" && (
+          <span>Share your thoughts</span>
+        )}
+        {location.pathname === "/userProfile/yourPosts" && (
+          <Link to="settings">
+            <FiSettings className="cursor-pointer" size={20} />
+          </Link>
+        )}
       </div>
-      <div
-        // style={{ height: `calc(100vh - 104px)` }}
-        className="w-full min-h-screen mt-14"
-      >
+      <div className={`w-full ${postLoading ? "h-screen" : "h-full"} mt-12`}>
         <Outlet />
       </div>
-      <div className="z-10 fixed bottom-0 h-12 flex justify-between items-center p-2 w-full max-w-[430px] bg-inherit">
+      <div className="z-10 fixed bottom-0 h-12 flex justify-between items-center p-4 w-full max-w-[430px] bg-inherit">
         <span>
           <Link to="/">
             <FaHome size={25} />
           </Link>
         </span>
         <span>
-          <Link to="/createPost">
+          <Link
+            to="/createPost"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
             <FaPlusCircle size={25} />
           </Link>
         </span>
         <span>
-          <Link to="/userProfile">
+          <Link
+            to="/userProfile/yourPosts"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
             {loggedInUserData.img ? (
               <img
                 src={loggedInUserData?.img}
