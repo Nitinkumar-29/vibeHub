@@ -1,10 +1,9 @@
 import PostContext from "../context/PostContext/PostContext";
 import "../styles/overflow_scroll.css";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
-import { formatTime } from "../utils/FormatTime";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
@@ -14,12 +13,9 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
-import { TbMusicOff } from "react-icons/tb";
-import { GiMusicalNotes } from "react-icons/gi";
+import { formatDate, formatDistanceToNow } from "date-fns";
 
 const Home = () => {
-  const audioControl = useRef();
-  const [isPlaying, setIsPlaying] = useState(true);
   const {
     handleLikePost,
     currentUser,
@@ -33,23 +29,6 @@ const Home = () => {
     fetchAllPosts();
     // eslint-disable-next-line
   }, []);
-
-  const handlePlay = async () => {
-    const audioElement = audioControl.current;
-    if (audioElement) {
-      await audioElement.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const handlePause = async () => {
-    const audioElement = audioControl.current;
-    if (audioElement) {
-      await audioElement.play();
-      audioElement.pause();
-      setIsPlaying(false);
-    }
-  };
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -92,48 +71,16 @@ const Home = () => {
                         <FaUser size={48} />
                       )}
                       <div className="flex w-full justify-between items-center space-x-1">
-                        <div>
-                          <Link
-                            to={`/users/${post?.userData?.user_name}/profile`}
-                            className="font-medium"
-                          >
-                            {post?.userData?.user_name}
-                          </Link>
-                          <div className="flex items-center space-x-2">
-                            {post?.audio && (
-                              <audio
-                                className="border-2 bg-inherit"
-                                autoPlay
-                                onPlay={handlePlay}
-                                onPause={handlePause}
-                                ref={audioControl}
-                              >
-                                <source src={post?.audio} type="audio/*" />
-                                Your browser does not support the audio element.
-                              </audio>
-                            )}
-                            {post?.audio ? (
-                              <div
-                                onClick={isPlaying ? handlePause : handlePlay}
-                              >
-                                {isPlaying === true ? (
-                                  <GiMusicalNotes
-                                    size={15}
-                                    className="animate-pulse cursor-pointer"
-                                  />
-                                ) : (
-                                  <TbMusicOff
-                                    size={15}
-                                    className="cursor-pointer"
-                                  />
-                                )}
-                              </div>
-                            ) : (
-                              ""
-                            )}
-                            <span className="text-xs">{post.audioName}</span>
-                          </div>
-                        </div>
+                        <Link
+                          to={`/users/${post?.userData?.user_name}/profile`}
+                          className="flex flex-col -space-y-1 font-medium"
+                        >
+                          <span>{post?.userData?.name}</span>
+                          <span className="text-sm text-zinc-600">
+                            {" "}
+                            @{post?.userData?.user_name}
+                          </span>
+                        </Link>
                         <div>
                           <HiDotsVertical
                             className="cursor-pointer"
@@ -149,6 +96,32 @@ const Home = () => {
                     </div>
                     <div className="w-full h-full my-2">
                       <p className="px-4 py-2">{post?.postCaption}</p>
+                      <div className="px-2 flex flex-wrap">
+                        {post?.mentionedUsers?.map((user, index) => {
+                          return (
+                            <Link
+                              key={index}
+                              className="text-zinc-500 px-2"
+                              onClick={() => {
+                                console.log(user?.userId, user);
+                              }}
+                              to={`/users/${user?.userId || user}/profile`}
+                            >
+                              {currentUser.uid === user?.userId &&
+                              post.userId ? (
+                                <div className="flex items-center">
+                                  @{user?.username || user}{" "}
+                                  <span className="text-sm">
+                                    &nbsp;(author)
+                                  </span>
+                                </div>
+                              ) : (
+                                <span>@{user?.username || user}</span>
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </div>
                       <Carousel
                         className="carousel"
                         showThumbs={false}
@@ -242,7 +215,7 @@ const Home = () => {
                       </div>
                       <span className="w-full px-4 text-sm text-zinc-400">
                         {post?.timeStamp
-                          ? formatTime(post?.timeStamp, "PPpp")
+                          ? formatDistanceToNow(post?.timeStamp, "PPpp")
                           : "not provided"}
                       </span>
                     </div>

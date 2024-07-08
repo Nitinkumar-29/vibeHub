@@ -235,49 +235,12 @@ const UserProfile = () => {
             <div
               className={`flex flex-col items-center space-y-12 h-fit w-full`}
             >
-              {/* <div className="relative w-full "> */}
-              {/* <div
-                  className={`relative h-40 ${
-                    !fetchedUserData.bgImg
-                      ? "border-y-[1px] border-blue-900"
-                      : ""
-                  } rounded-sm`}
-                >
-                  <TbBackground size={50} className="w-full h-full" />
-                  {fetchedUserData?.bgImg && (
-                    <img
-                      src={fetchedUserData?.bgImg}
-                      className="w-full bg-center h-40 rounded-md object-cover"
-                      alt=""
-                    />
-                  )}
-                  {bgImgPreview && (
-                    <img
-                      src={bgImgPreview}
-                      onChange={handleBgImageOnChange}
-                      alt=""
-                    />
-                  )}
-                  <input type="file" hidden ref={bgImgRef} name="" id="" />
-                  <span
-                    onClick={() => bgImgRef.current.click()}
-                    className="absolute top-[20%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
-                  >
-                    <FaPencilAlt color="black" size={12} />
-                  </span>
-                  <input
-                    type="file"
-                    ref={imageRef}
-                    style={{ display: "none" }}
-                    onChange={handleImageOnChange}
-                  />
-                </div> */}
               <div className=" flex flex-col items-center justify-center w-full space-y-3">
                 <div className="relative">
                   {!isLoading && (
                     <img
                       src={fetchedUserData?.img}
-                      className={`h-36 w-36 hover:h-72 hover:w-72 hover:rounded-4xl touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
+                      className={`h-36 w-36 hover:h-56 cursor-pointer hover:w-56 hover:rounded-4xl touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
                         fetchedUserData?.img
                           ? "border-[1px] border-blue-900"
                           : ""
@@ -285,15 +248,6 @@ const UserProfile = () => {
                       alt=""
                     />
                   )}
-                  {isLoading && (
-                    <VscLoading className="animate-spin h-36 w-36" />
-                  )}
-                  <span
-                    onClick={() => imageRef.current.click()}
-                    className="absolute top-[80%] right-4 rounded-full p-2 bg-white h-fit w-fit cursor-pointer"
-                  >
-                    <FaPencil color="black" size={12} />
-                  </span>
                 </div>
                 <span className="text-2xl">{fetchedUserData.name}</span>
               </div>
@@ -304,7 +258,9 @@ const UserProfile = () => {
           )}
           <div className="flex justify-between w-full my-4 px-4">
             <span>Personal Information</span>
-            <FaEdit />
+            <Link to="/userProfile/settings">
+              <FaEdit />
+            </Link>
           </div>
           <div className="flex flex-col w-full space-y-4 rounded-md p-4 text-sm">
             <div className="flex justify-between w-full">

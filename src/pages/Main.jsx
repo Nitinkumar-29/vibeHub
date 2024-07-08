@@ -46,10 +46,11 @@ const Home = () => {
         )}
         {location.pathname === "/explore" && <span>Explore</span>}
         {location.pathname === "/userProfile/yourPosts" && (
-          <Link to="settings">
+          <Link to="/userProfile/settings">
             <FiSettings className="cursor-pointer" size={20} />
           </Link>
         )}
+        {location.pathname === "/userProfile/settings" && <span>Settings</span>}
       </div>
       <div
         className={`w-full ${

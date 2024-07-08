@@ -65,12 +65,12 @@ function App() {
                 />
               </Route>
               <Route
-                path="/users/:user_name/profile"
+                path="/users/:userId?/:username?/profile"
                 element={<OtherUsersProfile />}
               />
               <Route path="/explore" element={<Explore />} />
               <Route path="/post/:id" element={<Post />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/userProfile/settings" element={<Settings />} />
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />

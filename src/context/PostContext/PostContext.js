@@ -176,7 +176,10 @@ export const PostProvider = ({ children }) => {
       const allPosts = doc.data();
       queryPosts.push({ id: doc.id, ...allPosts });
       console.log({ queryPosts });
-      setUserPosts(queryPosts);
+      const sortedUserPosts = queryPosts.sort(
+        (a, b) => b.timeStamp - a.timeStamp
+      );
+      setUserPosts(sortedUserPosts);
     });
   };
   const handleLikePost = async (id) => {

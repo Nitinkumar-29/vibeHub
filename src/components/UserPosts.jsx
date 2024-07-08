@@ -16,13 +16,16 @@ import { TbMusicOff } from "react-icons/tb";
 
 const UserPosts = () => {
   const audioControl = useRef();
+  const menuRefs = useRef({});
+
   const { userPosts, handleDeletePost } = useContext(PostContext);
   const { sub } = useParams();
   const { currentUser, handleLikePost, handleSavePost } =
     useContext(PostContext);
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentUserData, setCurrentUserData] = useState(null);
-  const [toggleMenu, setToggleMenu] = useState("hidden");
+  const [toggleMenu, setToggleMenu] = useState({});
+  // const [togglePostId, setTogglePostId] = useState(null);
 
   const handlePlay = async () => {
     const audioElement = audioControl.current;
@@ -40,17 +43,34 @@ const UserPosts = () => {
       setIsPlaying(false);
     }
   };
-
-  const handlePostMenuToggle = () => {
-    if (toggleMenu === "hidden") {
-      setToggleMenu("flex");
-      console.log(toggleMenu);
-    } else {
-      setToggleMenu("hidden");
-      console.log(toggleMenu);
-    }
-
+  // Function to handle menu toggle for a specific post
+  const handlePostMenuToggle = (postId) => {
+    setToggleMenu((prevState) => ({
+      ...prevState,
+      [postId]: prevState[postId] === "hidden" ? "flex" : "hidden",
+    }));
   };
+
+  const handleClickOutside = (event) => {
+    Object.keys(menuRefs.current).forEach((postId) => {
+      if (
+        menuRefs.current[postId] &&
+        !menuRefs.current[postId].contains(event.target)
+      ) {
+        setToggleMenu((prevState) => ({
+          ...prevState,
+          [postId]: "hidden",
+        }));
+      }
+    });
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const formatDate = (timestamp) => {
     const date = new Date(
@@ -99,9 +119,12 @@ const UserPosts = () => {
                 <FaUser size={48} />
               )}
               <div className="flex w-full justify-between items-center space-x-1">
-                <div>
-                  <span className="font-medium">{currentUserData?.user_name}</span>
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col -space-y-1">
+                  <span className="font-medium">{currentUserData?.name}</span>
+                  <span className="text-zinc-600 font-medium text-sm">
+                    @{currentUserData?.user_name}
+                  </span>
+                  {/* <div className="flex items-center space-x-2">
                     {post?.audio && (
                       <audio
                         className="border-2 bg-inherit"
@@ -129,25 +152,30 @@ const UserPosts = () => {
                       ""
                     )}
                     <span className="text-xs">{post.audioName}</span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="relative ">
                   <HiDotsVertical
-                    onClick={handlePostMenuToggle}
+                    onClick={() => {
+                      handlePostMenuToggle(post.id);
+                    }}
                     className={`cursor-pointer ${
-                      toggleMenu === "flex" ? "text-pink-600" : ""
+                      toggleMenu[post.id] === "flex" ? "text-pink-600" : ""
                     }`}
                     size={25}
                   />
                   <div
-                    className={`${toggleMenu} ${
-                      toggleMenu === "hidden" ? "duration:300" : ""
+                    ref={(el) => (menuRefs.current[post.id] = el)}
+                    className={`${
+                      toggleMenu[post.id] === "flex" ? "flex" : "hidden"
+                    } ${
+                      toggleMenu[post.id] === "flex" ? "duration-300" : ""
                     }  flex-col items-start right-6 top-0 bg-zinc-900 space-y-4 transition-all z-20 rounded-md p-4 w-[80px] absolute`}
                   >
                     <button
                       onClick={() => {
                         handleDeletePost(post.id);
-                        handlePostMenuToggle();
+                        handlePostMenuToggle(post.id);
                         console.log(post.id);
                       }}
                       className="text-sm"
@@ -176,6 +204,29 @@ const UserPosts = () => {
             </div>
             <div className="w-full h-full my-2">
               <p className="px-4 py-2">{post?.postCaption}</p>
+              <div className="px-2 flex flex-wrap">
+                {post?.mentionedUsers?.map((user, index) => {
+                  return (
+                    <Link
+                      key={index}
+                      className="text-zinc-500 px-2"
+                      onClick={() => {
+                        console.log(user?.userId, user);
+                      }}
+                      to={`/users/${user?.userId || user}/profile`}
+                    >
+                      {currentUser.uid === user?.userId && post.userId ? (
+                        <div className="flex items-center">
+                          @{user?.username || user}{" "}
+                          <span className="text-sm">&nbsp;(author)</span>
+                        </div>
+                      ) : (
+                        <span>@{user?.username || user}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
               <Carousel
                 className="carousel"
                 showThumbs={false}

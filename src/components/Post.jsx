@@ -72,9 +72,13 @@ const Post = () => {
                 <div className="flex justify-between space-x-1 w-full">
                   <Link
                     to={`/users/${userDataWithPostId?.user_name}/profile`}
-                    className="font-medium"
+                    className="flex flex-col -space-y-1 font-medium"
                   >
-                    {userDataWithPostId?.user_name}
+                    <span>{userDataWithPostId?.name}</span>
+                    <span className="text-sm text-zinc-600">
+                      {" "}
+                      @{userDataWithPostId?.user_name}
+                    </span>
                   </Link>
                   <span
                     className="cursor-pointer text-slate-500 hover:text-white duration-200"
@@ -87,7 +91,21 @@ const Post = () => {
                   </span>
                 </div>
               </div>
-              <p className="p-2">{postData.postCaption}</p>
+              <div className="flex flex-wrap">
+                <p className="p-2">{postData.postCaption}</p>
+                {postData?.mentionedUsers?.map((user, index) => (
+                  <Link
+                    key={index}
+                    onClick={() => {
+                      console.log(user?.userId, user?.username);
+                    }}
+                    to={`/users/${user?.userid || user}/profile`}
+                    className="text-zinc-500 px-2"
+                  >
+                    @{user}
+                  </Link>
+                ))}
+              </div>
               <Carousel
                 className="carousel"
                 showThumbs={false}
