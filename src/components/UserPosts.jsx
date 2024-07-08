@@ -13,6 +13,7 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { formatDistanceToNow } from "date-fns";
 import { GiMusicalNotes } from "react-icons/gi";
 import { TbMusicOff } from "react-icons/tb";
+import { formatTime } from "../utils/FormatTime";
 
 const UserPosts = () => {
   const audioControl = useRef();
@@ -72,6 +73,14 @@ const UserPosts = () => {
     };
   }, []);
 
+  const [isEdit, setIsEdit] = useState(false);
+
+  const handleEditPost = (postId) => {
+    setIsEdit(!isEdit);
+    let updateState = isEdit;
+    console.log(updateState, postId);
+  };
+
   const formatDate = (timestamp) => {
     const date = new Date(
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
@@ -124,35 +133,6 @@ const UserPosts = () => {
                   <span className="text-zinc-600 font-medium text-sm">
                     @{currentUserData?.user_name}
                   </span>
-                  {/* <div className="flex items-center space-x-2">
-                    {post?.audio && (
-                      <audio
-                        className="border-2 bg-inherit"
-                        autoPlay
-                        onPlay={handlePlay}
-                        onPause={handlePause}
-                        ref={audioControl}
-                      >
-                        <source src={post?.audio} type="audio/*" />
-                        Your browser does not support the audio element.
-                      </audio>
-                    )}
-                    {post?.audio ? (
-                      <div onClick={isPlaying ? handlePause : handlePlay}>
-                        {isPlaying === true ? (
-                          <GiMusicalNotes
-                            size={15}
-                            className="animate-pulse cursor-pointer"
-                          />
-                        ) : (
-                          <TbMusicOff size={15} className="cursor-pointer" />
-                        )}
-                      </div>
-                    ) : (
-                      ""
-                    )}
-                    <span className="text-xs">{post.audioName}</span>
-                  </div> */}
                 </div>
                 <div className="relative ">
                   <HiDotsVertical
@@ -184,11 +164,11 @@ const UserPosts = () => {
                     </button>
                     <button
                       onClick={() => {
-                        handleDeletePost(post.id);
+                        handleEditPost(post.id);
                       }}
                       className="text-sm"
                     >
-                      Unsave
+                      {!isEdit ? "Edit" : "Save"}
                     </button>
                     <button
                       onClick={() => {
@@ -196,14 +176,20 @@ const UserPosts = () => {
                       }}
                       className="text-sm"
                     >
-                      UnLike
+                      Archive
                     </button>
                   </div>
                 </div>
               </div>
             </div>
             <div className="w-full h-full my-2">
-              <p className="px-4 py-2">{post?.postCaption}</p>
+              <div
+                contentEditable={isEdit}
+                suppressContentEditableWarning={true}
+                className="px-4 py-2"
+              >
+                {post?.postCaption}
+              </div>
               <div className="px-2 flex flex-wrap">
                 {post?.mentionedUsers?.map((user, index) => {
                   return (
@@ -279,7 +265,7 @@ const UserPosts = () => {
                       <span>{post?.likes?.length}</span>
                     )}
                   </div>
-                  <Link to={`/post/${post?.id}`}>
+                  <Link to={`/posts/${post?.id}`}>
                     <div className="flex items-center space-x-1">
                       <SlBubble size={20} />
                       <span>
@@ -308,7 +294,7 @@ const UserPosts = () => {
               </div>
               <span className="w-full px-4 text-sm text-zinc-400">
                 {post?.timeStamp
-                  ? formatDate(post?.timeStamp, "PPpp")
+                  ? formatTime(post?.timeStamp, "PPpp")
                   : "not provided"}
               </span>
             </div>

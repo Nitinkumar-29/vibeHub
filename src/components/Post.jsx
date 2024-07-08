@@ -185,7 +185,7 @@ const Post = () => {
                 </div>
               </div>
               <span className="text-sm text-zinc-400 px-4">
-                {postData?.timeStamp && formatDate(postData?.timeStamp, "PPpp")}
+                {postData?.timeStamp && formatTime(postData?.timeStamp, "PPpp")}
               </span>
             </div>
           )}

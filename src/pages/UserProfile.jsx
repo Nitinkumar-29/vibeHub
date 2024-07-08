@@ -32,6 +32,7 @@ import { BiImageAdd, BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
 import PostContext from "../context/PostContext/PostContext";
 import { TbBackground } from "react-icons/tb";
+import UserLikedPosts from "../components/UserLikedPosts";
 
 const UserProfile = () => {
   const imageRef = useRef();
@@ -44,7 +45,14 @@ const UserProfile = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { handleFetchUserPosts, userPosts } = useContext(PostContext);
+  const {
+    handleFetchUserPosts,
+    handleFetchLikedPosts,
+    handleFetchSavedPosts,
+    userPosts,
+    savedPosts,
+    likedPosts,
+  } = useContext(PostContext);
   const location = useLocation();
   const bgImgRef = useRef();
 
@@ -224,6 +232,8 @@ const UserProfile = () => {
 
   useEffect(() => {
     handleFetchUserPosts();
+    handleFetchLikedPosts();
+    handleFetchSavedPosts();
     // eslint-disable-next-line
   }, [currentUser.uid]);
 
@@ -325,9 +335,8 @@ const UserProfile = () => {
             } p-2 w-full flex justify-center text-center`}
           >
             <div className="flex items-center justify-center w-fit space-x-2">
-              {" "}
               <span>Saved</span>
-              {/* <span>{userSavedPosts?.length}</span> */}
+              <span>{savedPosts?.length}</span>
             </div>
           </Link>
           <Link
@@ -339,9 +348,8 @@ const UserProfile = () => {
             } p-2 w-full flex justify-center text-center`}
           >
             <div className="flex items-center justify-center w-fit space-x-2">
-              {" "}
               <span>Liked</span>
-              {/* <span>{likedPosts.length}</span> */}
+              <span>{likedPosts?.length}</span>
             </div>
           </Link>
         </div>

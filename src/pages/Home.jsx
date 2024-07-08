@@ -13,7 +13,8 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
-import { formatDate, formatDistanceToNow } from "date-fns";
+import { formatDate, formatDistanceToNow, formatDuration, formatISODuration } from "date-fns";
+import { formatTime } from "../utils/FormatTime";
 
 const Home = () => {
   const {
@@ -122,40 +123,42 @@ const Home = () => {
                           );
                         })}
                       </div>
-                      <Carousel
-                        className="carousel"
-                        showThumbs={false}
-                        autoPlay={false}
-                        infiniteLoop={true}
-                        showStatus={false}
-                        emulateTouch={true}
-                        useKeyboardArrows={true}
-                        swipeable={true}
-                        showArrows={true}
-                        showIndicators={true}
-                      >
-                        {post?.fileURLs?.map((fileURL, index) => (
-                          <div
-                            key={index}
-                            className="relative aspect-w-3 aspect-h-3  mx-[.25px]"
-                          >
-                            {fileURL ? (
-                              <img
-                                src={fileURL}
-                                alt="post media"
-                                className={`h-full w-full object-contain rounded-sm border-[1px] border-blue-950`}
-                              />
-                            ) : fileURL ? (
-                              <video
-                                controls
-                                className="h-[10rem] w-[10rem] object-cover rounded-sm border-[1px] border-blue-950"
-                              >
-                                <source src={fileURL} type="video" />
-                              </video>
-                            ) : null}
-                          </div>
-                        ))}
-                      </Carousel>
+                      <div className="flex w-full">
+                        <Carousel
+                          className="carousel"
+                          showThumbs={false}
+                          autoPlay={false}
+                          infiniteLoop={true}
+                          showStatus={false}
+                          emulateTouch={true}
+                          useKeyboardArrows={true}
+                          swipeable={true}
+                          showArrows={true}
+                          showIndicators={true}
+                        >
+                          {post?.fileURLs?.map((fileURL, index) => (
+                            <div
+                              key={index}
+                              className="relative aspect-w-3 aspect-h-3  mx-[.25px]"
+                            >
+                              {fileURL ? (
+                                <img
+                                  src={fileURL}
+                                  alt="post media"
+                                  className={`h-full w-full object-contain rounded-sm border-[1px] border-blue-950`}
+                                />
+                              ) : fileURL ? (
+                                <video
+                                  controls
+                                  className="h-[10rem] w-[10rem] object-cover rounded-sm border-[1px] border-blue-950"
+                                >
+                                  <source src={fileURL} type="video" />
+                                </video>
+                              ) : null}
+                            </div>
+                          ))}
+                        </Carousel>
+                      </div>
                       <div className="flex items-center justify-between h-12 px-4 pt-2">
                         <div className="flex items-center space-x-6">
                           <div
@@ -179,7 +182,7 @@ const Home = () => {
                             {/* )} */}
                           </div>
                           <Link
-                            to={`/post/${post?.id}`}
+                            to={`/posts/${post?.id}`}
                             onClick={() => {
                               window.scrollTo(0, 0);
                             }}
@@ -215,7 +218,9 @@ const Home = () => {
                       </div>
                       <span className="w-full px-4 text-sm text-zinc-400">
                         {post?.timeStamp
-                          ? formatDistanceToNow(post?.timeStamp, "PPpp")
+                          ? formatTime(post?.timeStamp, "PPpp", {
+                              addSuffix: true,
+                            })
                           : "not provided"}
                       </span>
                     </div>

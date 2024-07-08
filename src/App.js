@@ -22,6 +22,7 @@ import UserSavedPosts from "./components/UserSavedPosts";
 import Explore from "./pages/Explore";
 import Notfound from "./pages/Notfound";
 import OtherUsersProfile from "./pages/OtherUsersProfile";
+import UserLikedPosts from "./components/UserLikedPosts";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -61,7 +62,7 @@ function App() {
                 />
                 <Route
                   path="/userProfile/likedPosts"
-                  element={<UserProfileSub />}
+                  element={<UserLikedPosts />}
                 />
               </Route>
               <Route
@@ -69,7 +70,7 @@ function App() {
                 element={<OtherUsersProfile />}
               />
               <Route path="/explore" element={<Explore />} />
-              <Route path="/post/:id" element={<Post />} />
+              <Route path="/posts/:id" element={<Post />} />
               <Route path="/userProfile/settings" element={<Settings />} />
             </Route>
             <Route path="/login" element={<Login />} />

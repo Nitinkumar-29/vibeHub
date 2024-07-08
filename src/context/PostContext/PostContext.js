@@ -33,7 +33,8 @@ export const PostProvider = ({ children }) => {
   const [postsLoading, setPostsLoading] = useState(false);
   const [userDataWithPostId, setUserDataWithPostId] = useState();
   const [userPosts, setUserPosts] = useState(null);
-  const [userSavedPosts, setUserSavedPosts] = useState(null);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
 
   const fetchPostById = async (id) => {
     const postRef = doc(db, "posts", id);
@@ -181,7 +182,68 @@ export const PostProvider = ({ children }) => {
       );
       setUserPosts(sortedUserPosts);
     });
+    handleFetchSavedPosts();
   };
+
+  const handleFetchSavedPosts = async () => {
+    try {
+      // Fetch saved posts
+      const q = query(
+        collection(db, "posts"),
+        where("saves", "array-contains", currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const posts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch user data for each post
+      const postsWithUserData = await Promise.all(
+        posts.map(async (post) => {
+          const userDoc = await getDoc(doc(db, "users", post.userId));
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          return { ...post, user: userData };
+        })
+      );
+
+      // Set the posts with user data to state
+      setSavedPosts(postsWithUserData);
+      handleFetchLikedPosts();
+    } catch (error) {
+      console.error("Error fetching saved posts: ", error);
+    }
+  };
+
+  const handleFetchLikedPosts = async () => {
+    try {
+      // Fetch saved posts
+      const q = query(
+        collection(db, "posts"),
+        where("likes", "array-contains", currentUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const posts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch user data for each post
+      const postsWithUserData = await Promise.all(
+        posts.map(async (post) => {
+          const userDoc = await getDoc(doc(db, "users", post.userId));
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          return { ...post, user: userData };
+        })
+      );
+      // Set the posts with user data to state
+      setLikedPosts(postsWithUserData);
+      console.log(likedPosts, typeof likedPosts);
+    } catch (error) {
+      console.error("Error fetching saved posts: ", error);
+    }
+  };
+
   const handleLikePost = async (id) => {
     try {
       const postRef = doc(db, "posts", id);
@@ -210,6 +272,8 @@ export const PostProvider = ({ children }) => {
           toast.dismiss();
           toast.success("Like removed");
           handleFetchUserPosts();
+          handleFetchSavedPosts();
+          handleFetchLikedPosts();
         } else {
           // Optimistically update UI
           updatedPosts = posts.map((post) =>
@@ -234,6 +298,8 @@ export const PostProvider = ({ children }) => {
         // Fetch the latest post data
         fetchPostById(id);
         handleFetchUserPosts();
+        handleFetchSavedPosts();
+        handleFetchLikedPosts();
       }
     } catch (error) {
       console.error("Error liking post: ", error);
@@ -344,6 +410,8 @@ export const PostProvider = ({ children }) => {
           toast.dismiss();
           toast.success("removed");
           handleFetchUserPosts();
+          handleFetchSavedPosts();
+          handleFetchLikedPosts();
         } else {
           toast.loading("saving...");
 
@@ -363,6 +431,7 @@ export const PostProvider = ({ children }) => {
           toast.dismiss();
           toast.success("saved");
           handleFetchUserPosts();
+          handleFetchSavedPosts();
         }
         fetchPostById(id);
       } else {
@@ -370,26 +439,6 @@ export const PostProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Error saving post: ", error);
-    }
-  };
-
-  const handleFetchSavedPosts = async () => {
-    try {
-      const q = query(
-        collection(db, "posts"),
-        where("saves", "array-contains", currentUser.uid)
-      );
-      const querySnapshot = await getDocs(q);
-      const savedPosts = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // Assuming you have a state to hold these saved posts
-      setUserSavedPosts(savedPosts);
-      console.log("usersavedpost: ", userSavedPosts);
-    } catch (error) {
-      console.error("Error fetching saved posts: ", error);
     }
   };
 
@@ -448,9 +497,11 @@ export const PostProvider = ({ children }) => {
         handleSavePost,
         handleFetchUserPosts,
         userPosts,
-        userSavedPosts,
+        savedPosts,
         handleFetchSavedPosts,
+        handleFetchLikedPosts,
         handleDeletePost,
+        likedPosts,
       }}
     >
       {children}
