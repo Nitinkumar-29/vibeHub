@@ -87,10 +87,10 @@ const UserSavedPosts = () => {
                     onClick={() => {
                       console.log(user?.userId, user?.username);
                     }}
-                    to={`/users/${user?.userid || user}/profile`}
+                    to={`/users/${user?.userId}/profile`}
                     className="text-zinc-500 px-2"
                   >
-                    @{user}
+                    @{user?.username}
                   </Link>
                 ))}
               </div>
@@ -108,11 +108,11 @@ const UserSavedPosts = () => {
               >
                 {Array.isArray(savedPost.fileURLs) &&
                   savedPost.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="aspect-w-3 aspect-h-4 relative">
                       {fileURL.endsWith(".mp4") ? (
                         <video
                           controls
-                          className="h-[10rem] w-[10rem] object-none rounded-sm border-[1px] border-blue-950"
+                          className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
                         >
                           <source src={fileURL} type="video/*" />
                         </video>

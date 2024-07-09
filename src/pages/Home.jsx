@@ -13,7 +13,12 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
-import { formatDate, formatDistanceToNow, formatDuration, formatISODuration } from "date-fns";
+import {
+  formatDate,
+  formatDistanceToNow,
+  formatDuration,
+  formatISODuration,
+} from "date-fns";
 import { formatTime } from "../utils/FormatTime";
 
 const Home = () => {
@@ -97,7 +102,7 @@ const Home = () => {
                     </div>
                     <div className="w-full h-full my-2">
                       <p className="px-4 py-2">{post?.postCaption}</p>
-                      <div className="px-2 flex flex-wrap">
+                      <div className="px-2 my-1 flex flex-wrap">
                         {post?.mentionedUsers?.map((user, index) => {
                           return (
                             <Link
@@ -108,8 +113,7 @@ const Home = () => {
                               }}
                               to={`/users/${user?.userId || user}/profile`}
                             >
-                              {currentUser.uid === user?.userId &&
-                              post.userId ? (
+                              {post.userId === user?.userId ? (
                                 <div className="flex items-center">
                                   @{user?.username || user}{" "}
                                   <span className="text-sm">
@@ -139,22 +143,23 @@ const Home = () => {
                           {post?.fileURLs?.map((fileURL, index) => (
                             <div
                               key={index}
-                              className="relative aspect-w-3 aspect-h-3  mx-[.25px]"
+                              className="relative aspect-w-3 aspect-h-4  mx-[.25px]"
                             >
-                              {fileURL ? (
+                              {fileURL.includes(".mp4") ? (
+                                <video
+                                  controls
+                                  autoFocus={true}
+                                  className="h-full w-full object-contain rounded-sm "
+                                >
+                                  <source src={fileURL} type="video/mp4" />
+                                </video>
+                              ) : (
                                 <img
                                   src={fileURL}
                                   alt="post media"
-                                  className={`h-full w-full object-contain rounded-sm border-[1px] border-blue-950`}
+                                  className="h-full w-full object-contain rounded-sm "
                                 />
-                              ) : fileURL ? (
-                                <video
-                                  controls
-                                  className="h-[10rem] w-[10rem] object-cover rounded-sm border-[1px] border-blue-950"
-                                >
-                                  <source src={fileURL} type="video" />
-                                </video>
-                              ) : null}
+                              )}
                             </div>
                           ))}
                         </Carousel>
@@ -189,10 +194,6 @@ const Home = () => {
                           >
                             <div className="flex items-center space-x-1">
                               <SlBubble size={20} />
-                              <span className="w-2">
-                                {post?.commentsCount !== 0 &&
-                                  post?.commentsCount}
-                              </span>
                             </div>
                           </Link>
                           <SlPaperPlane size={20} />

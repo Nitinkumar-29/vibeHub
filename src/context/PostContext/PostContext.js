@@ -76,15 +76,32 @@ export const PostProvider = ({ children }) => {
         // Fetch user data for the comment
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
-        const userData = userDocSnap.exists() ? userDocSnap.data() : {};
-        console.log(userData);
-        // Combine comment data with user data
-        comments.push({
-          id: docSnap.id,
-          ...commentData,
-          user: userData,
-        });
-        console.log({ comments });
+
+        // Log user document snapshot
+        console.log(
+          `User document snapshot for userId ${userId}: `,
+          userDocSnap
+        );
+
+        // Check if user document exists
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+
+          // Combine comment data with user data
+          comments.push({
+            id: docSnap.id,
+            ...commentData,
+            user: userData,
+          });
+
+          console.log(`Comment with user data: `, {
+            id: docSnap.id,
+            ...commentData,
+            user: userData,
+          });
+        } else {
+          console.warn(`User data not found for userId ${userId}`);
+        }
       }
 
       // Sort comments by timestamp
@@ -98,6 +115,7 @@ export const PostProvider = ({ children }) => {
 
       // Update state with combined comments and user data
       setPostComments(comments);
+      console.log("Sorted and combined comments: ", comments);
     } catch (error) {
       console.error("Error fetching comments: ", error);
     }

@@ -71,6 +71,9 @@ const Post = () => {
                 )}
                 <div className="flex justify-between space-x-1 w-full">
                   <Link
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
                     to={`/users/${userDataWithPostId?.user_name}/profile`}
                     className="flex flex-col -space-y-1 font-medium"
                   >
@@ -99,10 +102,10 @@ const Post = () => {
                     onClick={() => {
                       console.log(user?.userId, user?.username);
                     }}
-                    to={`/users/${user?.userid || user}/profile`}
+                    to={`/users/${user?.userId || user?.username}/profile`}
                     className="text-zinc-500 px-2"
                   >
-                    @{user}
+                    @{user?.user_name}
                   </Link>
                 ))}
               </div>
@@ -119,26 +122,32 @@ const Post = () => {
                 showIndicators={true}
               >
                 {Array.isArray(postData.fileURLs) &&
-                  postData.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative">
-                      {fileURL.endsWith(".mp4") ? (
-                        <video
-                          controls
-                          className="h-[10rem] w-[10rem] object-none rounded-sm border-[1px] border-blue-950"
-                        >
-                          <source src={fileURL} type="video/*" />
-                        </video>
-                      ) : (
-                        <div className="aspec-w-3 aspect-h-4">
+                  postData.fileURLs.map((fileURL, index) => {
+                    console.log("Processing file URL: ", fileURL);
+                    console.log("Is video:", fileURL.includes(".mp4"));
+                    return (
+                      <div
+                        key={index}
+                        className="aspect-w-4 aspect-h-3 relative"
+                      >
+                        {fileURL.includes(".mp4") ? (
+                          <video
+                            controls
+                            autoFocus={true}
+                            className="h-full w-full object-none rounded-sm "
+                          >
+                            <source src={fileURL} type="video/mp4" />
+                          </video>
+                        ) : (
                           <img
                             src={fileURL}
                             alt="post media"
-                            className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                            className="h-full w-full object-contain rounded-sm "
                           />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        )}
+                      </div>
+                    );
+                  })}
               </Carousel>
               <div className="flex items-center justify-between h-10 px-4 w-full">
                 <div className="flex items-center space-x-6">
@@ -240,7 +249,10 @@ const Post = () => {
                               )}
                               {postData.userId === comment.userId ? (
                                 <Link
-                                  to={`/users/${comment?.user?.user_name}`}
+                                  onClick={() => {
+                                    window.scrollTo(0, 0);
+                                  }}
+                                  to={`/users/${comment?.user?.user_name}/profile`}
                                   className="flex items-center space-x-1"
                                 >
                                   <span>{comment?.user?.user_name}</span>{" "}
@@ -250,9 +262,17 @@ const Post = () => {
                                 </Link>
                               ) : (
                                 <Link
+                                  onClick={() => {
+                                    window.scrollTo(0, 0);
+                                  }}
                                   to={`/users/${comment?.user?.user_name}/profile`}
+                                  className="flex space-x-1"
                                 >
-                                  {comment?.user?.user_name}
+                                  <span>{comment?.user?.name}</span>
+
+                                  <span className="text-zinc-600">
+                                    @{comment?.user?.user_name}
+                                  </span>
                                 </Link>
                               )}
                             </div>

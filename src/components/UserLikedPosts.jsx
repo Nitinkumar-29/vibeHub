@@ -81,10 +81,10 @@ const UserLikedPosts = () => {
                     onClick={() => {
                       console.log(user?.userId, user?.username);
                     }}
-                    to={`/users/${user?.userid || user}/profile`}
+                    to={`/users/${user?.userId||user?.username}/profile`}
                     className="text-zinc-500 px-2"
                   >
-                    @{user}
+                    @{user?.username}
                   </Link>
                 ))}
               </div>
@@ -102,7 +102,7 @@ const UserLikedPosts = () => {
               >
                 {Array.isArray(likedPost.fileURLs) &&
                   likedPost.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="aspect-w-3 aspect-h-4 relative">
                       {fileURL.endsWith(".mp4") ? (
                         <video
                           controls

@@ -444,7 +444,7 @@ const CreatePost = () => {
                     <p className="pt-4 text-zinc-600 w-full text-start">
                       Note:{" "}
                       <span className="text-sm">
-                        Your usersname is not in the list as you don't need to
+                        Your username is not in the list as you don't need to
                         mention yourself, Please{" "}
                         {
                           <Link

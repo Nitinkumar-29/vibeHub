@@ -228,22 +228,23 @@ const UserPosts = () => {
                 {post?.fileURLs?.map((fileURL, index) => (
                   <div
                     key={index}
-                    className="relative aspect-w-3 aspect-h-3  mx-[.25px]"
+                    className="relative aspect-w-4 aspect-h-3  mx-[.25px]"
                   >
-                    {fileURL ? (
+                    {fileURL.includes(".mp4") ? (
+                      <video
+                        controls
+                        autoFocus={true}
+                        className="h-full w-full object-none rounded-sm "
+                      >
+                        <source src={fileURL} type="video/mp4" />
+                      </video>
+                    ) : (
                       <img
                         src={fileURL}
                         alt="post media"
-                        className={`h-full w-full object-contain rounded-sm border-[1px] border-blue-950`}
+                        className="h-full w-full object-contain rounded-sm "
                       />
-                    ) : fileURL ? (
-                      <video
-                        controls
-                        className="h-[10rem] w-[10rem] object-cover rounded-sm border-[1px] border-blue-950"
-                      >
-                        <source src={fileURL} type="video" />
-                      </video>
-                    ) : null}
+                    )}
                   </div>
                 ))}
               </Carousel>
