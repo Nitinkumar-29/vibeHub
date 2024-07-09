@@ -13,13 +13,8 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
 import { BiLoaderCircle } from "react-icons/bi";
-import {
-  formatDate,
-  formatDistanceToNow,
-  formatDuration,
-  formatISODuration,
-} from "date-fns";
 import { formatTime } from "../utils/FormatTime";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Home = () => {
   const {
@@ -30,6 +25,7 @@ const Home = () => {
     postsLoading,
     handleSavePost,
   } = useContext(PostContext);
+  const { theme } = useContext(ThemeContext);
 
   useEffect(() => {
     fetchAllPosts();

@@ -23,6 +23,7 @@ import Explore from "./pages/Explore";
 import Notfound from "./pages/Notfound";
 import OtherUsersProfile from "./pages/OtherUsersProfile";
 import UserLikedPosts from "./components/UserLikedPosts";
+import { ThemeProvider } from "./context/Theme/ThemeContext";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -33,51 +34,56 @@ function App() {
   return (
     <>
       <Router>
-        <PostProvider>
-          <Toaster position="top-left" />
-          <Routes>
-            <Route
-              exact
-              path="/"
-              element={
-                <RequireAuth>
-                  <Main />
-                </RequireAuth>
-              }
-            >
-              <Route path="/" element={<Home />} />
-              <Route path="/createPost" element={<CreatePost />} />
+        <ThemeProvider>
+          <PostProvider>
+            <Toaster position="top-left" />
+            <Routes>
               <Route
-                path="/userProfile"
+                exact
+                path="/"
                 element={
                   <RequireAuth>
-                    <UserProfile />
+                    <Main />
                   </RequireAuth>
                 }
               >
-                <Route path="/userProfile/yourPosts" element={<UserPosts />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/createPost" element={<CreatePost />} />
                 <Route
-                  path="/userProfile/savedPosts"
-                  element={<UserSavedPosts />}
-                />
+                  path="/userProfile"
+                  element={
+                    <RequireAuth>
+                      <UserProfile />
+                    </RequireAuth>
+                  }
+                >
+                  <Route
+                    path="/userProfile/yourPosts"
+                    element={<UserPosts />}
+                  />
+                  <Route
+                    path="/userProfile/savedPosts"
+                    element={<UserSavedPosts />}
+                  />
+                  <Route
+                    path="/userProfile/likedPosts"
+                    element={<UserLikedPosts />}
+                  />
+                </Route>
                 <Route
-                  path="/userProfile/likedPosts"
-                  element={<UserLikedPosts />}
+                  path="/users/:userId?/:username?/profile"
+                  element={<OtherUsersProfile />}
                 />
+                <Route path="/explore" element={<Explore />} />
+                <Route path="/posts/:id" element={<Post />} />
+                <Route path="/userProfile/settings" element={<Settings />} />
               </Route>
-              <Route
-                path="/users/:userId?/:username?/profile"
-                element={<OtherUsersProfile />}
-              />
-              <Route path="/explore" element={<Explore />} />
-              <Route path="/posts/:id" element={<Post />} />
-              <Route path="/userProfile/settings" element={<Settings />} />
-            </Route>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/*" element={<Notfound />} />
-          </Routes>
-        </PostProvider>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/*" element={<Notfound />} />
+            </Routes>
+          </PostProvider>
+        </ThemeProvider>{" "}
       </Router>
     </>
   );
