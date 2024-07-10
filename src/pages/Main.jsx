@@ -75,13 +75,7 @@ const Home = () => {
       }`}
     >
       <div
-        className={`z-20 ${position} ${
-          position === "fixed" ? "top-0" : ""
-        } transition-all duration-300 ease-in-out transform ${
-          position === "fixed"
-            ? "translate-y-0 opacity-100"
-            : "-translate-y-full opacity-80"
-        } h-14 flex ${
+        className={`z-20 fixed top-0 h-14 flex ${
           theme === "dark" ? "" : ""
         } justify-between items-center bg-zinc-950 bg-opacity-60 p-4 w-full max-w-[430px] backdrop-blur-3xl`}
       >
@@ -96,6 +90,14 @@ const Home = () => {
         {location.pathname === "/createPost" && (
           <span>Share your thoughts</span>
         )}
+
+        {location.pathname === "/explore" && <span>Explore</span>}
+        {location.pathname === "/userProfile/yourPosts" && (
+          <Link to="/userProfile/settings">
+            <FiSettings className="cursor-pointer" size={20} />
+          </Link>
+        )}
+        {location.pathname === "/userProfile/settings" && <span>Settings</span>}
         <button
           onClick={toggleTheme}
           className={`relative flex items-center p-2 rounded-md border-[1px] ${
@@ -111,13 +113,6 @@ const Home = () => {
             size={25}
           />
         </button>
-        {location.pathname === "/explore" && <span>Explore</span>}
-        {location.pathname === "/userProfile/yourPosts" && (
-          <Link to="/userProfile/settings">
-            <FiSettings className="cursor-pointer" size={20} />
-          </Link>
-        )}
-        {location.pathname === "/userProfile/settings" && <span>Settings</span>}
       </div>
       <div
         className={`w-full ${postLoading ? "h-screen" : "h-full"} 

@@ -5,10 +5,12 @@ import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import PostContext from "../context/PostContext/PostContext";
 import { GiSpinningSword } from "react-icons/gi";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
   const { posts } = useContext(PostContext);
+  const {theme}=useContext(ThemeContext)
   const [query, setQuery] = useState(" ");
   const handleFetchUsersData = async () => {
     try {
@@ -38,8 +40,8 @@ const Explore = () => {
   return (
     <>
       {allUsers && posts ? (
-        <div className="relative w-full bg-inherit border-t-[1px] border-blue-950 space-y-2 pb-20 min-h-screen">
-          <div className="fixed top-14 flex justify-between items-center border-y-[1px] border-blue-950 bg-zinc-900 w-full max-w-[430px] h-16">
+        <div className={`relative w-full bg-inherit border-t-[1px] border-blue-950 space-y-2 pb-20 min-h-screen`}>
+          <div className={`fixed top-14 flex justify-between items-center border-y-[1px] border-blue-950 ${theme==="dark"?"bg-zinc-900":"bg-white"} w-full max-w-[430px] h-16`}>
             <input
               type="text"
               className="bg-inherit w-full focus:outline-none placeholder:text-zinc-500 focus:placeholder:text-zinc-300 text-sky-600 px-4 py-2"
@@ -126,7 +128,7 @@ const Explore = () => {
                   <Link
                     className="flex flex-col w-full space-y-2"
                     key={post.id}
-                    to={`/post/${post.id}`}
+                    to={`/posts/${post.id}`}
                   >
                     {post?.fileURLs && post?.fileURLs.length > 0 && (
                       <div key={post.id}>

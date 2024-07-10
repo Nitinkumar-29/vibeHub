@@ -12,6 +12,7 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { FaSpinner } from "react-icons/fa6";
 import { formatTime } from "../utils/FormatTime";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Post = () => {
   const {
@@ -30,6 +31,7 @@ const Post = () => {
     fetchPostComments,
     handleSavePost,
   } = useContext(PostContext);
+  const {theme}=useContext(ThemeContext)
   const { id } = useParams();
 
   const formatDate = (timestamp) => {
@@ -205,7 +207,7 @@ const Post = () => {
                 <textarea
                   type="textarea"
                   placeholder="Post a comment"
-                  className="outline-none w-full bg-zinc-950 px-4"
+                  className={`outline-none w-full ${theme==="dark"?"bg-zinc-950":"bg-inherit"} px-4`}
                   rows={3}
                   name="commentText"
                   required

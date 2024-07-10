@@ -29,6 +29,7 @@ import { FaUser, FaUserCircle } from "react-icons/fa";
 import { MdClearAll } from "react-icons/md";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { toBeDisabled } from "@testing-library/jest-dom/matchers";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const CreatePost = () => {
   const inputRef = useRef();
@@ -37,6 +38,7 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
   const [files, setFiles] = useState([]);
   const [audioFile, setAudioFile] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
@@ -257,7 +259,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="text-white flex justify-center w-full bg-zinc-950 h-full">
+    <div className={`text-white flex justify-center w-full bg-zinc-950 h-full`}>
       <div className="flex flex-col items-center justify-center w-full h-full">
         <div className="min-h-screen h-full w-full bg-inherit rounded-md pb-16">
           <form className="relative w-full h-full mt-2">

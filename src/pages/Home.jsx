@@ -56,7 +56,7 @@ const Home = () => {
   return (
     <>
       {!postsLoading ? (
-        <div className="flex flex-col justify-center items-center mb-10 h-full">
+        <div className="flex flex-col justify-center items-center h-full">
           {posts?.length > 0 ? (
             <div className="flex justify-center w-full h-full py-2">
               <div className="flex flex-col w-full h-fit">
