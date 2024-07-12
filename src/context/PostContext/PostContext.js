@@ -227,6 +227,7 @@ export const PostProvider = ({ children }) => {
 
       // Set the posts with user data to state
       setSavedPosts(postsWithUserData);
+      console.log(postsWithUserData);
       handleFetchLikedPosts();
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
