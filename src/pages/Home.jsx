@@ -58,11 +58,11 @@ const Home = () => {
       {!postsLoading ? (
         <div className="flex flex-col justify-center items-center h-full">
           {posts?.length > 0 ? (
-            <div className="flex justify-center w-full h-full py-2">
+            <div className="flex justify-center w-full h-full pb-2">
               <div className="flex flex-col w-full h-fit">
                 {posts?.map((post, index) => (
                   <div key={index} className="w-full rounded-md">
-                    <div className="h-16 flex items-center border-t-[1px] border-blue-950 rounded-sm space-x-4 w-full justify-start px-3">
+                    <div className="h-16 flex items-center border-t-[1px] border-gray-800 rounded-sm space-x-4 w-full justify-start px-3">
                       {post?.userData?.img ? (
                         <img
                           src={post?.userData?.img}
@@ -74,7 +74,14 @@ const Home = () => {
                       )}
                       <div className="flex w-full justify-between items-center space-x-1">
                         <Link
-                          to={`/users/${post?.userData?.user_name}/profile`}
+                          onClick={() => {
+                            window.scrollTo(0, 0);
+                          }}
+                          to={
+                            currentUser?.uid === post?.userId
+                              ? `/userProfile/yourPosts`
+                              : `/users/${post?.userData?.user_name}/profile`
+                          }
                           className="flex flex-col -space-y-1 font-medium"
                         >
                           <span>{post?.userData?.name}</span>
@@ -83,7 +90,7 @@ const Home = () => {
                             @{post?.userData?.user_name}
                           </span>
                         </Link>
-                        <div>
+                        {/* <div>
                           <HiDotsVertical
                             className="cursor-pointer"
                             size={25}
@@ -93,11 +100,13 @@ const Home = () => {
                             <span>Delete</span>
                             <span></span>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                     <div className="w-full h-full my-2">
-                      <p className="px-4 py-2">{post?.postCaption}</p>
+                      {post?.postCaption && (
+                        <p className="px-4 py-2">{post?.postCaption}</p>
+                      )}
                       <div className="px-2 my-1 flex flex-wrap">
                         {post?.mentionedUsers?.map((user, index) => {
                           return (
@@ -105,9 +114,9 @@ const Home = () => {
                               key={index}
                               className="text-zinc-500 px-2"
                               onClick={() => {
-                                console.log(user?.userId, user);
+                                window.scrollTo(0, 0);
                               }}
-                              to={`/users/${user?.userId || user}/profile`}
+                              to={`/users/${user?.userId}/profile`}
                             >
                               {post.userId === user?.userId ? (
                                 <div className="flex items-center">
@@ -117,7 +126,7 @@ const Home = () => {
                                   </span>
                                 </div>
                               ) : (
-                                <span>@{user?.username || user}</span>
+                                <span>@{user?.username || user?.username}</span>
                               )}
                             </Link>
                           );
@@ -134,18 +143,17 @@ const Home = () => {
                           useKeyboardArrows={true}
                           swipeable={true}
                           showArrows={true}
-                          showIndicators={true}
+                          showIndicators={
+                            post?.fileURLs.length > 1 ? true : false
+                          }
                         >
                           {post?.fileURLs?.map((fileURL, index) => (
-                            <div
-                              key={index}
-                              className="relative aspect-w-3 aspect-h-4  mx-[.25px]"
-                            >
+                            <div key={index} className="relative  mx-[.25px]">
                               {fileURL.includes(".mp4") ? (
                                 <video
                                   controls
                                   autoFocus={true}
-                                  className="h-full w-full object-contain rounded-sm "
+                                  className="h-[80%] w-full object-contain rounded-sm "
                                 >
                                   <source src={fileURL} type="video/mp4" />
                                 </video>
@@ -153,17 +161,17 @@ const Home = () => {
                                 <img
                                   src={fileURL}
                                   alt="post media"
-                                  className="h-full w-full object-contain rounded-sm "
+                                  className="h-fit w-fit object-contain rounded-sm"
                                 />
                               )}
                             </div>
                           ))}
                         </Carousel>
                       </div>
-                      <div className="flex items-center justify-between h-12 px-4 pt-2">
+                      <div className="flex items-center justify-between h-10 px-4 pt-2">
                         <div className="flex items-center space-x-6">
                           <div
-                            className="flex space-x-1 items-center cursor-pointer"
+                            className="flex items-center cursor-pointer"
                             onClick={() =>
                               handleLikePost(post?.id, currentUser?.uid)
                             }
@@ -176,11 +184,6 @@ const Home = () => {
                             ) : (
                               <SlHeart size={20} />
                             )}
-                            {/* {post?.likes?.length !== 0 && ( */}
-                            <span className="w-2">
-                              {post?.likes?.length !== 0 && post?.likes?.length}
-                            </span>
-                            {/* )} */}
                           </div>
                           <Link
                             to={`/posts/${post?.id}`}
@@ -213,13 +216,23 @@ const Home = () => {
                           )}
                         </div>
                       </div>
-                      <span className="w-full px-4 text-sm text-zinc-400">
-                        {post?.timeStamp
-                          ? formatTime(post?.timeStamp, "PPpp", {
-                              addSuffix: true,
-                            })
-                          : "not provided"}
-                      </span>
+                      <div className="flex flex-col">
+                        {/* {post?.likes?.length !== 0 && ( */}
+                        {post?.likes?.length !== 0 && (
+                          <span className="w-full px-4">
+                            {post?.likes?.length !== 0 && post?.likes?.length}
+                            &nbsp;{post?.likes?.length === 1 ? "like" : "likes"}
+                          </span>
+                        )}
+                        {/* )} */}
+                        <span className="w-full px-4 text-sm text-zinc-400">
+                          {post?.timeStamp
+                            ? formatTime(post?.timeStamp, "PPpp", {
+                                addSuffix: true,
+                              })
+                            : "not provided"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}

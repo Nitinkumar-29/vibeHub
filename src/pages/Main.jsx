@@ -1,11 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  FaHome,
-  FaPlusCircle,
-  FaToggleOn,
-  FaUser,
-  FaWpexplorer,
-} from "react-icons/fa";
+import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
@@ -14,7 +8,6 @@ import { FiSettings } from "react-icons/fi";
 import { MdDarkMode, MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSunnyOutline } from "react-icons/io5";
-import { RxSwitch } from "react-icons/rx";
 
 const Home = () => {
   const { posts, currentUser, postLoading } = useContext(PostContext);
@@ -49,7 +42,7 @@ const Home = () => {
 
     if (currentScrollY < lastScrollY) {
       // Scrolling down
-      setPosition("fixed");
+      setPosition("sticky");
     } else {
       // Scrolling up
       setPosition("static");
@@ -68,16 +61,14 @@ const Home = () => {
   }, [lastScrollY]);
   return (
     <div
-      className={`relative w-full max-w-[430px] h-fit ${
-        theme === "dark"
-          ? "bg-zinc-950 text-white"
-          : "bg-gradient-to-t from-violet-50 via-green-50 to-red-50 text-black"
+      className={`relative w-full max-w-[430px] h-fit  ${
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
       }`}
     >
       <div
-        className={`z-20 fixed top-0 h-14 flex ${
-          theme === "dark" ? "" : ""
-        } justify-between items-center bg-zinc-950 bg-opacity-60 p-4 w-full max-w-[430px] backdrop-blur-3xl`}
+        className={`z-20 ${position} top-0 h-14 flex ${
+          theme === "dark" ? "bg-gray-900" : "bg-white"
+        }  justify-between items-center bg-opacity-60 p-4 w-full max-w-[430px] backdrop-blur-3xl`}
       >
         <Link to="/">
           <img
@@ -105,71 +96,61 @@ const Home = () => {
           }`}
         >
           <IoSunnyOutline
-            className={`${theme === "dark" ? "hidden" : "flex"}`}
-            size={25}
+            className={`${theme === "light" ? "hidden" : "flex"}`}
+            size={20}
           />
           <MdDarkMode
-            className={`${theme === "light" ? "hidden" : "flex"}`}
-            size={25}
+            className={`${theme === "dark" ? "hidden" : "flex"}`}
+            size={20}
           />
         </button>
       </div>
       <div
         className={`w-full ${postLoading ? "h-screen" : "h-full"} 
-        pt-12 `}
+        `}
       >
         <Outlet />
       </div>
       <div
         className={`z-10 ${position} bottom-0 h-12 flex justify-between items-center p-4 w-full max-w-[430px] ${
-          theme === "dark"
-            ? "bg-zinc-950"
-            : "bg-gradient-to-tr from-violet-50 via-green-50 to-red-50"
+          theme === "dark" ? "bg-gray-900" : "bg-white"
         } bg-opacity-60 backdrop-blur-3xl `}
       >
-        <span>
-          <Link to="/">
-            <FaHome size={25} />
-          </Link>
-        </span>
-        <span>
-          <Link
-            to="/explore"
-            onClick={() => {
-              window.scrollTo(0, 0);
-            }}
-          >
-            <MdOutlineExplore size={25} />
-          </Link>
-        </span>
-        <span>
-          <Link
-            to="/createPost"
-            onClick={() => {
-              window.scrollTo(0, 0);
-            }}
-          >
-            <FaPlusCircle size={25} />
-          </Link>
-        </span>
-        <span>
-          <Link
-            to="/userProfile/yourPosts"
-            onClick={() => {
-              window.scrollTo(0, 0);
-            }}
-          >
-            {loggedInUserData.img ? (
-              <img
-                src={loggedInUserData?.img}
-                className="h-8 w-8 rounded-full"
-                alt=""
-              />
-            ) : (
-              <FaUser size={25} />
-            )}
-          </Link>
-        </span>
+        <Link className="flex flex-col items-center" to="/">
+          <FaHome size={25} />
+        </Link>
+        <Link
+          to="/explore"
+          onClick={() => {
+            window.scrollTo(0, 0);
+          }}
+        >
+          <MdOutlineExplore size={28} />
+        </Link>
+        <Link
+          to="/createPost"
+          onClick={() => {
+            window.scrollTo(0, 0);
+          }}
+        >
+          <FaPlusCircle size={25} />
+        </Link>
+        <Link
+          to="/userProfile/yourPosts"
+          onClick={() => {
+            window.scrollTo(0, 0);
+          }}
+        >
+          {loggedInUserData.img ? (
+            <img
+              src={loggedInUserData?.img}
+              className="h-7 w-7 rounded-full"
+              alt=""
+            />
+          ) : (
+            <FaUser size={25} />
+          )}
+        </Link>
       </div>
     </div>
   );

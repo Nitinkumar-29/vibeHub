@@ -33,6 +33,7 @@ import { CgUserRemove } from "react-icons/cg";
 import PostContext from "../context/PostContext/PostContext";
 import { TbBackground } from "react-icons/tb";
 import UserLikedPosts from "../components/UserLikedPosts";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const UserProfile = () => {
   const imageRef = useRef();
@@ -55,6 +56,7 @@ const UserProfile = () => {
   } = useContext(PostContext);
   const location = useLocation();
   const bgImgRef = useRef();
+  const { theme } = useContext(ThemeContext);
 
   const handleImageOnChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -238,7 +240,7 @@ const UserProfile = () => {
   }, [currentUser.uid]);
 
   return (
-    <div className="flex flex-col items-center space-y-6 bg-zinc-950 text-white min-h-screen w-full max-w-[430px] py-1">
+    <div className={`flex flex-col items-center space-y-6 ${theme==="dark"?"bg-gray-900 text-white":"bg-white text-black"} min-h-screen w-full max-w-[430px] py-1`}>
       {fetchedUserData && (
         <div className="flex flex-col items-center w-full py-4 space-y-4 h-full">
           {fetchedUserData?.img ? (
