@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 
 const ThemeContext = createContext();
 
@@ -36,7 +37,24 @@ export const ThemeProvider = ({ children }) => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
-    toast.success(newTheme === "light" ? "Light mode" : "Dark Mode");
+    // toast.success(newTheme === "light" ? "Light mode" : "Dark Mode");
+    if (newTheme === "dark") {
+      toast.dismiss();
+      toast("Dark Mode!", {
+        duration: 800,
+        icon: <MdOutlineDarkMode />,
+        style: {
+          background: "#333",
+          color: "#fff",
+        },
+      });
+    } else {
+      toast.dismiss();
+      toast("Light Mode", {
+        duration: 800,
+        icon: <MdOutlineLightMode />,
+      });
+    }
   };
 
   const setLightTheme = () => {
@@ -48,7 +66,11 @@ export const ThemeProvider = ({ children }) => {
   const setDarkTheme = () => {
     setTheme("dark");
     localStorage.setItem("theme", "dark");
-    toast.success("Dark mode");
+    toast.success("Dark mode", {
+      style: {
+        background: "#333",
+      },
+    });
   };
 
   const setSystemTheme = () => {
