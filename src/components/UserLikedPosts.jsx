@@ -19,8 +19,6 @@ const UserLikedPosts = () => {
     handleSavePost,
   } = useContext(PostContext);
 
-
-
   useEffect(() => {
     if (currentUser?.uid) {
       handleFetchLikedPosts();
@@ -81,7 +79,7 @@ const UserLikedPosts = () => {
                     onClick={() => {
                       console.log(user?.userId, user?.username);
                     }}
-                    to={`/users/${user?.userId||user?.username}/profile`}
+                    to={`/users/${user?.userId || user?.username}/profile`}
                     className="text-zinc-500 px-2"
                   >
                     @{user?.username}
@@ -102,20 +100,20 @@ const UserLikedPosts = () => {
               >
                 {Array.isArray(likedPost.fileURLs) &&
                   likedPost.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="aspect-w-3 aspect-h-4 relative">
-                      {fileURL.endsWith(".mp4") ? (
+                    <div key={index} className="relative">
+                      {fileURL.includes(".mp4") ? (
                         <video
                           controls
-                          className="h-[10rem] w-[10rem] object-none rounded-sm border-[1px] border-blue-950"
+                          className="h-full bg-transparent w-full object-contain rounded-sm border-[1px] border-blue-950"
                         >
                           <source src={fileURL} type="video/*" />
                         </video>
                       ) : (
-                        <div className="aspec-w-3 aspect-h-4">
+                        <div className="">
                           <img
                             src={fileURL}
                             alt="post media"
-                            className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                            className="h-fit w-fit object-contain rounded-sm border-[1px] border-blue-950"
                           />
                         </div>
                       )}
@@ -135,9 +133,6 @@ const UserLikedPosts = () => {
                         <SlHeart className="cursor-pointer" size={20} />
                       )}
                     </span>
-                    {likedPost?.likes?.length !== 0 && (
-                      <span>{likedPost?.likes?.length}</span>
-                    )}
                   </div>
                   <Link
                     onClick={() => {
@@ -169,10 +164,18 @@ const UserLikedPosts = () => {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-zinc-400 px-4">
-                {likedPost?.timeStamp &&
-                  formatTime(likedPost?.timeStamp, "PPpp")}
-              </span>
+              <div className="flex flex-col items-start pb-2  w-fit px-4">
+                {likedPost?.likes?.length !== 0 && (
+                  <span className="w-fit">
+                    {likedPost?.likes?.length !== 0 && likedPost?.likes?.length}
+                    &nbsp;{likedPost?.likes?.length === 1 ? "like" : "likes"}
+                  </span>
+                )}
+                <span className="text-sm text-zinc-400">
+                  {likedPost?.timeStamp &&
+                    formatTime(likedPost?.timeStamp, "PPpp")}
+                </span>
+              </div>
             </div>
           ))}
         </div>

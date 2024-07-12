@@ -38,7 +38,6 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const { currentUser } = useContext(AuthContext);
-  const { theme } = useContext(ThemeContext);
   const [files, setFiles] = useState([]);
   const [audioFile, setAudioFile] = useState(null);
   const [currentUserData, setCurrentUserData] = useState(null);
@@ -48,6 +47,7 @@ const CreatePost = () => {
     postCaption: "",
   });
   const [mentionedUsers, setMentionedUsers] = useState([]);
+  const { theme } = useContext(ThemeContext);
 
   const [displayUsersdata, setDisplayUsersData] = useState("hidden");
 
@@ -259,7 +259,11 @@ const CreatePost = () => {
   };
 
   return (
-    <div className={`text-white flex justify-center w-full bg-zinc-950 h-full`}>
+    <div
+      className={` flex justify-center w-full ${
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+      } h-full`}
+    >
       <div className="flex flex-col items-center justify-center w-full h-full">
         <div className="min-h-screen h-full w-full bg-inherit rounded-md pb-16">
           <form className="relative w-full h-full mt-2">
@@ -343,7 +347,9 @@ const CreatePost = () => {
             <div className="flex flex-col items-center w-full h-fit p-2">
               <textarea
                 type="textarea"
-                className="w-full focus:outline-none p-2 my-1 bg-zinc-900 rounded-md placeholder:text-zinc-400 overflow-y-auto"
+                className={`w-full focus:outline-none p-2 my-1 ${
+                  theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                } rounded-md placeholder:text-zinc-400 overflow-y-auto`}
                 placeholder={`What's on your mind, ${currentUserData?.name} ?`}
                 rows={6}
                 name="postCaption"
@@ -352,11 +358,15 @@ const CreatePost = () => {
                 value={newPostData.postCaption || ""}
               />
               {mentionedUsers.length > 0 ? (
-                <div className="flex flex-wrap space-x-1 h-32 duration-150 p-2 bg-zinc-900 w-full rounded-md">
+                <div
+                  className={`flex flex-wrap space-x-1 h-32 duration-150 p-2 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                  } w-full rounded-md`}
+                >
                   {mentionedUsers.map((user, index) => (
                     <div
                       key={index}
-                      className="flex space-x-1 bg-zinc-950 rounded-full p-2 h-fit items-center justify-center"
+                      className={`flex space-x-1 ${theme==="dark"?"bg-gray-950":"bg-gray-300"} rounded-full p-2 h-fit items-center justify-center`}
                     >
                       <Link
                         to={`/users/${user.userId}/profile`}
@@ -377,7 +387,11 @@ const CreatePost = () => {
                   ))}
                 </div>
               ) : (
-                <span className="h-32 text-zinc-700 rounded-md bg-zinc-900 w-full p-2">
+                <span
+                  className={`h-32 text-zinc-700 rounded-md ${
+                    theme === "dark" ? "bg-gray-800 text-gray-600" : "bg-gray-100"
+                  } w-full p-2`}
+                >
                   All mentions will be displayed here
                 </span>
               )}
@@ -389,7 +403,7 @@ const CreatePost = () => {
                 accept="image/*, video/*"
                 onChange={handleFileChange}
               />
-              <div className="relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md bg-zinc-900 w-full">
+              <div className={`relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md ${theme==="dark"?"bg-gray-800":"bg-gray-100"} w-full`}>
                 <div className="flex items-center w-full justify-between">
                   <div className="flex items-center space-x-2">
                     <TiAttachmentOutline
@@ -415,12 +429,14 @@ const CreatePost = () => {
                   <button
                     type="button"
                     className={`p-1 rounded-md duration-200  ${
-                      files.length === 0 && newPostData.length === 0
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
+                      files.length !== 0 || newPostData.postCaption.length > 0
+                        ? "cursor-pointer"
+                        : "opacity-50 cursor-not-allowed"
                     }`}
                     onClick={handlePublishPost}
-                    disabled={files.length === 0 && newPostData.length === 0}
+                    disabled={
+                      files.length === 0 && newPostData.postCaption.length === 0
+                    }
                   >
                     {isPublished === null && "Publish"}
                     {isPublished === false && (
@@ -429,7 +445,7 @@ const CreatePost = () => {
                   </button>
                 </div>
                 <div
-                  className={`${displayUsersdata} z-10 absolute top-12 bg-zinc-900 rounded-md h-64 overflow-y-auto w-full flex-col items-start space-y-3 p-2`}
+                  className={`${displayUsersdata} z-10 absolute top-12 ${theme==="dark"?"bg-gray-800":"bg-gray-100"} rounded-md h-64 overflow-y-auto w-full flex-col items-start space-y-3 p-2`}
                 >
                   <CgClose
                     className="absolute top-2 border-[1px] rounded-full right-2 cursor-pointer"
@@ -443,7 +459,7 @@ const CreatePost = () => {
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
                   ).length === 0 && (
-                    <p className="pt-4 text-zinc-600 w-full text-start">
+                    <p className={`pt-4 ${theme==="dark"?"text-gray-600":"text-gray-900"} w-full text-start`}>
                       Note:{" "}
                       <span className="text-sm">
                         Your username is not in the list as you don't need to
@@ -502,7 +518,7 @@ const CreatePost = () => {
                           ) : (
                             <FaUserCircle className="h-[20px] w-[20px]" />
                           )}
-                          <span className="cursor-pointer text-zinc-200">
+                          <span className={`cursor-pointer ${theme==="dark"?"text-gray-200":"text-gray-900"}`}>
                             {user.user_name}
                           </span>
                         </div>

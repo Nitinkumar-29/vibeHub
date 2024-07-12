@@ -11,8 +11,8 @@ import { Link, useParams } from "react-router-dom";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { formatDistance, formatDistanceToNow } from "date-fns";
 import { FaSpinner } from "react-icons/fa6";
-import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { formatTime } from "../utils/FormatTime";
 
 const Post = () => {
   const {
@@ -31,15 +31,8 @@ const Post = () => {
     fetchPostComments,
     handleSavePost,
   } = useContext(PostContext);
-  const {theme}=useContext(ThemeContext)
+  const { theme } = useContext(ThemeContext);
   const { id } = useParams();
-
-  const formatDate = (timestamp) => {
-    const date = new Date(
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
-    );
-    return formatDistanceToNow(date, { addSuffix: true });
-  };
 
   const postCommentById = (e) => {
     e.preventDefault();
@@ -76,7 +69,11 @@ const Post = () => {
                     onClick={() => {
                       window.scrollTo(0, 0);
                     }}
-                    to={`/users/${userDataWithPostId?.user_name}/profile`}
+                    to={
+                      !currentUser.uid === postData?.userId
+                        ? `/users/${userDataWithPostId?.user_name}/profile`
+                        : `/userProfile/yourposts`
+                    }
                     className="flex flex-col -space-y-1 font-medium"
                   >
                     <span>{userDataWithPostId?.name}</span>
@@ -125,18 +122,13 @@ const Post = () => {
               >
                 {Array.isArray(postData.fileURLs) &&
                   postData.fileURLs.map((fileURL, index) => {
-                    console.log("Processing file URL: ", fileURL);
-                    console.log("Is video:", fileURL.includes(".mp4"));
                     return (
-                      <div
-                        key={index}
-                        className="aspect-w-4 aspect-h-3 relative"
-                      >
+                      <div key={index} className=" relative">
                         {fileURL.includes(".mp4") ? (
                           <video
                             controls
                             autoFocus={true}
-                            className="h-full w-full object-none rounded-sm "
+                            className="h-full w-full object-contain rounded-sm "
                           >
                             <source src={fileURL} type="video/mp4" />
                           </video>
@@ -203,12 +195,16 @@ const Post = () => {
           {postData?.userId && (
             <div className="flex flex-col items-center space-y-4 w-full rounded-sm">
               <span className="w-full px-4 mt-3">Comments</span>
-              <form onSubmit={postCommentById} className="w-full ">
-                <textarea
-                  type="textarea"
+              <form
+                onSubmit={postCommentById}
+                className="flex flex-col items-start w-[93%] space-y-2 mx-auto "
+              >
+                <input
+                  type="text"
                   placeholder="Post a comment"
-                  className={`outline-none w-full ${theme==="dark"?"bg-zinc-950":"bg-inherit"} px-4`}
-                  rows={3}
+                  className={`outline-none border-b-[1px] ${
+                    theme === "dark" ? "border-gray-400" : "border-gray-800"
+                  } w-full bg-inherit p-2`}
                   name="commentText"
                   required
                   onChange={(e) => {
@@ -221,7 +217,7 @@ const Post = () => {
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-md duration-200 cursor-pointer outline-none mx-4 border-[1px]"
+                  className="p-2 rounded-md duration-200 cursor-pointer outline-none border-[1px]"
                 >
                   {isPublished === true && <RxPaperPlane size={20} />}
                   {isPublished === false && (
@@ -255,12 +251,17 @@ const Post = () => {
                                     window.scrollTo(0, 0);
                                   }}
                                   to={`/users/${comment?.user?.user_name}/profile`}
-                                  className="flex items-center space-x-1"
+                                  className="flex flex-col items-start -space-y-1 px-2"
                                 >
-                                  <span>{comment?.user?.user_name}</span>{" "}
-                                  <span className="text-zinc-500">
-                                    (author)
-                                  </span>
+                                  <div className="">
+                                    <span>{comment?.user?.name}</span>
+                                    <span className="text-zinc-500">
+                                      (author)
+                                    </span>
+                                  </div>
+                                  <span className="text-zinc-600">
+                                    @{comment?.user?.user_name}
+                                  </span>{" "}
                                 </Link>
                               ) : (
                                 <Link
@@ -320,11 +321,6 @@ const Post = () => {
                         </div>
                         <SlBubble size={18} />
                       </div>
-                      {/* <span className="w-full px-2 text-sm text-zinc-400">
-                        {comment?.timeStamp
-                          ? formatTime(comment?.timeStamp, "PPpp")
-                          : "not provided"}
-                      </span> */}
                     </div>
                   );
                 })}

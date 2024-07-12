@@ -228,13 +228,13 @@ const UserPosts = () => {
                 {post?.fileURLs?.map((fileURL, index) => (
                   <div
                     key={index}
-                    className="relative aspect-w-4 aspect-h-3  mx-[.25px]"
+                    className="relative mx-[.25px]"
                   >
                     {fileURL.includes(".mp4") ? (
                       <video
                         controls
                         autoFocus={true}
-                        className="h-full w-full object-none rounded-sm "
+                        className="h-full w-full object-contain rounded-sm "
                       >
                         <source src={fileURL} type="video/mp4" />
                       </video>

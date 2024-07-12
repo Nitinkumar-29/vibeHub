@@ -20,13 +20,6 @@ const UserSavedPosts = () => {
     handleSavePost,
   } = useContext(PostContext);
 
-  const formatDate = (timestamp) => {
-    const date = new Date(
-      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
-    );
-    return formatDistanceToNow(date, { addSuffix: true });
-  };
-
   useEffect(() => {
     if (currentUser?.uid) {
       handleFetchSavedPosts();
@@ -59,7 +52,7 @@ const UserSavedPosts = () => {
                 )}
                 <div className="flex justify-between space-x-1 w-full">
                   <Link
-                    to={`/users/${savedPost.user?.user_name}/profile`}
+                    to={`/users/${savedPost?.userId}/profile`}
                     className="flex flex-col -space-y-1 font-medium"
                   >
                     <span>{savedPost.user?.name}</span>
@@ -108,20 +101,20 @@ const UserSavedPosts = () => {
               >
                 {Array.isArray(savedPost.fileURLs) &&
                   savedPost.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="aspect-w-3 aspect-h-4 relative">
-                      {fileURL.endsWith(".mp4") ? (
+                    <div key={index} className="relative">
+                      {fileURL.includes(".mp4") ? (
                         <video
                           controls
-                          className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                          className="h-full w-full object-contain rounded-sm border-[1px] border-blue-950"
                         >
                           <source src={fileURL} type="video/*" />
                         </video>
                       ) : (
-                        <div className="aspec-w-3 aspect-h-4">
+                        <div className="">
                           <img
                             src={fileURL}
                             alt="post media"
-                            className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                            className="h-fit w-fit object-contain rounded-sm border-[1px] border-blue-950"
                           />
                         </div>
                       )}
@@ -141,9 +134,6 @@ const UserSavedPosts = () => {
                         <SlHeart className="cursor-pointer" size={20} />
                       )}
                     </span>
-                    {savedPost?.likes?.length !== 0 && (
-                      <span>{savedPost?.likes?.length}</span>
-                    )}
                   </div>
                   <Link
                     onClick={() => {
@@ -175,10 +165,18 @@ const UserSavedPosts = () => {
                   )}
                 </div>
               </div>
-              <span className="text-sm text-zinc-400 px-4">
-                {savedPost?.timeStamp &&
-                  formatTime(savedPost?.timeStamp, "PPpp")}
-              </span>
+              <div className="flex flex-col items-start pb-2  w-fit px-4">
+                {savedPost?.likes?.length !== 0 && (
+                  <span className="w-fit">
+                    {savedPost?.likes?.length !== 0 && savedPost?.likes?.length}
+                    &nbsp;{savedPost?.likes?.length === 1 ? "like" : "likes"}
+                  </span>
+                )}
+                <span className="text-sm text-zinc-400">
+                  {savedPost?.timeStamp &&
+                    formatTime(savedPost?.timeStamp, "PPpp")}
+                </span>
+              </div>
             </div>
           ))}
         </div>
