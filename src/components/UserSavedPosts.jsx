@@ -78,7 +78,6 @@ const UserSavedPosts = () => {
                   <Link
                     key={index}
                     onClick={() => {
-                      console.log(user?.userId, user?.username);
                     }}
                     to={`/users/${user?.userId}/profile`}
                     className="text-zinc-500 px-2"

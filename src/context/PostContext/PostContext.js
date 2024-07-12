@@ -40,12 +40,10 @@ export const PostProvider = ({ children }) => {
     const postRef = doc(db, "posts", id);
     const postDocSnap = await getDoc(postRef);
     const postDataWithId = postDocSnap.data();
-    console.log("postData with id: ", postDataWithId);
     setPostData(postDataWithId);
     const userDataWithPostRef = doc(db, "users", postDataWithId.userId);
     const userDataDocSnap = await getDoc(userDataWithPostRef);
     const userDataWithPostUserId = userDataDocSnap.data();
-    console.log("userpostdata: ", userDataWithPostUserId);
     setUserDataWithPostId(userDataWithPostUserId);
   };
 
@@ -77,24 +75,12 @@ export const PostProvider = ({ children }) => {
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
 
-        // Log user document snapshot
-        console.log(
-          `User document snapshot for userId ${userId}: `,
-          userDocSnap
-        );
-
         // Check if user document exists
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
 
           // Combine comment data with user data
           comments.push({
-            id: docSnap.id,
-            ...commentData,
-            user: userData,
-          });
-
-          console.log(`Comment with user data: `, {
             id: docSnap.id,
             ...commentData,
             user: userData,
@@ -115,7 +101,6 @@ export const PostProvider = ({ children }) => {
 
       // Update state with combined comments and user data
       setPostComments(comments);
-      console.log("Sorted and combined comments: ", comments);
     } catch (error) {
       console.error("Error fetching comments: ", error);
     }
@@ -130,16 +115,14 @@ export const PostProvider = ({ children }) => {
     const docSnap = await getDoc(docRef);
     const docUserData = [];
     if (docSnap.exists()) {
-      console.log("post userdata", docSnap.data());
       docUserData.push(docSnap.data());
     }
     try {
-      const docRef = await addDoc(collection(db, "postComments"), {
+      await addDoc(collection(db, "postComments"), {
         comment: commentText,
         userId: currentUser.uid,
         postId: id,
       });
-      console.log("comment posted", docRef);
       // Increment the comment count in the corresponding post document
       const postRef = doc(db, "posts", id);
       await updateDoc(postRef, {
@@ -171,7 +154,6 @@ export const PostProvider = ({ children }) => {
       toast.dismiss();
       toast.success("deleted");
       fetchPostComments(id);
-      console.log(`Comment with ID ${commentId} deleted`);
       // Increment the comment count in the corresponding post document
       const postRef = doc(db, "posts", id);
       await updateDoc(postRef, {
@@ -191,10 +173,8 @@ export const PostProvider = ({ children }) => {
     );
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-      console.log(doc.id, "=>", doc.data());
       const allPosts = doc.data();
       queryPosts.push({ id: doc.id, ...allPosts });
-      console.log({ queryPosts });
       const sortedUserPosts = queryPosts.sort(
         (a, b) => b.timeStamp - a.timeStamp
       );
@@ -227,7 +207,6 @@ export const PostProvider = ({ children }) => {
 
       // Set the posts with user data to state
       setSavedPosts(postsWithUserData);
-      console.log(postsWithUserData);
       handleFetchLikedPosts();
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
@@ -257,7 +236,6 @@ export const PostProvider = ({ children }) => {
       );
       // Set the posts with user data to state
       setLikedPosts(postsWithUserData);
-      console.log(likedPosts, typeof likedPosts);
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
     }
@@ -393,7 +371,6 @@ export const PostProvider = ({ children }) => {
       postsWithUserData.sort((a, b) => b.timeStamp - a.timeStamp);
       setPostsLoading(false);
       setPosts(postsWithUserData);
-      console.log(postsWithUserData);
     } catch (error) {
       console.error("Error fetching posts: ", error);
     }
@@ -463,10 +440,7 @@ export const PostProvider = ({ children }) => {
 
   const handleDeletePost = async (id) => {
     const postRef = doc(db, "posts", id);
-    const postSnap = await getDoc(postRef);
-    if (postSnap.exists()) {
-      console.log(postSnap.data());
-    }
+    // const postSnap = await getDoc(postRef);
     toast.loading("deleting post");
     // Delete all files in the user's posts directory
     const postStorageRef = ref(storage, id);

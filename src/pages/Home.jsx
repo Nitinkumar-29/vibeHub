@@ -32,27 +32,6 @@ const Home = () => {
     // eslint-disable-next-line
   }, []);
 
-  const handleFetchUserData = async () => {
-    if (currentUser && currentUser.email) {
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        console.log(userData);
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      handleFetchUserData();
-    }
-    // eslint-disable-next-line
-  }, [currentUser]);
-
   return (
     <>
       {!postsLoading ? (
@@ -80,7 +59,7 @@ const Home = () => {
                           to={
                             currentUser?.uid === post?.userId
                               ? `/userProfile/yourPosts`
-                              : `/users/${post?.userData?.user_name}/profile`
+                              : `/users/${post?.userId}/profile`
                           }
                           className="flex flex-col -space-y-1 font-medium"
                         >

@@ -30,7 +30,7 @@ const UserLikedPosts = () => {
     <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-14">
       {likedPosts && likedPosts.length === 0 ? (
         <div className="mt-4">
-          0 posts? <Link to="/">Try saving a post now</Link>
+          0 posts? <Link to="/" className="underline underline-offset-2 decoration-gray-400">Check posts now</Link>
         </div>
       ) : (
         <div className="w-full">
@@ -77,7 +77,6 @@ const UserLikedPosts = () => {
                   <Link
                     key={index}
                     onClick={() => {
-                      console.log(user?.userId, user?.username);
                     }}
                     to={`/users/${user?.userId || user?.username}/profile`}
                     className="text-zinc-500 px-2"

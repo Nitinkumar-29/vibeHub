@@ -3,7 +3,15 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  where,
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
@@ -24,11 +32,11 @@ const SignUp = () => {
   });
   const [error, setError] = useState("");
   const [file, setFile] = useState("");
-  const { dispatch,currentUser } = useContext(AuthContext);
+  const { dispatch, currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
   const [loading, setLoading] = useState(true);
-  const [userData,setUserData]=useState([])
+  const [userData, setUserData] = useState([]);
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -55,18 +63,6 @@ const SignUp = () => {
         (snapshot) => {
           const progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-
-          switch (snapshot.state) {
-            case "paused":
-              console.log("Upload is paused");
-              break;
-            case "running":
-              console.log("Upload is running");
-              break;
-            default:
-              break;
-          }
         },
         (error) => {
           console.log(error);
@@ -74,7 +70,6 @@ const SignUp = () => {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("File available at", downloadURL);
             setData((prev) => ({ ...prev, img: downloadURL }));
           });
         }

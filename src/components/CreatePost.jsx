@@ -64,14 +64,12 @@ const CreatePost = () => {
       // Add userId and username to mentionedUsers
       const updatedUsers = [...mentionedUsers, { userId, username }];
       setMentionedUsers(updatedUsers);
-      console.log("pushed user: ", userId, updatedUsers);
     } else {
       // Remove userId from mentionedUsers
       const updatedUsers = mentionedUsers.filter(
         (user) => user.userId !== userId
       );
       setMentionedUsers(updatedUsers);
-      console.log("pulled user: ", userId, updatedUsers);
     }
   };
 
@@ -94,7 +92,6 @@ const CreatePost = () => {
         allUsersData.push({ id: userId, ...userData });
       });
 
-      console.log(allUsersData);
       setAllUsers(allUsersData);
       return allUsersData;
     } catch (error) {
@@ -147,7 +144,6 @@ const CreatePost = () => {
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log(userData);
         setCurrentUserData(userData);
       });
     }
@@ -173,18 +169,6 @@ const CreatePost = () => {
           (snapshot) => {
             const progress =
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-
-            switch (snapshot.state) {
-              case "paused":
-                console.log("Upload is paused");
-                break;
-              case "running":
-                console.log("Upload is running");
-                break;
-              default:
-                break;
-            }
           },
           (error) => {
             console.log(error);
@@ -192,7 +176,6 @@ const CreatePost = () => {
           },
           async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            console.log("File available at", downloadURL);
             resolve(downloadURL);
           }
         );
@@ -366,7 +349,9 @@ const CreatePost = () => {
                   {mentionedUsers.map((user, index) => (
                     <div
                       key={index}
-                      className={`flex space-x-1 ${theme==="dark"?"bg-gray-950":"bg-gray-300"} rounded-full p-2 h-fit items-center justify-center`}
+                      className={`flex space-x-1 ${
+                        theme === "dark" ? "bg-gray-950" : "bg-gray-300"
+                      } rounded-full p-2 h-fit items-center justify-center`}
                     >
                       <Link
                         to={`/users/${user.userId}/profile`}
@@ -389,7 +374,9 @@ const CreatePost = () => {
               ) : (
                 <span
                   className={`h-32 text-zinc-700 rounded-md ${
-                    theme === "dark" ? "bg-gray-800 text-gray-600" : "bg-gray-100"
+                    theme === "dark"
+                      ? "bg-gray-800 text-gray-600"
+                      : "bg-gray-100"
                   } w-full p-2`}
                 >
                   All mentions will be displayed here
@@ -403,7 +390,11 @@ const CreatePost = () => {
                 accept="image/*, video/*"
                 onChange={handleFileChange}
               />
-              <div className={`relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md ${theme==="dark"?"bg-gray-800":"bg-gray-100"} w-full`}>
+              <div
+                className={`relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md ${
+                  theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                } w-full`}
+              >
                 <div className="flex items-center w-full justify-between">
                   <div className="flex items-center space-x-2">
                     <TiAttachmentOutline
@@ -445,7 +436,9 @@ const CreatePost = () => {
                   </button>
                 </div>
                 <div
-                  className={`${displayUsersdata} z-10 absolute top-12 ${theme==="dark"?"bg-gray-800":"bg-gray-100"} rounded-md h-64 overflow-y-auto w-full flex-col items-start space-y-3 p-2`}
+                  className={`${displayUsersdata} z-10 absolute top-12 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                  } rounded-md h-64 overflow-y-auto w-full flex-col items-start space-y-3 p-2`}
                 >
                   <CgClose
                     className="absolute top-2 border-[1px] rounded-full right-2 cursor-pointer"
@@ -459,7 +452,11 @@ const CreatePost = () => {
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
                   ).length === 0 && (
-                    <p className={`pt-4 ${theme==="dark"?"text-gray-600":"text-gray-900"} w-full text-start`}>
+                    <p
+                      className={`pt-4 ${
+                        theme === "dark" ? "text-gray-600" : "text-gray-900"
+                      } w-full text-start`}
+                    >
                       Note:{" "}
                       <span className="text-sm">
                         Your username is not in the list as you don't need to
@@ -518,7 +515,13 @@ const CreatePost = () => {
                           ) : (
                             <FaUserCircle className="h-[20px] w-[20px]" />
                           )}
-                          <span className={`cursor-pointer ${theme==="dark"?"text-gray-200":"text-gray-900"}`}>
+                          <span
+                            className={`cursor-pointer ${
+                              theme === "dark"
+                                ? "text-gray-200"
+                                : "text-gray-900"
+                            }`}
+                          >
                             {user.user_name}
                           </span>
                         </div>

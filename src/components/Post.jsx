@@ -70,9 +70,9 @@ const Post = () => {
                       window.scrollTo(0, 0);
                     }}
                     to={
-                      !currentUser.uid === postData?.userId
-                        ? `/users/${userDataWithPostId?.user_name}/profile`
-                        : `/userProfile/yourposts`
+                      currentUser?.uid === postData?.userId
+                        ? `/userProfile/yourPosts`
+                        : `/users/${postData?.userId}/profile`
                     }
                     className="flex flex-col -space-y-1 font-medium"
                   >
@@ -194,10 +194,9 @@ const Post = () => {
           )}
           {postData?.userId && (
             <div className="flex flex-col items-center space-y-4 w-full rounded-sm">
-              <span className="w-full px-4 mt-3">Comments</span>
               <form
                 onSubmit={postCommentById}
-                className="flex flex-col items-start w-[93%] space-y-2 mx-auto "
+                className="flex flex-col items-start w-[93%] space-y-2 my-5 mx-auto "
               >
                 <input
                   type="text"
@@ -226,11 +225,15 @@ const Post = () => {
                 </button>
               </form>
               <div className="flex flex-col space-y-2 w-full">
+                <div>
+                  {" "}
+                  <span className="w-full text-lg px-4">Comments</span>
+                </div>
                 {postComments?.map((comment) => {
                   return (
                     <div
                       key={comment.id}
-                      className="flex flex-col items-center space-y-2 p-2 border-t-[1px] rounded-ms w-full"
+                      className="flex flex-col items-center space-y-2 p-2 rounded-ms w-full"
                     >
                       <div className="flex w-full items-center justify-between px-2">
                         {

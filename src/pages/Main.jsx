@@ -14,6 +14,8 @@ const Home = () => {
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [loggedInUserData, setLoggedInUserData] = useState({});
+
+
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
       const q = query(
@@ -21,10 +23,8 @@ const Home = () => {
         where("email", "==", currentUser.email)
       );
       const querySnapshot = await getDocs(q);
-      console.log(querySnapshot);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log({ userData, uid: currentUser.uid });
         setLoggedInUserData(userData, currentUser.uid);
       });
     }
@@ -59,6 +59,7 @@ const Home = () => {
     };
     // eslint-disable-next-line
   }, [lastScrollY]);
+  
   return (
     <div
       className={`relative w-full max-w-[430px] h-fit  ${

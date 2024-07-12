@@ -205,10 +205,8 @@ const UserProfile = () => {
         where("email", "==", currentUser.email)
       );
       const querySnapshot = await getDocs(q);
-      console.log(querySnapshot);
       querySnapshot.forEach((doc) => {
         const userData = doc.data();
-        console.log({ userData, uid: currentUser.uid });
         setFetchedUserData(userData, currentUser.uid);
         localStorage.setItem(
           "loggedInUserData",
@@ -252,7 +250,7 @@ const UserProfile = () => {
                   {!isLoading && (
                     <img
                       src={fetchedUserData?.img}
-                      className={`h-36 w-36 hover:h-56 cursor-pointer hover:w-56 hover:rounded-4xl touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
+                      className={`h-36 w-36 hover:h-56 cursor-pointer hover:w-56 touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
                         fetchedUserData?.img
                           ? "border-[1px] border-blue-900"
                           : ""
@@ -261,7 +259,7 @@ const UserProfile = () => {
                     />
                   )}
                 </div>
-                <span className="text-2xl">{fetchedUserData.name}</span>
+                <span className="text-2xl">{fetchedUserData?.name}</span>
               </div>
               {/* </div> */}
             </div>

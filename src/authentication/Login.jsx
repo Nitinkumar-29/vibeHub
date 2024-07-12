@@ -20,7 +20,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
   const token = localStorage.getItem("token");
-  
+
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
       setPasswordType("text");
@@ -44,7 +44,6 @@ const Login = () => {
     await signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
         setIsLoading(true);
         navigate("/");
         dispatch({ type: "LOGIN", payload: user });
@@ -68,8 +67,6 @@ const Login = () => {
       })
       .catch((error) => {
         console.log(error);
-        console.log(error.code);
-        console.log(error.message);
       });
   };
   return (
