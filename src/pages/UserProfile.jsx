@@ -27,13 +27,21 @@ import {
 import { FaEdit, FaPencilAlt, FaUserPlus } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { VscLoading } from "react-icons/vsc";
-import { TfiEmail, TfiLocationPin, TfiMobile } from "react-icons/tfi";
+import {
+  TfiEmail,
+  TfiLayoutListPost,
+  TfiLocationPin,
+  TfiMobile,
+} from "react-icons/tfi";
 import { BiImageAdd, BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
 import PostContext from "../context/PostContext/PostContext";
 import { TbBackground } from "react-icons/tb";
 import UserLikedPosts from "../components/UserLikedPosts";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { MdSavedSearch } from "react-icons/md";
+import { IoSaveSharp } from "react-icons/io5";
+import { BsHeartFill } from "react-icons/bs";
 
 const UserProfile = () => {
   const imageRef = useRef();
@@ -127,76 +135,6 @@ const UserProfile = () => {
     }
   };
 
-  const handleLogOut = async () => {
-    await signOut(auth)
-      .then(() => {
-        dispatch({ type: "LOGOUT" });
-        localStorage.removeItem("user");
-        localStorage.removeItem("loggedInUserData");
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.error(error);
-        setError("Logout failed. Please try again.");
-      });
-  };
-
-  const handleDeleteAccount = async () => {
-    try {
-      const user = auth.currentUser;
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        prompt("Please enter your password to confirm deletion:")
-      );
-
-      await reauthenticateWithCredential(user, credential);
-
-      // Delete user document from Firestore
-      const userDocRef = doc(db, "users", currentUser.uid);
-      await deleteDoc(userDocRef);
-
-      // Delete all files in the user's storage directory
-      const userStorageRef = ref(storage, `users/${currentUser.uid}`);
-      const userListResult = await listAll(userStorageRef);
-
-      const userDeletePromises = userListResult.items.map((itemRef) => {
-        return deleteObject(itemRef);
-      });
-      await Promise.all(userDeletePromises);
-
-      // Delete all files in the user's posts directory
-      const postStorageRef = ref(storage, `posts/${currentUser.uid}`);
-      const postListResult = await listAll(postStorageRef);
-
-      const postDeletePromises = postListResult.items.map((itemRef) => {
-        return deleteObject(itemRef);
-      });
-      await Promise.all(postDeletePromises);
-
-      // Delete posts from Firestore
-      const postsCollectionRef = collection(db, "posts");
-      const postsQuery = query(
-        postsCollectionRef,
-        where("userId", "==", currentUser.uid)
-      );
-      const postsSnapshot = await getDocs(postsQuery);
-
-      const postDeleteDocPromises = postsSnapshot.docs.map((doc) => {
-        return deleteDoc(doc.ref);
-      });
-      await Promise.all(postDeleteDocPromises);
-
-      // Delete user account from Firebase Auth
-      await deleteUser(user);
-
-      dispatch({ type: "DELETE" });
-      localStorage.removeItem("user");
-      navigate("/login");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      setError("Failed to delete account. Please try again.");
-    }
-  };
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -238,76 +176,53 @@ const UserProfile = () => {
   }, [currentUser.uid]);
 
   return (
-    <div className={`flex flex-col items-center space-y-6 ${theme==="dark"?"bg-gray-900 text-white":"bg-white text-black"} min-h-screen w-full max-w-[430px] py-1`}>
+    <div
+      className={`flex flex-col items-center space-y-6 ${
+        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+      } min-h-screen w-full max-w-[430px] py-1`}
+    >
       {fetchedUserData && (
-        <div className="flex flex-col items-center w-full py-4 space-y-4 h-full">
-          {fetchedUserData?.img ? (
-            <div
-              className={`flex flex-col items-center space-y-12 h-fit w-full`}
-            >
-              <div className=" flex flex-col items-center justify-center w-full space-y-3">
-                <div className="relative">
-                  {!isLoading && (
-                    <img
-                      src={fetchedUserData?.img}
-                      className={`h-36 w-36 hover:h-56 cursor-pointer hover:w-56 touch-pinch-zoom touch duration-300 rounded-full object-right-top ${
-                        fetchedUserData?.img
-                          ? "border-[1px] border-blue-900"
-                          : ""
-                      }`}
-                      alt=""
-                    />
-                  )}
-                </div>
-                <span className="text-2xl">{fetchedUserData?.name}</span>
-              </div>
-              {/* </div> */}
+        <div className="flex flex-col items-center h-fit space-y-10 px-4">
+          <div className="flex flex-col items-center space-y-2 mt-10">
+            <div>
+              <img
+                src={fetchedUserData?.img}
+                className="h-32 w-32 hover:h-40 hover:w-40 rounded-full duration-300 cursor-pointer"
+                alt=""
+              />
             </div>
-          ) : (
-            <FaUserPlus size={45} />
-          )}
-          <div className="flex justify-between w-full my-4 px-4">
-            <span>Personal Information</span>
-            <Link to="/userProfile/settings">
-              <FaEdit />
-            </Link>
-          </div>
-          <div className="flex flex-col w-full space-y-4 rounded-md p-4 text-sm">
-            <div className="flex justify-between w-full">
-              <div className="flex justify-between items-center space-x-2">
-                <TfiEmail className="text-blue-700" />
-                <span>Email</span>
-              </div>
-              <span>{fetchedUserData.email}</span>
-            </div>
-            <div className="flex justify-between w-full">
-              <div className="flex justify-between items-center space-x-2">
-                <TfiMobile className="text-blue-700" />
-                <span>Phone</span>
-              </div>
-              <span>{fetchedUserData.mobileNumber}</span>
-            </div>
-            <div className="flex justify-between w-full">
-              <div className="flex justify-between items-center space-x-2">
-                <TfiLocationPin className="text-blue-700" />
-                <span>Location</span>
-              </div>
-              <span>{fetchedUserData.address}</span>
+            <div className="space-x-2">
+              <span className="text-xl font-semibold">
+                {fetchedUserData?.name}
+              </span>
+              <span className={` `}>
+                {fetchedUserData?.user_name && (
+                  <span className={`text-gray-400`}>
+                    @{fetchedUserData?.user_name}
+                  </span>
+                )}
+              </span>
             </div>
           </div>
-          <div className="flex justify-between w-full px-4">
-            <button
-              className="shadow-sm shadow-blue-800 border-[1px] border-blue-800 px-4 py-2 rounded-md duration-200"
-              onClick={handleLogOut}
-            >
-              <BiLogOut size={20} />
-            </button>
-            <button
-              className="shadow-sm shadow-blue-800 border-[1px] border-blue-800 px-4 py-2 rounded-md duration-200"
-              onClick={handleDeleteAccount}
-            >
-              <CgUserRemove size={20} />
-            </button>
+          <div className="flex flex-col items-center space-y-6">
+            <div className="flex space-x-3">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl">{userPosts?.length || 0}</span>
+                <span className={`px-3 py-1 `}>Posts</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl">
+                  {fetchedUserData?.followers?.length || 0}
+                </span>
+                <span className={`px-3 py-1 `}>Followers</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl">
+                  {fetchedUserData?.following?.length || 0}
+                </span>
+                <span className={`px-3 py-1 `}>Following</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -317,40 +232,31 @@ const UserProfile = () => {
             to={`/userProfile/yourPosts`}
             className={`${
               location.pathname === "/userProfile/yourPosts"
-                ? "bg-zinc-700"
-                : ""
+                ? `${theme === "dark" ? "text-white" : "text-black"}`
+                : "text-gray-400"
             } p-2 w-full flex justify-center text-center`}
           >
-            <div className="flex items-center justify-center w-fit space-x-2">
-              <span>Posts</span>
-              <span>{userPosts?.length}</span>
-            </div>
+            <TfiLayoutListPost size={25} />
           </Link>
           <Link
             to={`/userProfile/savedPosts`}
             className={`${
               location.pathname === "/userProfile/savedPosts"
-                ? "bg-zinc-700"
-                : ""
+                ? `${theme === "dark" ? "text-white" : "text-black"}`
+                : "text-gray-400"
             } p-2 w-full flex justify-center text-center`}
           >
-            <div className="flex items-center justify-center w-fit space-x-2">
-              <span>Saved</span>
-              <span>{savedPosts?.length}</span>
-            </div>
+            <IoSaveSharp size={23} />
           </Link>
           <Link
             to={`/userProfile/likedPosts`}
             className={`${
               location.pathname === "/userProfile/likedPosts"
-                ? "bg-zinc-700"
-                : ""
+                ? `${theme === "dark" ? "text-white" : "text-black"}`
+                : "text-gray-400"
             } p-2 w-full flex justify-center text-center`}
           >
-            <div className="flex items-center justify-center w-fit space-x-2">
-              <span>Liked</span>
-              <span>{likedPosts?.length}</span>
-            </div>
+            <BsHeartFill size={22} />
           </Link>
         </div>
         <div className="w-full h-full">

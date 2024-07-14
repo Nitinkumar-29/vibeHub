@@ -9,7 +9,8 @@ import ThemeContext from "../context/Theme/ThemeContext";
 
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
-  const { posts, fetchAllPosts } = useContext(PostContext);
+  const { explorePosts, fetchExploreAllPosts, currentUser } =
+    useContext(PostContext);
   const { theme } = useContext(ThemeContext);
   const [query, setQuery] = useState(" ");
   const searchInputRef = useRef(null);
@@ -99,17 +100,26 @@ const Explore = () => {
     handleFetchUsersData();
   }, []);
 
+  useEffect(() => {
+    fetchExploreAllPosts();
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <>
-      {allUsers && posts ? (
+      {allUsers && explorePosts ? (
         <div
-          className={`relative w-full bg-inherit  space-y-2 pb-20 min-h-[95vh]`}
+          className={`relative w-full ${
+            theme === "dark" ? "bg-gray-900" : "bg-white"
+          } space-y-2 pb-20 min-h-[95vh]`}
         >
           <div
             ref={componentRef}
             className={`${
               isSticky ? "sticky top-0 " : "static"
-            }  flex justify-between items-center w-full max-w-[430px] h-12 border-y-[1px] border-gray-400`}
+            }  flex justify-between items-center w-full ${
+              theme === "dark" ? "bg-gray-900" : "bg-white"
+            } max-w-[430px]  h-12 border-y-[1px] border-gray-400`}
           >
             <input
               onClickCapture={() => {}}
@@ -151,11 +161,19 @@ const Explore = () => {
                         ?.includes(query.trim().toLowerCase())
                     )
                   )
+                  .sort((a, b) => b.timeStamp - a.timeStamp)
                   ?.map((user) => {
                     return (
                       <Link
                         key={user.id}
-                        to={`/users/${user?.user_name}/profile`}
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                        }}
+                        to={
+                          currentUser?.uid !== user?.id
+                            ? `/users/${user?.id}/profile`
+                            : `/userProfile/yourPosts`
+                        }
                       >
                         <div className="flex w-fit items-center space-x-2">
                           {user.img ? (
@@ -187,15 +205,14 @@ const Explore = () => {
             </div>
           )}
           {query.trim(" ").length < 1 && (
-            <div className="grid grid-cols-3 gap-1 px-2">
-              {posts
-                ?.filter((post) =>
-                  keys?.some((key) =>
-                    post?.userData[key]
-                      ?.toLowerCase()
-                      ?.includes(query?.trim()?.toLowerCase())
-                  )
+            <div className="grid grid-cols-3 gap-[.125rem]">
+              {explorePosts
+                ?.filter(
+                  (post) =>
+                    post.fileURLs.length > 0 &&
+                    post.userData.accountType === "public"
                 )
+                .sort((a, b) => b.timeStamp - a.timeStamp)
                 .map((post) => {
                   return (
                     <Link
@@ -205,10 +222,10 @@ const Explore = () => {
                     >
                       {post?.fileURLs && post?.fileURLs.length > 0 && (
                         <div key={post.id}>
-                          {post?.fileURLs[0].endsWith(".mp4") ? (
+                          {post?.fileURLs[0].includes(".mp4") ? (
                             <video
                               controls
-                              className="h-full w-full object-cover rounded-sm border-[1px] border-blue-950"
+                              className="h-40 w-40 object-cover rounded-sm"
                             >
                               <source src={post.fileURLs[0]} type="video/mp4" />
                             </video>
@@ -216,7 +233,7 @@ const Explore = () => {
                             <img
                               src={post?.fileURLs[0]}
                               alt="post media"
-                              className="h-40 w-40 object-cover rounded-sm border-[1px] border-blue-950"
+                              className="h-40 w-40 object-cover rounded-sm"
                             />
                           )}
                         </div>

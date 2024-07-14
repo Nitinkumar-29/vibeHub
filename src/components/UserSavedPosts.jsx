@@ -77,8 +77,7 @@ const UserSavedPosts = () => {
                 {savedPost?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
-                    onClick={() => {
-                    }}
+                    onClick={() => {}}
                     to={`/users/${user?.userId}/profile`}
                     className="text-zinc-500 px-2"
                   >

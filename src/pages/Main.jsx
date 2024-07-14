@@ -10,7 +10,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSunnyOutline } from "react-icons/io5";
 
 const Home = () => {
-  const { posts, currentUser, postLoading } = useContext(PostContext);
+  const { homePagePosts, currentUser, postLoading } = useContext(PostContext);
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [loggedInUserData, setLoggedInUserData] = useState({});
@@ -34,7 +34,7 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser.uid]);
 
-  const [position, setPosition] = useState("static");
+  const [position, setPosition] = useState("sticky");
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const handlePosition = () => {
@@ -59,7 +59,7 @@ const Home = () => {
     };
     // eslint-disable-next-line
   }, [lastScrollY]);
-  
+
   return (
     <div
       className={`relative w-full max-w-[430px] h-fit  ${
@@ -78,7 +78,7 @@ const Home = () => {
             alt=""
           />
         </Link>
-        {location.pathname === "/" && <span>Posts: {posts?.length}</span>}
+        {location.pathname === "/" && <span>Home</span>}
         {location.pathname === "/createPost" && (
           <span>Share your thoughts</span>
         )}

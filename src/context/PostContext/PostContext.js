@@ -22,7 +22,7 @@ import { deleteObject, listAll, ref } from "firebase/storage";
 
 const PostContext = createContext();
 export const PostProvider = ({ children }) => {
-  const [posts, setPosts] = useState([]);
+  const [homePagePosts, setHomePagePosts] = useState([]);
   const [postData, setPostData] = useState();
   const navigate = useNavigate();
   const [postComment, setPostComment] = useState({ commentText: "" });
@@ -35,6 +35,9 @@ export const PostProvider = ({ children }) => {
   const [userPosts, setUserPosts] = useState(null);
   const [savedPosts, setSavedPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
+  const [otherUserPosts, setOtherUserPosts] = useState([]);
+  const [explorePosts, setExplorePosts] = useState([]);
+  const [otherPublicPostsHomePage, setOtherPublicPostsHomePage] = useState([]);
 
   const fetchPostById = async (id) => {
     const postRef = doc(db, "posts", id);
@@ -185,11 +188,22 @@ export const PostProvider = ({ children }) => {
 
   const handleFetchSavedPosts = async () => {
     try {
+      if (!currentUser) {
+        throw new Error("Current user not found");
+      }
+
       // Fetch saved posts
       const q = query(
         collection(db, "posts"),
         where("saves", "array-contains", currentUser.uid)
       );
+      const docRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      const followingList = docSnap.exists()
+        ? docSnap.data().following || []
+        : [];
+      console.log(followingList);
+
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -201,12 +215,52 @@ export const PostProvider = ({ children }) => {
         posts.map(async (post) => {
           const userDoc = await getDoc(doc(db, "users", post.userId));
           const userData = userDoc.exists() ? userDoc.data() : {};
-          return { ...post, user: userData };
+
+          return {
+            ...post,
+            user: userData,
+            timeStamp: post.timeStamp?.toDate(),
+          };
         })
       );
 
-      // Set the posts with user data to state
-      setSavedPosts(postsWithUserData);
+      console.log(postsWithUserData);
+
+      const currentUserSavedPosts = [];
+      const followedUsersSavedPosts = [];
+      const publicUsersSavedPosts = [];
+
+      postsWithUserData.forEach((post) => {
+        const currentUserPost = post.userId === currentUser.uid;
+        const followingUserSavedPost = followingList.includes(post.userId);
+        const publicUserSavedPost = post.user.accountType !== "private";
+
+        if (currentUserPost) {
+          currentUserSavedPosts.push(post);
+        } else if (followingUserSavedPost) {
+          followedUsersSavedPosts.push(post);
+        } else if (publicUserSavedPost) {
+          publicUsersSavedPosts.push(post);
+        }
+      });
+
+      // Sort each category by timestamp in descending order
+      currentUserSavedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+      followedUsersSavedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+      publicUsersSavedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+
+      // Combine all categories
+      const allSavedPosts = [
+        ...currentUserSavedPosts,
+        ...followedUsersSavedPosts,
+        ...publicUsersSavedPosts,
+      ];
+
+      console.log(allSavedPosts);
+
+      // Set the sorted posts to state
+      setSavedPosts(allSavedPosts);
+      console.log(allSavedPosts);
       handleFetchLikedPosts();
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
@@ -220,6 +274,14 @@ export const PostProvider = ({ children }) => {
         collection(db, "posts"),
         where("likes", "array-contains", currentUser.uid)
       );
+      const docRef = doc(db, "users", currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      const followingList = docSnap.exists()
+        ? docSnap.data().following || []
+        : [];
+
+      console.log(followingList);
+
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -231,11 +293,49 @@ export const PostProvider = ({ children }) => {
         posts.map(async (post) => {
           const userDoc = await getDoc(doc(db, "users", post.userId));
           const userData = userDoc.exists() ? userDoc.data() : {};
-          return { ...post, user: userData };
+          return {
+            ...post,
+            user: userData,
+            timeStamp: post.timeStamp?.toDate(),
+          };
         })
       );
+
+      console.log(postsWithUserData);
+
+      const currentUserLikedPosts = [];
+      const followedUsersLikedPosts = [];
+      const publicUsersLikedPosts = [];
+
+      postsWithUserData.forEach((post) => {
+        const currentUserPost = post.userId === currentUser.uid;
+        const followingUserLikedPost = followingList.includes(post.userId);
+        const publicUserLikedPost = post.user.accountType !== "private";
+
+        if (currentUserPost) {
+          currentUserLikedPosts.push(post);
+        } else if (followingUserLikedPost) {
+          followedUsersLikedPosts.push(post);
+        } else if (publicUserLikedPost) {
+          publicUsersLikedPosts.push(post);
+        }
+      });
+
+      // Sort each category by timestamp in descending order
+      currentUserLikedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+      followedUsersLikedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+      publicUsersLikedPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+
+      // Combine all categories
+      const allLikedPosts = [
+        ...currentUserLikedPosts,
+        ...followedUsersLikedPosts,
+        ...publicUsersLikedPosts,
+      ];
+
+      console.log(allLikedPosts);
       // Set the posts with user data to state
-      setLikedPosts(postsWithUserData);
+      setLikedPosts(allLikedPosts);
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
     }
@@ -252,7 +352,7 @@ export const PostProvider = ({ children }) => {
 
         if (likes.includes(currentUser.uid)) {
           // Optimistically update UI
-          updatedPosts = posts.map((post) =>
+          updatedPosts = homePagePosts.map((post) =>
             post.id === id
               ? {
                   ...post,
@@ -260,7 +360,17 @@ export const PostProvider = ({ children }) => {
                 }
               : post
           );
-          setPosts(updatedPosts);
+          setHomePagePosts(updatedPosts);
+          setOtherPublicPostsHomePage((prev) =>
+            prev?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                  }
+                : post
+            )
+          );
           toast.loading("Removing like...");
           // Update database
           await updateDoc(postRef, {
@@ -273,17 +383,26 @@ export const PostProvider = ({ children }) => {
           handleFetchLikedPosts();
         } else {
           // Optimistically update UI
-          updatedPosts = posts.map((post) =>
+          updatedPosts = homePagePosts.map((post) =>
             post.id === id
               ? {
                   ...post,
-                  likes: [...post.likes, currentUser.uid],
+                  likes: [...post?.likes, currentUser?.uid],
                 }
               : post
           );
-          setPosts(updatedPosts);
+          setHomePagePosts(updatedPosts);
+          setOtherPublicPostsHomePage((prev) =>
+            prev?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    likes: [...post?.likes, currentUser?.uid],
+                  }
+                : post
+            )
+          );
           toast.loading("Adding like...");
-
           // Update database
           await updateDoc(postRef, {
             likes: arrayUnion(currentUser.uid),
@@ -342,7 +461,97 @@ export const PostProvider = ({ children }) => {
     }
   };
 
-  const fetchAllPosts = async () => {
+  const fetchHomePagePosts = async () => {
+    setPostsLoading(true);
+    // if (!localStorage.getItem("token")) {
+    //   setPostsLoading(false);
+    //   return;
+    // }
+    try {
+      if (!currentUser) {
+        return;
+      }
+
+      // Fetch the current user's following list
+      const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const currentUserData = currentUserDoc.exists()
+        ? currentUserDoc.data()
+        : {};
+      const followingList = currentUserData.following || [];
+
+      // Fetch all posts from the database
+      const querySnapshot = await getDocs(collection(db, "posts"));
+
+      // Use Promise.all to fetch user data concurrently
+      const postsWithUserData = await Promise.all(
+        querySnapshot.docs.map(async (docSnapshot) => {
+          const postData = docSnapshot.data();
+          const userDocRef = doc(db, "users", postData.userId);
+          const userDocSnap = await getDoc(userDocRef);
+
+          let userData = {};
+          if (userDocSnap.exists()) {
+            userData = userDocSnap.data();
+          }
+
+          return {
+            id: docSnapshot.id,
+            ...postData,
+            userData,
+            timeStamp: postData.timeStamp?.toDate(), // Convert Firestore timestamp to JS Date
+          };
+        })
+      );
+
+      // Separate the posts into current user's, followed users', and other users' posts
+      const currentUserPosts = [];
+      const followedUsersPosts = [];
+      const otherUsersPosts = [];
+
+      postsWithUserData.forEach((post) => {
+        const isCurrentUser = post.userId === currentUser.uid;
+        const isFollowing = followingList.includes(post.userId);
+        const isPrivate = post.userData.accountType === "private";
+
+        if (isCurrentUser) {
+          currentUserPosts.push(post);
+        } else if (isFollowing) {
+          followedUsersPosts.push(post);
+        } else if (!isPrivate) {
+          otherUsersPosts.push(post);
+        }
+      });
+
+      // Sort each category by timestamp in descending order
+      currentUserPosts?.sort((a, b) => b.timeStamp - a.timeStamp);
+      followedUsersPosts.length > 0 &&
+        followedUsersPosts?.sort((a, b) => b.timeStamp - a.timeStamp);
+      // let sortedPosts = [...currentUserPosts, ...followedUsersPosts].sort(
+      //   (a, b) => b.timeStamp - a.timeStamp
+      // );
+      // if (followedUsersPosts.length === 0) {
+      //   sortedPosts = [...currentUserPosts];
+      // }
+      otherUsersPosts.sort((a, b) => b.timeStamp - a.timeStamp);
+
+      // Combine the categories: current user's posts, followed users' posts, and other users' posts
+      const combinedPosts = [
+        // sortedPosts,
+        ...currentUserPosts,
+        ...followedUsersPosts,
+      ];
+
+      setPostsLoading(false);
+      setHomePagePosts(combinedPosts);
+      console.log(combinedPosts);
+      setOtherPublicPostsHomePage(otherUsersPosts);
+    } catch (error) {
+      console.error("Error fetching posts: ", error);
+      setPostsLoading(false);
+    }
+  };
+
+  const fetchExploreAllPosts = async () => {
     setPostsLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, "posts"));
@@ -367,10 +576,15 @@ export const PostProvider = ({ children }) => {
         })
       );
 
+      // // Filter out posts from private accounts
+      const publicPosts = postsWithUserData.filter(
+        (post) => post.userData.accountType !== "private"
+      );
+      console.log(publicPosts);
       // Sort posts by timestamp in descending order
-      postsWithUserData.sort((a, b) => b.timeStamp - a.timeStamp);
+      publicPosts.sort((a, b) => b.timeStamp - a.timeStamp);
       setPostsLoading(false);
-      setPosts(postsWithUserData);
+      setExplorePosts(publicPosts);
     } catch (error) {
       console.error("Error fetching posts: ", error);
     }
@@ -391,8 +605,20 @@ export const PostProvider = ({ children }) => {
             saves: arrayRemove(currentUser?.uid),
           });
 
-          setPosts((prevPosts) =>
+          setHomePagePosts((prevPosts) =>
             prevPosts?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    saves: post?.saves?.filter(
+                      (uid) => uid !== currentUser?.uid
+                    ),
+                  }
+                : post
+            )
+          );
+          setOtherPublicPostsHomePage((prev) =>
+            prev?.map((post) =>
               post?.id === id
                 ? {
                     ...post,
@@ -414,8 +640,18 @@ export const PostProvider = ({ children }) => {
           await updateDoc(postRef, {
             saves: arrayUnion(currentUser?.uid),
           });
-          setPosts((prevPosts) =>
+          setHomePagePosts((prevPosts) =>
             prevPosts?.map((post) =>
+              post?.id === id
+                ? {
+                    ...post,
+                    saves: [...post?.saves, currentUser?.uid],
+                  }
+                : post
+            )
+          );
+          setOtherPublicPostsHomePage((prev) =>
+            prev?.map((post) =>
               post?.id === id
                 ? {
                     ...post,
@@ -456,11 +692,11 @@ export const PostProvider = ({ children }) => {
     toast.dismiss();
     toast.success("Post deleted");
     handleFetchUserPosts();
-    fetchAllPosts();
+    fetchHomePagePosts();
   };
 
   useEffect(() => {
-    fetchAllPosts();
+    fetchHomePagePosts();
     // eslint-disable-next-line
   }, []);
 
@@ -483,8 +719,10 @@ export const PostProvider = ({ children }) => {
         handleLikePost,
         handlePostComment,
         currentUser,
-        fetchAllPosts,
-        posts,
+        fetchHomePagePosts,
+        homePagePosts,
+        fetchExploreAllPosts,
+        explorePosts,
         postsLoading,
         userDataWithPostId,
         handleSavePost,
@@ -495,6 +733,8 @@ export const PostProvider = ({ children }) => {
         handleFetchLikedPosts,
         handleDeletePost,
         likedPosts,
+        otherUserPosts,
+        otherPublicPostsHomePage,
       }}
     >
       {children}
