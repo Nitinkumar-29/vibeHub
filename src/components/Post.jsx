@@ -94,7 +94,9 @@ const Post = () => {
                 </div>
               </div>
               <div className="flex flex-wrap">
-                <p className="p-2">{postData.postCaption}</p>
+                <p className="p-2 whitespace-pre-wrap">
+                  {postData.postCaption}
+                </p>
                 {postData?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
@@ -225,10 +227,12 @@ const Post = () => {
                 </button>
               </form>
               <div className="flex flex-col space-y-2 w-full">
-                <div>
-                  {" "}
-                  <span className="w-full text-lg px-4">Comments</span>
-                </div>
+                {postComments.length > 0 && (
+                  <div>
+                    {" "}
+                    <span className="w-full text-lg px-4">Comments</span>
+                  </div>
+                )}
                 {postComments?.map((comment) => {
                   return (
                     <div

@@ -135,7 +135,6 @@ const UserProfile = () => {
     }
   };
 
-
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
       const q = query(
@@ -187,7 +186,7 @@ const UserProfile = () => {
             <div>
               <img
                 src={fetchedUserData?.img}
-                className="h-32 w-32 hover:h-40 hover:w-40 rounded-full duration-300 cursor-pointer"
+                className="h-32 w-32 object-cover rounded-full duration-300"
                 alt=""
               />
             </div>
@@ -208,57 +207,110 @@ const UserProfile = () => {
             <div className="flex space-x-3">
               <div className="flex flex-col items-center">
                 <span className="text-2xl">{userPosts?.length || 0}</span>
-                <span className={`px-3 py-1 `}>Posts</span>
+                <Link to="/userProfile/yourPosts" className={`px-3 py-1 `}>
+                  Posts
+                </Link>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl">
                   {fetchedUserData?.followers?.length || 0}
                 </span>
-                <span className={`px-3 py-1 `}>Followers</span>
+                <Link
+                  to={`/userProfile/${currentUser.uid}/followers`}
+                  className={`px-3 py-1 `}
+                >
+                  Followers
+                </Link>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-2xl">
                   {fetchedUserData?.following?.length || 0}
                 </span>
-                <span className={`px-3 py-1 `}>Following</span>
+                <Link
+                  to={`/userProfile/${currentUser.uid}/following`}
+                  className={`px-3 py-1 `}
+                >
+                  Following
+                </Link>
               </div>
             </div>
           </div>
         </div>
       )}
       <div className="flex flex-col items-center w-full">
-        <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
-          <Link
-            to={`/userProfile/yourPosts`}
-            className={`${
-              location.pathname === "/userProfile/yourPosts"
-                ? `${theme === "dark" ? "text-white" : "text-black"}`
-                : "text-gray-400"
-            } p-2 w-full flex justify-center text-center`}
-          >
-            <TfiLayoutListPost size={25} />
-          </Link>
-          <Link
-            to={`/userProfile/savedPosts`}
-            className={`${
-              location.pathname === "/userProfile/savedPosts"
-                ? `${theme === "dark" ? "text-white" : "text-black"}`
-                : "text-gray-400"
-            } p-2 w-full flex justify-center text-center`}
-          >
-            <IoSaveSharp size={23} />
-          </Link>
-          <Link
-            to={`/userProfile/likedPosts`}
-            className={`${
-              location.pathname === "/userProfile/likedPosts"
-                ? `${theme === "dark" ? "text-white" : "text-black"}`
-                : "text-gray-400"
-            } p-2 w-full flex justify-center text-center`}
-          >
-            <BsHeartFill size={22} />
-          </Link>
-        </div>
+        {location.pathname === `/userProfile/yourPosts` ||
+        location.pathname === `/userProfile/likedPosts` ||
+        location.pathname === `/userProfile/savedPosts` ? (
+          <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+            <span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/yourPosts`}
+                className={`${
+                  location.pathname === "/userProfile/yourPosts"
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2  text-center`}
+              >
+                <TfiLayoutListPost size={25} />
+              </Link>
+            </span>
+            <span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/savedPosts`}
+                className={`${
+                  location.pathname === "/userProfile/savedPosts"
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2 text-center`}
+              >
+                <IoSaveSharp size={23} />
+              </Link>
+            </span>
+            <span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/likedPosts`}
+                className={`${
+                  location.pathname === "/userProfile/likedPosts"
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2 text-center`}
+              >
+                <BsHeartFill size={22} />
+              </Link>
+            </span>
+          </div>
+        ) : (
+          <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+            <span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/${currentUser.uid}/followers`}
+                className={`${
+                  location.pathname ===
+                  `/userProfile/${currentUser.uid}/followers`
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2  text-center`}
+              >
+                {/* <TfiLayoutListPost size={25} /> */}
+                Followers
+              </Link>
+            </span>
+            <span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/${currentUser.uid}/following`}
+                className={`${
+                  location.pathname ===
+                  `/userProfile/${currentUser.uid}/following`
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2  text-center`}
+              >
+                {/* <TfiLayoutListPost size={25} /> */}
+                Following
+              </Link>
+            </span>
+          </div>
+        )}
         <div className="w-full h-full">
           <Outlet />
         </div>

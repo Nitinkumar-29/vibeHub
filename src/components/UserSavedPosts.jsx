@@ -95,8 +95,9 @@ const UserSavedPosts = () => {
                 useKeyboardArrows={true}
                 swipeable={true}
                 showArrows={true}
-                showIndicators={true}
-              >
+                showIndicators={
+                  savedPost && savedPost?.fileURLs.length > 1 ? true : false
+                }              >
                 {Array.isArray(savedPost.fileURLs) &&
                   savedPost.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative">

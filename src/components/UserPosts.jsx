@@ -175,7 +175,7 @@ const UserPosts = () => {
                 <div
                   contentEditable={isEdit}
                   suppressContentEditableWarning={true}
-                  className="px-4 py-2"
+                  className="px-4 py-2 whitespace-pre-wrap"
                 >
                   {post?.postCaption}
                 </div>
@@ -210,7 +210,7 @@ const UserPosts = () => {
                   useKeyboardArrows={true}
                   swipeable={true}
                   showArrows={true}
-                  showIndicators={true}
+                  showIndicators={post.fileURLs.length > 1 ? true : false}
                 >
                   {post?.fileURLs?.map((fileURL, index) => (
                     <div key={index} className="relative mx-[.25px]">

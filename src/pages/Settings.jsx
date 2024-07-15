@@ -93,13 +93,21 @@ const Settings = () => {
     }
   };
   return (
-    <div className="min-h-[89vh] bg-black border-t-[1px] border-blue-950">
-      <button
-        className="border-[1px] rounded-md px-4 py-2"
-        onClick={handleLogOut}
-      >
-        Logout
-      </button>
+    <div className={`min-h-[86.5vh] bg-black border-t-[1px] border-blue-950`}>
+      <div className="flex space-x-6 w-full justify-center">
+        <button
+          className="border-[1px] rounded-md px-4 py-2"
+          onClick={handleLogOut}
+        >
+          Logout
+        </button>
+        <button
+          className="border-[1px] rounded-md px-4 py-2"
+          onClick={handleDeleteAccount}
+        >
+         Delete Account
+        </button>
+      </div>
     </div>
   );
 };

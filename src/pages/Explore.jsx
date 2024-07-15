@@ -111,12 +111,12 @@ const Explore = () => {
         <div
           className={`relative w-full ${
             theme === "dark" ? "bg-gray-900" : "bg-white"
-          } space-y-2 pb-20 min-h-[95vh]`}
+          } space-y-2 pb-20 min-h-[85.95vh]`}
         >
           <div
             ref={componentRef}
             className={`${
-              isSticky ? "sticky top-0 " : "static"
+              isSticky ? "z-10 sticky top-0 " : "static"
             }  flex justify-between items-center w-full ${
               theme === "dark" ? "bg-gray-900" : "bg-white"
             } max-w-[430px]  h-12 border-y-[1px] border-gray-400`}
@@ -126,31 +126,13 @@ const Explore = () => {
               type="text"
               ref={searchInputRef}
               className="bg-inherit w-full focus:outline-none placeholder:text-zinc-500 focus:placeholder:text-zinc-300 px-4 py-2"
-              placeholder="Search @username, name...."
+              placeholder="Search @username, name.... with '/ '"
               onChange={(e) => {
                 setQuery(e.target.value);
               }}
             />
-            <div
-              className={`text-base absolute right-4 space-x-1 flex items-center w-fit`}
-            >
-              <span
-                className={`${
-                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
-                } px-3 py-1 rounded-md`}
-              >
-                Ctrl
-              </span>{" "}
-              <span
-                className={`${
-                  theme === "dark" ? "bg-gray-700" : "bg-gray-200"
-                } px-3 py-1 rounded-md`}
-              >
-                K
-              </span>
-            </div>
           </div>
-          {query.length > 1 && (
+          {query.trim(" ").length > 0 && (
             <div className="flex flex-col px-2 space-y-3 pb-2">
               {query.length > 0 &&
                 allUsers
@@ -210,7 +192,7 @@ const Explore = () => {
                 ?.filter(
                   (post) =>
                     post.fileURLs.length > 0 &&
-                    post.userData.accountType === "public"
+                    post.userData.accountType !== "private"
                 )
                 .sort((a, b) => b.timeStamp - a.timeStamp)
                 .map((post) => {

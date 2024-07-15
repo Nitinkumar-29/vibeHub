@@ -27,8 +27,6 @@ const SignUp = () => {
     name: "",
     email: "",
     password: "",
-    mobileNumber: "",
-    address: "",
   });
   const [error, setError] = useState("");
   const [file, setFile] = useState("");
@@ -82,6 +80,14 @@ const SignUp = () => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
+  const generateUsername = (name) => {
+    const randomDigits = Math.floor(1000 + Math.random() * 9000); // Generates a random number between 1000 and 9999
+    return `${name}${randomDigits}`;
+  };
+  const username = data.name.split(" ");
+  const updatedName = username[0];
+  const generateUser_name = generateUsername(updatedName);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(false);
@@ -93,14 +99,15 @@ const SignUp = () => {
       );
       await setDoc(doc(db, "users", response.user.uid), {
         ...data,
+        followers: data.followers || [],
+        following: data.following || [],
+        user_name: generateUser_name,
         timeStamp: serverTimestamp(),
       });
       setData({
         name: "",
         email: "",
         password: "",
-        mobileNumber: "",
-        address: "",
       });
       setFile("");
       setLoading(true);
@@ -193,26 +200,6 @@ const SignUp = () => {
               {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
             </span>
           </div>
-          <input
-            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
-            type="text"
-            name="address"
-            id="address"
-            required
-            placeholder="Address"
-            value={data.address}
-            onChange={onChange}
-          />
-          <input
-            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
-            type="phone"
-            name="mobileNumber"
-            id="mobileNumber"
-            required
-            placeholder="Mobile Number"
-            value={data.mobileNumber}
-            onChange={onChange}
-          />
           <button
             className="border-[1px] flex justify-center rounded-md w-72 p-2"
             type="submit"

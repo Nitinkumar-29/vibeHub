@@ -24,6 +24,8 @@ import Notfound from "./pages/Notfound";
 import OtherUsersProfile from "./pages/OtherUsersProfile";
 import UserLikedPosts from "./components/UserLikedPosts";
 import { ThemeProvider } from "./context/Theme/ThemeContext";
+import FollowersList from "./components/FollowersList";
+import FollowingList from "./components/FollowingList";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -69,11 +71,22 @@ function App() {
                     path="/userProfile/likedPosts"
                     element={<UserLikedPosts />}
                   />
+                  <Route
+                    path="/userProfile/:userId?/followers"
+                    element={<FollowersList />}
+                  />
+                  <Route
+                    path="/userProfile/:userId?/following"
+                    element={<FollowingList />}
+                  />
                 </Route>
                 <Route
-                  path="/users/:userId?/:username?/profile"
+                  path="/users/:userId?/profile/"
                   element={<OtherUsersProfile />}
-                />
+                >
+                  <Route path="followers" element={<FollowersList />} />
+                  <Route path="following" element={<FollowingList />} />
+                </Route>
                 <Route path="/explore" element={<Explore />} />
                 <Route path="/posts/:id" element={<Post />} />
                 <Route path="/userProfile/settings" element={<Settings />} />

@@ -59,8 +59,8 @@ const UserLikedPosts = () => {
                   )}
                   <div className="flex justify-between space-x-1 w-full">
                     <Link
-                    to={`/users/${likedPost?.userId}/profile`}
-                    className="flex flex-col -space-y-1 font-medium"
+                      to={`/users/${likedPost?.userId}/profile`}
+                      className="flex flex-col -space-y-1 font-medium"
                     >
                       <span>{likedPost.user?.name}</span>
                       <span className="text-sm text-zinc-600">
@@ -102,7 +102,9 @@ const UserLikedPosts = () => {
                   useKeyboardArrows={true}
                   swipeable={true}
                   showArrows={true}
-                  showIndicators={true}
+                  showIndicators={
+                    likedPost && likedPost?.fileURLs.length > 1 ? true : false
+                  }
                 >
                   {Array.isArray(likedPost.fileURLs) &&
                     likedPost.fileURLs.map((fileURL, index) => (

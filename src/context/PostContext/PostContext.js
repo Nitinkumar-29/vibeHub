@@ -202,7 +202,6 @@ export const PostProvider = ({ children }) => {
       const followingList = docSnap.exists()
         ? docSnap.data().following || []
         : [];
-      console.log(followingList);
 
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
@@ -223,9 +222,6 @@ export const PostProvider = ({ children }) => {
           };
         })
       );
-
-      console.log(postsWithUserData);
-
       const currentUserSavedPosts = [];
       const followedUsersSavedPosts = [];
       const publicUsersSavedPosts = [];
@@ -255,12 +251,8 @@ export const PostProvider = ({ children }) => {
         ...followedUsersSavedPosts,
         ...publicUsersSavedPosts,
       ];
-
-      console.log(allSavedPosts);
-
       // Set the sorted posts to state
       setSavedPosts(allSavedPosts);
-      console.log(allSavedPosts);
       handleFetchLikedPosts();
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
@@ -279,9 +271,6 @@ export const PostProvider = ({ children }) => {
       const followingList = docSnap.exists()
         ? docSnap.data().following || []
         : [];
-
-      console.log(followingList);
-
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -300,9 +289,6 @@ export const PostProvider = ({ children }) => {
           };
         })
       );
-
-      console.log(postsWithUserData);
-
       const currentUserLikedPosts = [];
       const followedUsersLikedPosts = [];
       const publicUsersLikedPosts = [];
@@ -332,8 +318,6 @@ export const PostProvider = ({ children }) => {
         ...followedUsersLikedPosts,
         ...publicUsersLikedPosts,
       ];
-
-      console.log(allLikedPosts);
       // Set the posts with user data to state
       setLikedPosts(allLikedPosts);
     } catch (error) {
@@ -463,10 +447,6 @@ export const PostProvider = ({ children }) => {
 
   const fetchHomePagePosts = async () => {
     setPostsLoading(true);
-    // if (!localStorage.getItem("token")) {
-    //   setPostsLoading(false);
-    //   return;
-    // }
     try {
       if (!currentUser) {
         return;
@@ -526,12 +506,6 @@ export const PostProvider = ({ children }) => {
       currentUserPosts?.sort((a, b) => b.timeStamp - a.timeStamp);
       followedUsersPosts.length > 0 &&
         followedUsersPosts?.sort((a, b) => b.timeStamp - a.timeStamp);
-      // let sortedPosts = [...currentUserPosts, ...followedUsersPosts].sort(
-      //   (a, b) => b.timeStamp - a.timeStamp
-      // );
-      // if (followedUsersPosts.length === 0) {
-      //   sortedPosts = [...currentUserPosts];
-      // }
       otherUsersPosts.sort((a, b) => b.timeStamp - a.timeStamp);
 
       // Combine the categories: current user's posts, followed users' posts, and other users' posts
@@ -543,7 +517,6 @@ export const PostProvider = ({ children }) => {
 
       setPostsLoading(false);
       setHomePagePosts(combinedPosts);
-      console.log(combinedPosts);
       setOtherPublicPostsHomePage(otherUsersPosts);
     } catch (error) {
       console.error("Error fetching posts: ", error);
@@ -580,7 +553,6 @@ export const PostProvider = ({ children }) => {
       const publicPosts = postsWithUserData.filter(
         (post) => post.userData.accountType !== "private"
       );
-      console.log(publicPosts);
       // Sort posts by timestamp in descending order
       publicPosts.sort((a, b) => b.timeStamp - a.timeStamp);
       setPostsLoading(false);

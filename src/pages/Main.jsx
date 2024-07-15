@@ -145,7 +145,7 @@ const Home = () => {
           {loggedInUserData.img ? (
             <img
               src={loggedInUserData?.img}
-              className="h-7 w-7 rounded-full"
+              className="h-7 w-7 rounded-full object-cover"
               alt=""
             />
           ) : (

@@ -1,4 +1,4 @@
-.horizontal-scrollbar {
+/* .horizontal-scrollbar {
   display: flex;
   height: fit-content;
   width: 340px;
@@ -6,36 +6,34 @@
 }
 
 /* For Chrome, Safari, and newer versions of Edge */
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   display: hidden;
   scrollbar-width: 0px;
-  /* overflow-y: hidden; */
-}
+} */
+/* overflow-y: hidden; */
 
 /* Track */
-::-webkit-scrollbar-track {
-  background: #fbf9f9; /* Color of the scrollbar track */
-}
-
+/* ::-webkit-scrollbar-track {
+  background: #fbf9f9; 
+} */
 /* Handle */
-::-webkit-scrollbar-thumb {
-  background: rgb(159, 158, 158); /* Color of the scrollbar handle */
-  border-radius: 2px; /* Border radius for the scrollbar handle */
+/* ::-webkit-scrollbar-thumb {
+  background: rgb(159, 158, 158); 
   scrollbar-width: 1px;
   cursor: grabbing;
-}
+} */
 
-.scroll-container {
+/* .scroll-container {
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
   scrollbar-width: thin;
   scrollbar-color: #4a5568 #2d3748;
-}
+} */
 
-.scroll-container::-webkit-scrollbar {
+/* .scroll-container::-webkit-scrollbar {
   height: 6px;
-}
+} 
 
 .scroll-container::-webkit-scrollbar-track {
   background: #2d3748;
@@ -45,7 +43,7 @@
   background-color: #080808;
   border-radius: 1px;
   scrollbar-width: 0px;
-}
+} */
 
 .carousel {
   display: flex;
