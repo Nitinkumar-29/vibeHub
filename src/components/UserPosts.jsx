@@ -246,16 +246,10 @@ const UserPosts = () => {
                       ) : (
                         <SlHeart size={20} />
                       )}
-                      {post?.likes?.length !== 0 && (
-                        <span>{post?.likes?.length}</span>
-                      )}
                     </div>
                     <Link to={`/posts/${post?.id}`}>
                       <div className="flex items-center space-x-1">
                         <SlBubble size={20} />
-                        <span>
-                          {post?.commentsCount !== 0 && post?.commentsCount}
-                        </span>
                       </div>
                     </Link>
                     <SlPaperPlane size={20} />
@@ -277,11 +271,23 @@ const UserPosts = () => {
                     )}
                   </div>
                 </div>
-                <span className="w-full px-4 text-sm text-zinc-400">
-                  {post?.timeStamp
-                    ? formatTime(post?.timeStamp, "PPpp")
-                    : "not provided"}
-                </span>
+                <div className="flex flex-col space-y-1 px-4">
+                  {post?.likes?.length !== 0 && (
+                    <div className="flex items-center">
+                      {post?.likes?.length !== 0 && (
+                        <span>{post?.likes?.length}</span>
+                      )}
+                      <span>
+                        &nbsp;{post?.likes?.length === 1 ? "like" : "likes"}
+                      </span>
+                    </div>
+                  )}
+                  <span className="w-full text-sm text-zinc-400">
+                    {post?.timeStamp
+                      ? formatTime(post?.timeStamp, "PPpp")
+                      : "not provided"}
+                  </span>
+                </div>
               </div>
             </div>
           );

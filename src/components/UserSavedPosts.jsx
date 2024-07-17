@@ -52,7 +52,14 @@ const UserSavedPosts = () => {
                 )}
                 <div className="flex justify-between space-x-1 w-full">
                   <Link
-                    to={`/users/${savedPost?.userId}/profile`}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to={
+                      currentUser.uid === savedPost.userId
+                        ? `/userProfile/yourPosts`
+                        : `/users/${savedPost?.userId}/profile`
+                    }
                     className="flex flex-col -space-y-1 font-medium"
                   >
                     <span>{savedPost.user?.name}</span>
@@ -77,8 +84,14 @@ const UserSavedPosts = () => {
                 {savedPost?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
-                    onClick={() => {}}
-                    to={`/users/${user?.userId}/profile`}
+                    onClick={() => {
+                      window.scrollTo(0, 0);
+                    }}
+                    to={
+                      currentUser.uid === user?.userId
+                        ? `/userProfile/yourPosts`
+                        : `/users/${user?.userId}/profile`
+                    }
                     className="text-zinc-500 px-2"
                   >
                     @{user?.username}
@@ -97,7 +110,8 @@ const UserSavedPosts = () => {
                 showArrows={true}
                 showIndicators={
                   savedPost && savedPost?.fileURLs.length > 1 ? true : false
-                }              >
+                }
+              >
                 {Array.isArray(savedPost.fileURLs) &&
                   savedPost.fileURLs.map((fileURL, index) => (
                     <div key={index} className="relative">

@@ -129,7 +129,7 @@ const FollowingList = () => {
                     ? `/userProfile/yourPosts`
                     : `/users/${following.id}/profile`
                 }
-                className="flex flex-col "
+                className="flex flex-col"
               >
                 <span>{following?.data?.name}</span>
                 <span className="text-sm text-gray-400">

@@ -87,7 +87,9 @@ const Home = () => {
                         </div>
                         <div className="w-full h-full ">
                           {post?.postCaption && (
-                            <p className="whitespace-pre-wrap px-4 py-2">{post?.postCaption}</p>
+                            <p className="whitespace-pre-wrap px-4 py-2">
+                              {post?.postCaption}
+                            </p>
                           )}
                           <div className="px-2 my-1 flex flex-wrap">
                             {post?.mentionedUsers?.map((user, index) => {
@@ -98,7 +100,11 @@ const Home = () => {
                                   onClick={() => {
                                     window.scrollTo(0, 0);
                                   }}
-                                  to={`/users/${user?.userId}/profile`}
+                                  to={
+                                    currentUser.uid === user?.userId
+                                      ? `/userProfile/yourPosts`
+                                      : `/users/${user?.userId}/profile`
+                                  }
                                 >
                                   {post.userId === user?.userId ? (
                                     <div className="flex items-center">
@@ -108,9 +114,7 @@ const Home = () => {
                                       </span>
                                     </div>
                                   ) : (
-                                    <span>
-                                      @{user?.username || user?.username}
-                                    </span>
+                                    <span>@{user?.username}</span>
                                   )}
                                 </Link>
                               );

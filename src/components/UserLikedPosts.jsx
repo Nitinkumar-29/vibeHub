@@ -59,7 +59,14 @@ const UserLikedPosts = () => {
                   )}
                   <div className="flex justify-between space-x-1 w-full">
                     <Link
-                      to={`/users/${likedPost?.userId}/profile`}
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                      }}
+                      to={
+                        currentUser.uid === likedPost.userId
+                          ? `/userProfile/yourPosts`
+                          : `/users/${likedPost?.userId}/profile`
+                      }
                       className="flex flex-col -space-y-1 font-medium"
                     >
                       <span>{likedPost.user?.name}</span>
@@ -84,8 +91,14 @@ const UserLikedPosts = () => {
                   {likedPost?.mentionedUsers?.map((user, index) => (
                     <Link
                       key={index}
-                      onClick={() => {}}
-                      to={`/users/${user?.userId || user?.username}/profile`}
+                      onClick={() => {
+                        window.scrollTo(0, 0);
+                      }}
+                      to={
+                        currentUser.uid === user?.userId
+                          ? `/userProfile/yourPosts`
+                          : `/users/${user?.userId}/profile`
+                      }
                       className="text-zinc-500 px-2"
                     >
                       @{user?.username}

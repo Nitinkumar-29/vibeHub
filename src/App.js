@@ -15,7 +15,6 @@ import Home from "./pages/Home";
 import CreatePost from "./components/CreatePost";
 import { PostProvider } from "./context/PostContext/PostContext";
 import Post from "./components/Post";
-import UserProfileSub from "./components/UserPosts";
 import Settings from "./pages/Settings";
 import UserPosts from "./components/UserPosts";
 import UserSavedPosts from "./components/UserSavedPosts";

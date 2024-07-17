@@ -120,7 +120,7 @@ const Post = () => {
                 useKeyboardArrows={true}
                 swipeable={true}
                 showArrows={true}
-                showIndicators={true}
+                showIndicators={postData.fileURLs.length > 1 ? true : false}
               >
                 {Array.isArray(postData.fileURLs) &&
                   postData.fileURLs.map((fileURL, index) => {
