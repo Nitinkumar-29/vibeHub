@@ -10,6 +10,7 @@ import { db } from "../firebase";
 import PostContext from "../context/PostContext/PostContext";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { CgSpinner } from "react-icons/cg";
 
 const FollwersList = () => {
   const { currentUser } = useContext(PostContext);
@@ -59,7 +60,7 @@ const FollwersList = () => {
           toast.dismiss();
           const docSnapData = targetUserSnapShot;
           toast.success(`You are now following ${docSnapData.name}`);
-          handleFetchFollowersList()
+          handleFetchFollowersList();
         }
       } else {
         console.log("User document does not exist");
@@ -135,81 +136,93 @@ const FollwersList = () => {
   }, []);
 
   return (
-    <div className="h-full w-full flex flex-col items-center space-y-4 px-4 mt-4">
-      {followersList
-        ?.sort((a, b) => {
-          if (a.id === currentUser.uid) {
-            return -1;
-          } else if (b.id === currentUser.uid) {
-            return 1;
-          }
-          return a.user_name;
-        })
-        .map((follower, index) => {
-          return (
-            <div className="flex justify-between w-full" key={index}>
-              <div>
-                <img
-                  src={follower?.data?.img}
-                  className="h-10 w-10 object-cover rounded-full"
-                  alt=""
-                />
-              </div>
-              <Link
-                to={
-                  follower.id === currentUser.uid
-                    ? `/userProfile/yourPosts`
-                    : `/users/${follower.id}/profile`
-                }
-                className="flex flex-col "
-              >
-                <span>{follower?.data?.name}</span>
-                <span className="text-sm text-gray-400">
-                  {follower?.data?.user_name}
-                </span>
-              </Link>
-
-              <div>
-                {follower?.data?.followers?.includes(currentUser.uid) ? (
-                  <button
-                    // eslint-disable-next-line no-undef
-                    onClick={() => handleManageFollow(follower.id)}
-                    className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+    <div>
+      {followersList.length > 0 ? (
+        <div className="h-full w-full flex flex-col items-center space-y-4 px-4 mt-4">
+          {followersList
+            ?.sort((a, b) => {
+              if (a.id === currentUser.uid) {
+                return -1;
+              } else if (b.id === currentUser.uid) {
+                return 1;
+              }
+              return a.user_name;
+            })
+            .map((follower, index) => {
+              return (
+                <div className="flex justify-between w-full" key={index}>
+                  <div>
+                    <img
+                      src={follower?.data?.img}
+                      className="h-10 w-10 object-cover rounded-full"
+                      alt=""
+                    />
+                  </div>
+                  <Link
+                    to={
+                      follower.id === currentUser.uid
+                        ? `/userProfile/yourPosts`
+                        : `/users/${follower.id}/profile`
+                    }
+                    className="flex flex-col "
                   >
-                    Unfollow &nbsp;
-                  </button>
-                ) : (
-                  <div className="flex items-center">
-                    {follower.id === currentUser.uid ? (
-                      <button className="cursor-auto px-8 py-2 ">You</button>
-                    ) : (
+                    <span>{follower?.data?.name}</span>
+                    <span className="text-sm text-gray-400">
+                      {follower?.data?.user_name}
+                    </span>
+                  </Link>
+
+                  {!isOwner && (
+                    <div>
+                      {follower?.data?.followers?.includes(currentUser.uid) ? (
+                        <button
+                          // eslint-disable-next-line no-undef
+                          onClick={() => handleManageFollow(follower.id)}
+                          className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                        >
+                          Unfollow &nbsp;
+                        </button>
+                      ) : (
+                        <div className="flex items-center">
+                          {follower.id === currentUser.uid ? (
+                            <button className="cursor-auto px-8 py-2 ">
+                              You
+                            </button>
+                          ) : (
+                            <button
+                              // eslint-disable-next-line no-undef
+                              onClick={() => handleManageFollow(follower.id)}
+                              className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                            >
+                              Follow Back
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {isOwner && (
+                    <div>
                       <button
-                        // eslint-disable-next-line no-undef
-                        onClick={() => handleManageFollow(follower.id)}
+                        onClick={() => {
+                          handleRemoveFollower(follower.id);
+                          console.log(follower.id, userId, currentUser.uid);
+                        }}
                         className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
                       >
-                        Follow Back
+                        Remove
                       </button>
-                    )}
-                  </div>
-                )}
-              </div>
-              {isOwner && (
-                <div>
-                  <button
-                    onClick={() => {
-                      handleRemoveFollower(follower.id);
-                      console.log(follower.id, userId, currentUser.uid);
-                    }}
-                    className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
-                  >
-                    Remove
-                  </button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            })}
+        </div>
+      ) : (
+        <div className="h-20 w-full flex items-center justify-center">
+          <CgSpinner className="animate-spin" size={40} />
+        </div>
+      )}
     </div>
   );
 };

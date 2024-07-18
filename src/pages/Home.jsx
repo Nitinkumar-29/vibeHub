@@ -1,7 +1,7 @@
 import PostContext from "../context/PostContext/PostContext";
 import "../styles/overflow_scroll.css";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import { db } from "../firebase";
 import { Carousel } from "react-responsive-carousel";
@@ -12,9 +12,10 @@ import { FaUser } from "react-icons/fa";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { HiDotsVertical } from "react-icons/hi";
-import { BiLoaderCircle } from "react-icons/bi";
+import { BiLoaderCircle, BiPause, BiPlay } from "react-icons/bi";
 import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { CgSpinner } from "react-icons/cg";
 
 const Home = () => {
   const {
@@ -27,6 +28,27 @@ const Home = () => {
     otherPublicPostsHomePage,
   } = useContext(PostContext);
   const { theme } = useContext(ThemeContext);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  const handlePlayPause = (index) => {
+    videoRef.current.click(index);
+    if (isPlaying === false) {
+        videoRef.current.play(index);
+        console.log(isPlaying);
+        setIsPlaying(true);
+    } else {
+      videoRef.current.pause(index);
+      console.log(isPlaying);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
+
   useEffect(() => {
     fetchHomePagePosts();
     // eslint-disable-next-line
@@ -142,7 +164,11 @@ const Home = () => {
                                 >
                                   {fileURL.includes(".mp4") ? (
                                     <video
-                                      controls
+                                      onClick={() => {
+                                        handlePlayPause(index);
+                                      }}
+                                      onEnded={handleEnded}
+                                      ref={videoRef}
                                       autoFocus={true}
                                       className="h-[80%] w-full object-contain rounded-sm "
                                     >
@@ -154,6 +180,19 @@ const Home = () => {
                                       alt="post media"
                                       className="h-fit w-fit object-contain rounded-sm"
                                     />
+                                  )}
+
+                                  {fileURL.includes(".mp4") && (
+                                    <button
+                                      onClick={() => handlePlayPause()}
+                                      className="z-20 absolute top-[50%]"
+                                    >
+                                      {isPlaying ? (
+                                        <BiPause className="z-20" size={40} />
+                                      ) : (
+                                        <BiPlay className="z-20" size={40} />
+                                      )}
+                                    </button>
                                   )}
                                 </div>
                               ))}
@@ -456,7 +495,7 @@ const Home = () => {
           style={{ height: `calc(100vh - 90px)` }}
           className="flex items-center justify-center"
         >
-          <BiLoaderCircle className="animate-ping" size={50} />
+          <CgSpinner className="animate-spin" size={50} />
         </div>
       )}
     </>

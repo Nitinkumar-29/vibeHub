@@ -399,7 +399,7 @@ const OtherUsersProfile = () => {
             <div className="w-full">
               {(location.pathname === `/users/${userId}/profile/followers` ||
                 location.pathname === `/users/${userId}/profile/following`) && (
-                <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+                <div className={`w-full flex justify-evenly border-b-[1px] ${theme==="dark"?"border-gray-400":"border-black"}`}>
                   <span className="w-full flex justify-center">
                     <Link
                       to={`/users/${userId}/profile/followers`}
@@ -482,7 +482,7 @@ const OtherUsersProfile = () => {
                     </div>
                   )}
 
-                  <div className="flex w-full border-t-[1px] border-gray-400">
+                  <div className={`flex w-full border-t-[1px] ${theme==="dark"?"border-gray-400":"border-black"}`}>
                     <div
                       className={`${
                         focusedSection === 1 ? "grid" : "hidden"
@@ -528,7 +528,7 @@ const OtherUsersProfile = () => {
                     </div>
                     {/* text based posts */}
                     <div
-                      className={`w-full flex flex-col items-center space-y-6 pt-2 border-t-[1px] border-gray-400 ${
+                      className={`w-full flex flex-col items-center space-y-6 pt-2 ${
                         focusedSection === 2 ? "flex" : "hidden"
                       }`}
                     >
@@ -697,7 +697,7 @@ const OtherUsersProfile = () => {
 
                     {/*  tagged posts*/}
                     <div
-                      className={`w-full flex justify-center pt-10 border-t-[1px] border-gray-400 ${
+                      className={`w-full flex justify-center pt-10 ${
                         focusedSection === 3 ? "flex" : "hidden"
                       }`}
                     >

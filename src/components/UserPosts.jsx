@@ -15,6 +15,7 @@ import { GiMusicalNotes, GiNextButton } from "react-icons/gi";
 import { TbMusicOff } from "react-icons/tb";
 import { formatTime } from "../utils/FormatTime";
 import { FaCircleLeft, FaCircleRight } from "react-icons/fa6";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const UserPosts = () => {
   const audioControl = useRef();
@@ -26,6 +27,7 @@ const UserPosts = () => {
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [toggleMenu, setToggleMenu] = useState({});
+  const { theme } = useContext(ThemeContext);
   // const [togglePostId, setTogglePostId] = useState(null);
 
   const handlePlay = async () => {
@@ -140,7 +142,9 @@ const UserPosts = () => {
                         toggleMenu[post.id] === "flex" ? "flex" : "hidden"
                       } ${
                         toggleMenu[post.id] === "flex" ? "duration-300" : ""
-                      }  flex-col items-start right-6 top-0 bg-zinc-900 space-y-4 transition-all z-20 rounded-md p-4 w-[80px] absolute`}
+                      }  flex-col items-start right-6 top-0 ${
+                        theme === "dark" ? "bg-gray-950" : "bg-gray-100"
+                      } space-y-4 transition-all z-20 rounded-md p-4 w-[120px] absolute`}
                     >
                       <button
                         onClick={() => {

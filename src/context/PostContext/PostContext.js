@@ -11,6 +11,7 @@ import {
   getDocs,
   increment,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -125,6 +126,7 @@ export const PostProvider = ({ children }) => {
         comment: commentText,
         userId: currentUser.uid,
         postId: id,
+        timeStamp: serverTimestamp(),
       });
       // Increment the comment count in the corresponding post document
       const postRef = doc(db, "posts", id);
