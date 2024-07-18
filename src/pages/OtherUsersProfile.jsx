@@ -314,7 +314,7 @@ const OtherUsersProfile = () => {
   }, [userId]);
 
   return (
-    <div className={`flex flex-col items-center w-full min-h-[86.5vh]`}>
+    <div className={`flex flex-col items-center w-full min-h-screen`}>
       <div className="flex flex-col items-center w-full">
         <div className="flex flex-col items-center h-[60vh] space-y-10 px-4">
           <div className="flex flex-col items-center space-y-2 mt-10">
