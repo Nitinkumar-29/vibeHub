@@ -111,7 +111,7 @@ const Explore = () => {
         <div
           className={`relative w-full ${
             theme === "dark" ? "bg-gray-900" : "bg-white"
-          } space-y-2 pb-20 min-h-screen`}
+          } space-y-2 pb-20 min-h-[85.95vh]`}
         >
           <div
             ref={componentRef}
@@ -206,7 +206,7 @@ const Explore = () => {
                         <div key={post.id}>
                           {post?.fileURLs[0].includes(".mp4") ? (
                             <video
-                              autoPlay={false}
+                              controls
                               className="h-40 w-40 object-cover rounded-sm"
                             >
                               <source src={post.fileURLs[0]} type="video/mp4" />
