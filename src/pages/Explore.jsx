@@ -205,10 +205,7 @@ const Explore = () => {
                       {post?.fileURLs && post?.fileURLs.length > 0 && (
                         <div key={post.id}>
                           {post?.fileURLs[0].includes(".mp4") ? (
-                            <video
-                              controls
-                              className="h-40 w-40 object-cover rounded-sm"
-                            >
+                            <video className="h-40 w-40 object-cover rounded-sm">
                               <source src={post.fileURLs[0]} type="video/mp4" />
                             </video>
                           ) : (

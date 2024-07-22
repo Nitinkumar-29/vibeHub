@@ -3,6 +3,8 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
+  redirect,
 } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./authentication/Login";
@@ -32,6 +34,7 @@ function App() {
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
+
   return (
     <>
       <Router>

@@ -109,7 +109,7 @@ const Home = () => {
                         </div>
                         <div className="w-full h-full ">
                           {post?.postCaption && (
-                            <p className="whitespace-pre-wrap px-4 py-2">
+                            <p className="whitespace-pre-wrap. px-4 py-2">
                               {post?.postCaption}
                             </p>
                           )}

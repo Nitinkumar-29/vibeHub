@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import PostContext from "../context/PostContext/PostContext";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
@@ -7,7 +7,7 @@ import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
 import { Carousel } from "react-responsive-carousel";
-import { BiCopy } from "react-icons/bi";
+import { BiCopy, BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 
@@ -19,6 +19,25 @@ const UserSavedPosts = () => {
     handleLikePost,
     handleSavePost,
   } = useContext(PostContext);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  const handlePlayPause = (index) => {
+    videoRef.current.click(index);
+    if (isPlaying === false) {
+      videoRef.current.play(index);
+      console.log(isPlaying);
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause(index);
+      console.log(isPlaying);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
 
   useEffect(() => {
     if (currentUser?.uid) {
@@ -34,17 +53,17 @@ const UserSavedPosts = () => {
           0 posts? <Link to="/">Try saving a post now</Link>
         </div>
       ) : (
-        <div className="w-full">
+        <div className="w-full space-y-2">
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
               className="flex flex-col space-y-1 w-full h-fit"
             >
-              <div className="h-16 border-t-[1px] border-blue-950 flex items-center space-x-4 w-full justify-start p-4">
+              <div className="h-16 flex items-center space-x-4 w-full justify-start p-4">
                 {savedPost.user?.img ? (
                   <img
                     src={savedPost.user.img}
-                    className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-900"
+                    className="h-12 w-12 duration-200 rounded-full"
                     alt=""
                   />
                 ) : (
@@ -68,19 +87,10 @@ const UserSavedPosts = () => {
                       @{savedPost.user?.user_name}
                     </span>
                   </Link>
-                  <span
-                    className="cursor-pointer text-slate-500 hover:text-white duration-200"
-                    onClick={() => {
-                      const fullUrl = window.location.href;
-                      navigator.clipboard.writeText(fullUrl);
-                    }}
-                  >
-                    <BiCopy size={20} />
-                  </span>
                 </div>
               </div>
               <div className="flex flex-wrap">
-                <p className="p-2">{savedPost.postCaption}</p>
+                <p className="px-4">{savedPost.postCaption}</p>
                 {savedPost?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
@@ -117,19 +127,34 @@ const UserSavedPosts = () => {
                     <div key={index} className="relative">
                       {fileURL.includes(".mp4") ? (
                         <video
-                          controls
-                          className="h-full w-full object-contain rounded-sm border-[1px] border-blue-950"
+                          onClick={() => {
+                            handlePlayPause(index);
+                          }}
+                          onEnded={handleEnded}
+                          ref={videoRef}
+                          autoFocus={true}
+                          className="h-full w-full object-contain rounded-sm "
                         >
-                          <source src={fileURL} type="video/*" />
+                          <source src={fileURL} type="video/mp4" />
                         </video>
                       ) : (
-                        <div className="">
-                          <img
-                            src={fileURL}
-                            alt="post media"
-                            className="h-fit w-fit object-contain rounded-sm border-[1px] border-blue-950"
-                          />
-                        </div>
+                        <img
+                          src={fileURL}
+                          alt="post media"
+                          className="h-full w-full object-contain rounded-sm "
+                        />
+                      )}
+                      {fileURL.includes(".mp4") && (
+                        <button
+                          onClick={() => handlePlayPause()}
+                          className="z-20 absolute top-[50%]"
+                        >
+                          {isPlaying ? (
+                            <BiPause className="z-20" size={40} />
+                          ) : (
+                            <BiPlay className="z-20" size={40} />
+                          )}
+                        </button>
                       )}
                     </div>
                   ))}

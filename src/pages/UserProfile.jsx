@@ -241,7 +241,7 @@ const UserProfile = () => {
         {location.pathname === `/userProfile/yourPosts` ||
         location.pathname === `/userProfile/likedPosts` ||
         location.pathname === `/userProfile/savedPosts` ? (
-          <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+          <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">
             <span className="w-full flex justify-center">
               <Link
                 to={`/userProfile/yourPosts`}
@@ -280,7 +280,7 @@ const UserProfile = () => {
             </span>
           </div>
         ) : (
-          <div className="w-full flex justify-evenly border-t-[1px] border-blue-950">
+          <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">
             <span className="w-full flex justify-center">
               <Link
                 to={`/userProfile/${currentUser.uid}/followers`}

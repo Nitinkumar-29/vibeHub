@@ -120,7 +120,7 @@ const FollowingList = () => {
             .map((following, index) => {
               return (
                 <div
-                  className="flex justify-between space-x-2 w-full"
+                  className="flex justify-between min-w-[90%]"
                   key={index}
                 >
                   <div>

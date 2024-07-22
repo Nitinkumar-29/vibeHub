@@ -1,6 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  redirect,
+  useNavigate,
+} from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import PostContext from "../context/PostContext/PostContext";
@@ -10,11 +16,11 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSunnyOutline } from "react-icons/io5";
 
 const Home = () => {
-  const { homePagePosts, currentUser, postLoading } = useContext(PostContext);
+  const { currentUser, postLoading } = useContext(PostContext);
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [loggedInUserData, setLoggedInUserData] = useState({});
-
+  const navigate = useNavigate();
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -60,6 +66,15 @@ const Home = () => {
     // eslint-disable-next-line
   }, [lastScrollY]);
 
+  useEffect(() => {
+    if (
+      location.pathname === "/userProfile" ||
+      location.pathname === "/userProfile/"
+    ) {
+      navigate("/userProfile/yourPosts");
+    }
+    // eslint-disable-next-line
+  }, [location.pathname === "/userProfile"]);
   return (
     <div
       className={`relative w-full max-w-[430px] h-fit  ${
@@ -84,7 +99,10 @@ const Home = () => {
         )}
 
         {location.pathname === "/explore" && <span>Explore</span>}
-        {location.pathname === "/userProfile/yourPosts" && (
+        {(location.pathname === "/userProfile/yourPosts" ||
+          location.pathname === `/userProfile/${currentUser.uid}/followers` ||
+          location.pathname ===
+            `/userProfile/${currentUser.uid}/following`) && (
           <Link to="/userProfile/settings">
             <FiSettings className="cursor-pointer" size={20} />
           </Link>

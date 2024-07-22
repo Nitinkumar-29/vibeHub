@@ -150,7 +150,7 @@ const FollwersList = () => {
             })
             .map((follower, index) => {
               return (
-                <div className="flex justify-between w-full" key={index}>
+                <div className="flex justify-between min-w-[90%]" key={index}>
                   <div>
                     <img
                       src={follower?.data?.img}

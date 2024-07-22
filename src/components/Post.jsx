@@ -306,7 +306,11 @@ const Post = () => {
                                     onClick={() => {
                                       window.scrollTo(0, 0);
                                     }}
-                                    to={`/users/${comment?.user?.user_name}/profile`}
+                                    to={
+                                      currentUser.uid === comment.userId
+                                        ? `/userProfile/yourPosts`
+                                        : `/users/${comment?.userId}/profile`
+                                    }
                                     className="flex flex-col items-start -space-y-1 px-2"
                                   >
                                     <div className="">
@@ -324,7 +328,11 @@ const Post = () => {
                                     onClick={() => {
                                       window.scrollTo(0, 0);
                                     }}
-                                    to={`/users/${comment?.user?.user_name}/profile`}
+                                    to={
+                                      currentUser.uid === comment.userId
+                                        ? `/userProfile/yourPosts`
+                                        : `/users/${comment?.userId}/profile`
+                                    }
                                     className="flex space-x-1"
                                   >
                                     <span>{comment?.user?.name}</span>

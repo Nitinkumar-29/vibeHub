@@ -16,6 +16,7 @@ import { TbMusicOff } from "react-icons/tb";
 import { formatTime } from "../utils/FormatTime";
 import { FaCircleLeft, FaCircleRight } from "react-icons/fa6";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { BiPause, BiPlay } from "react-icons/bi";
 
 const UserPosts = () => {
   const audioControl = useRef();
@@ -24,10 +25,29 @@ const UserPosts = () => {
   const { userPosts, handleDeletePost } = useContext(PostContext);
   const { currentUser, handleLikePost, handleSavePost } =
     useContext(PostContext);
-  const [isPlaying, setIsPlaying] = useState(true);
+  // const [isPlaying, setIsPlaying] = useState(true);
   const [currentUserData, setCurrentUserData] = useState(null);
   const [toggleMenu, setToggleMenu] = useState({});
   const { theme } = useContext(ThemeContext);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
+
+  const handlePlayPause = (index) => {
+    videoRef.current.click(index);
+    if (isPlaying === false) {
+      videoRef.current.play(index);
+      console.log(isPlaying);
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause(index);
+      console.log(isPlaying);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
   // const [togglePostId, setTogglePostId] = useState(null);
 
   const handlePlay = async () => {
@@ -104,16 +124,16 @@ const UserPosts = () => {
   }, [currentUser]);
 
   return (
-    <div className="pb-10 w-full">
+    <div className="pb-10 space-y-4 w-full">
       {userPosts?.length > 0 ? (
         userPosts?.map((post) => {
           return (
             <div key={post.id} className="w-full rounded-md">
-              <div className="h-16 flex items-center border-t-[1px] border-blue-950 rounded-sm space-x-4 w-full justify-start px-3">
+              <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-3">
                 {currentUserData?.img ? (
                   <img
                     src={currentUserData?.img}
-                    className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
+                    className="w-[3rem] h-[3rem] object-cover duration-200 rounded-full"
                     alt=""
                   />
                 ) : (
@@ -175,11 +195,11 @@ const UserPosts = () => {
                   </div>
                 </div>
               </div>
-              <div className="w-full h-full my-2">
+              <div className="w-full h-full">
                 <div
                   contentEditable={isEdit}
                   suppressContentEditableWarning={true}
-                  className="px-4 py-2 whitespace-pre-wrap"
+                  className="px-4 pb-2 whitespace-pre-wrap"
                 >
                   {post?.postCaption}
                 </div>
@@ -220,7 +240,11 @@ const UserPosts = () => {
                     <div key={index} className="relative mx-[.25px]">
                       {fileURL.includes(".mp4") ? (
                         <video
-                          controls
+                          onClick={() => {
+                            handlePlayPause(index);
+                          }}
+                          onEnded={handleEnded}
+                          ref={videoRef}
                           autoFocus={true}
                           className="h-full w-full object-contain rounded-sm "
                         >
@@ -233,10 +257,22 @@ const UserPosts = () => {
                           className="h-full w-full object-contain rounded-sm "
                         />
                       )}
+                      {fileURL.includes(".mp4") && (
+                        <button
+                          onClick={() => handlePlayPause()}
+                          className="z-20 absolute top-[50%]"
+                        >
+                          {isPlaying ? (
+                            <BiPause className="z-20" size={40} />
+                          ) : (
+                            <BiPlay className="z-20" size={40} />
+                          )}
+                        </button>
+                      )}
                     </div>
                   ))}
                 </Carousel>
-                <div className="flex items-center justify-between h-12 px-4 pt-2">
+                <div className="flex items-center justify-between h-12 px-4">
                   <div className="flex items-center space-x-6">
                     <div
                       className="flex space-x-1 items-center cursor-pointer"
