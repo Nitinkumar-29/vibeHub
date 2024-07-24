@@ -143,7 +143,7 @@ const Home = () => {
         <Outlet />
       </div>
       <div
-        className={`z-10 ${position} bottom-0 h-12 ${
+        className={`z-10 ${position} bottom-0 h-16 ${
           (location.pathname === "/userChats/" ||
           location.pathname === "/userChats" ||
           location.pathname === `/userChats/${userId}/messages`)
