@@ -93,11 +93,11 @@ const Chat = () => {
     // eslint-disable-next-line
   }, [userId]);
   return (
-    <div
-      ref={messageContainerRef}
-      className="relative min-h-[100vh] flex flex-col"
-    >
-      <div className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit scroll-smooth">
+    <div className="h-[100vh] flex flex-col">
+      <div
+        ref={messageContainerRef}
+        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-full scroll-smooth"
+      >
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
           ?.map((message) => {
@@ -155,20 +155,20 @@ const Chat = () => {
           })}
       </div>
       {/* input */}
-      <div className="absolute bottom-0 mt-2 bg-gray-900 w-full p-2">
+      <div className="relative my-2 bg-gray-900 w-full p-2">
         <div
           className={`flex ${
             theme === "dark"
               ? "bg-gray-800 text-white"
               : "bg-gray-200 text-black"
-          } rounded-md space-x-2 w-full justify-center`}
+          } rounded-3xl space-x-2 w-full justify-center h-12`}
         >
           <input
             type="text"
             placeholder="Message..."
             value={messageText}
             onChange={(e) => setMessageText(e.target.value)}
-            className={`bg-inherit rounded-md w-[90%]  px-2 focus:outline-none`}
+            className={`bg-inherit rounded-3xl w-[90%]  px-3 focus:outline-none`}
           />
           <button
             onClick={handleSendMessage}
