@@ -23,6 +23,7 @@ const Chat = () => {
   const { theme } = useContext(ThemeContext);
   const messageContainerRef = useRef(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const holdTimeout = useRef(null);
   const [currentUserData, setCurrentUserData] = useState([]);
   const {
@@ -45,7 +46,6 @@ const Chat = () => {
           ...docSnap.data(),
           id: userId,
         };
-        console.log(userData);
         setChatUserData(userData);
       } else {
         console.log("No such document!");
@@ -54,6 +54,7 @@ const Chat = () => {
       console.error(error);
     }
   };
+
   const handleSendMessage = () => {
     sendMessage(userId);
   };
@@ -69,11 +70,13 @@ const Chat = () => {
         const userData = doc.data();
         setCurrentUserData(userData, currentUser.uid);
       });
-      console.log(currentUserData);
     }
   };
 
-  const handleTouchStart = () => {
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setMenuPosition({ top: touch.clientY, left: touch.clientX });
+
     holdTimeout.current = setTimeout(() => {
       setShowMenu(true);
     }, 500); // Adjust the hold time as needed (500ms in this case)
@@ -85,6 +88,10 @@ const Chat = () => {
 
   const handleTouchMove = () => {
     clearTimeout(holdTimeout.current);
+  };
+
+  const handleCloseMenu = () => {
+    setShowMenu(false);
   };
 
   useEffect(() => {
@@ -108,11 +115,15 @@ const Chat = () => {
     handleFetchChatUserData();
     // eslint-disable-next-line
   }, [userId]);
+
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col relative">
       <div
         ref={messageContainerRef}
-        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth"
+        className={`flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth ${
+          showMenu ? "blur-sm" : ""
+        }`}
+        onClick={handleCloseMenu}
       >
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
@@ -122,7 +133,7 @@ const Chat = () => {
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
                 onTouchMove={handleTouchMove}
-                className={`flex space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2   ${
+                className={`flex space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
                   message.senderId === currentUser.uid
                     ? "self-end"
                     : "self-start"
@@ -168,21 +179,28 @@ const Chat = () => {
                     {message.message}
                   </span>
                 </div>
-                {showMenu && (
-                  <div className="absolute top-0 left-0 mt-8 p-2 bg-white shadow-lg rounded-lg z-10">
-                    <ul>
-                      <li className="p-2 hover:bg-gray-100">Option 1</li>
-                      <li className="p-2 hover:bg-gray-100">Option 2</li>
-                      <li className="p-2 hover:bg-gray-100">Option 3</li>
-                    </ul>
-                  </div>
-                )}{" "}
               </div>
             );
           })}
       </div>
+      {showMenu && (
+        <div
+          className="absolute p-2 bg-white shadow-lg rounded-lg z-10"
+          style={{ top: menuPosition.top, left: menuPosition.left }}
+        >
+          <ul>
+            <li className="p-2 hover:bg-gray-100">Option 1</li>
+            <li className="p-2 hover:bg-gray-100">Option 2</li>
+            <li className="p-2 hover:bg-gray-100">Option 3</li>
+          </ul>
+        </div>
+      )}
       {/* input */}
-      <div className="absolute bottom-0 mt-2 py-4 bg-gray-900 w-full px-2">
+      <div
+        className={`absolute bottom-0 mt-2 py-2 ${
+          theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-white text-black"
+        } w-full px-2`}
+      >
         <div
           className={`flex ${
             theme === "dark"
