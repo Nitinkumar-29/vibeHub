@@ -93,10 +93,10 @@ const Chat = () => {
     // eslint-disable-next-line
   }, [userId]);
   return (
-    <div className="h-[100vh] flex flex-col">
+    <div className="h-screen flex flex-col">
       <div
         ref={messageContainerRef}
-        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit scroll-smooth"
+        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth"
       >
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
@@ -155,7 +155,7 @@ const Chat = () => {
           })}
       </div>
       {/* input */}
-      <div className="relative my-2 bg-gray-900 w-full p-2">
+      <div className="absolute bottom-0 mt-2 py-4 bg-gray-900 w-full px-2">
         <div
           className={`flex ${
             theme === "dark"
