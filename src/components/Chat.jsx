@@ -93,11 +93,11 @@ const Chat = () => {
     // eslint-disable-next-line
   }, [userId]);
   return (
-    <div className="relative min-h-[100vh] flex flex-col">
-      <div
-        ref={messageContainerRef}
-        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit scroll-smooth"
-      >
+    <div
+      ref={messageContainerRef}
+      className="relative min-h-[100vh] flex flex-col"
+    >
+      <div className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit scroll-smooth">
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
           ?.map((message) => {
