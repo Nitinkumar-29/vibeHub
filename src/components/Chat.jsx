@@ -22,6 +22,8 @@ const Chat = () => {
   const [chatUserData, setChatUserData] = useState(null);
   const { theme } = useContext(ThemeContext);
   const messageContainerRef = useRef(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const holdTimeout = useRef(null);
   const [currentUserData, setCurrentUserData] = useState([]);
   const {
     sendMessage,
@@ -71,6 +73,20 @@ const Chat = () => {
     }
   };
 
+  const handleTouchStart = () => {
+    holdTimeout.current = setTimeout(() => {
+      setShowMenu(true);
+    }, 500); // Adjust the hold time as needed (500ms in this case)
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(holdTimeout.current);
+  };
+
+  const handleTouchMove = () => {
+    clearTimeout(holdTimeout.current);
+  };
+
   useEffect(() => {
     currentUser.uid && handleFetchUserData();
     // eslint-disable-next-line
@@ -103,6 +119,9 @@ const Chat = () => {
           ?.map((message) => {
             return (
               <div
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                onTouchMove={handleTouchMove}
                 className={`flex space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2   ${
                   message.senderId === currentUser.uid
                     ? "self-end"
@@ -149,7 +168,15 @@ const Chat = () => {
                     {message.message}
                   </span>
                 </div>
-                <div>{}</div>
+                {showMenu && (
+                  <div className="absolute top-0 left-0 mt-8 p-2 bg-white shadow-lg rounded-lg z-10">
+                    <ul>
+                      <li className="p-2 hover:bg-gray-100">Option 1</li>
+                      <li className="p-2 hover:bg-gray-100">Option 2</li>
+                      <li className="p-2 hover:bg-gray-100">Option 3</li>
+                    </ul>
+                  </div>
+                )}{" "}
               </div>
             );
           })}
