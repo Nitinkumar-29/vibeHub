@@ -1,12 +1,23 @@
 export const formatTime = (timestamp) => {
+  if (!timestamp) {
+    return "Invalid date"; // or any default message you prefer
+  }
+
   const currentTime = new Date();
   let postTime;
 
   // Check the type of timestamp and convert it to a JavaScript Date object
-  if (typeof timestamp === 'object' && 'seconds' in timestamp && 'nanoseconds' in timestamp) {
+  if (
+    typeof timestamp === "object" &&
+    timestamp !== null && // Ensure timestamp is not null
+    "seconds" in timestamp &&
+    "nanoseconds" in timestamp
+  ) {
     // Firestore timestamp with seconds and nanoseconds
-    postTime = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
-  } else if (typeof timestamp === 'number') {
+    postTime = new Date(
+      timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
+    );
+  } else if (typeof timestamp === "number") {
     if (timestamp.toString().length === 13) {
       // UNIX timestamp in milliseconds
       postTime = new Date(timestamp);
@@ -23,28 +34,40 @@ export const formatTime = (timestamp) => {
   }
 
   const timeDifference = Math.floor((currentTime - postTime) / 1000); // in seconds
-
-  if (timeDifference < 60) {
+  if (timeDifference < 0) {
+    return `just now`;
+  } else if (timeDifference < 60) {
     return `${timeDifference} seconds ago`;
   } else if (timeDifference < 3600) {
     const minutes = Math.floor(timeDifference / 60);
-    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+    return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 86400) {
     const hours = Math.floor(timeDifference / 3600);
     return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 7 * 86400) {
     const days = Math.floor(timeDifference / 86400);
     return `${days} day${days > 1 ? "s" : ""} ago`;
+  } else if (timeDifference < 30 * 86400) {
+    const weeks = Math.floor(timeDifference / (7 * 86400));
+    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  } else if (timeDifference < 365 * 86400) {
+    const months = Math.floor(timeDifference / (30 * 86400));
+    return `${months} month${months > 1 ? "s" : ""} ago`;
   } else {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-    };
-    return postTime.toLocaleDateString("en-US", options);
+    const years = Math.floor(timeDifference / (365 * 86400));
+    if (years === 1) {
+      return `a year ago`;
+    } else {
+      const options = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      };
+      return postTime.toLocaleDateString("en-US", options);
+    }
   }
 };

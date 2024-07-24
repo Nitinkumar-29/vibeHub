@@ -6,10 +6,10 @@
 }
 
 /* For Chrome, Safari, and newer versions of Edge */
-/* ::-webkit-scrollbar {
+::-webkit-scrollbar {
   display: hidden;
   scrollbar-width: 0px;
-} */
+}
 /* overflow-y: hidden; */
 
 /* Track */
@@ -31,9 +31,9 @@
   scrollbar-color: #4a5568 #2d3748;
 } */
 
-/* .scroll-container::-webkit-scrollbar {
+.scroll-container::-webkit-scrollbar {
   height: 6px;
-} 
+}
 
 .scroll-container::-webkit-scrollbar-track {
   background: #2d3748;
@@ -43,7 +43,7 @@
   background-color: #080808;
   border-radius: 1px;
   scrollbar-width: 0px;
-} */
+}
 
 .carousel {
   display: flex;
@@ -64,4 +64,13 @@
 }
 .carousel .carousel .control-dots {
   z-index: 10;
+}
+
+.hideScrollbar {
+  scrollbar-width: 0px;
+  /* display: none; */
+}
+.hideScrollbar::-webkit-scrollbar {
+  scrollbar-width: 0px;
+  display: none;
 }

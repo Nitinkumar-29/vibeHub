@@ -53,11 +53,11 @@ const UserSavedPosts = () => {
           0 posts? <Link to="/">Try saving a post now</Link>
         </div>
       ) : (
-        <div className="w-full space-y-2">
+        <div className="w-full space-y-4">
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
-              className="flex flex-col space-y-1 w-full h-fit"
+              className="flex flex-col -space-y-1 w-full h-fit"
             >
               <div className="h-16 flex items-center space-x-4 w-full justify-start p-4">
                 {savedPost.user?.img ? (
@@ -102,7 +102,7 @@ const UserSavedPosts = () => {
                         ? `/userProfile/yourPosts`
                         : `/users/${user?.userId}/profile`
                     }
-                    className="text-zinc-500 px-2"
+                    className="text-zinc-500 px-4"
                   >
                     @{user?.username}
                   </Link>
@@ -124,7 +124,7 @@ const UserSavedPosts = () => {
               >
                 {Array.isArray(savedPost.fileURLs) &&
                   savedPost.fileURLs.map((fileURL, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative my-1">
                       {fileURL.includes(".mp4") ? (
                         <video
                           onClick={() => {

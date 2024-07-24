@@ -6,6 +6,7 @@ import {
   useLocation,
   redirect,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
@@ -14,6 +15,10 @@ import { FiSettings } from "react-icons/fi";
 import { MdDarkMode, MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSunnyOutline } from "react-icons/io5";
+import { FaMessage } from "react-icons/fa6";
+import { BiMessage } from "react-icons/bi";
+import { BsChatSquare } from "react-icons/bs";
+import { AiFillMessage } from "react-icons/ai";
 
 const Home = () => {
   const { currentUser, postLoading } = useContext(PostContext);
@@ -21,6 +26,7 @@ const Home = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [loggedInUserData, setLoggedInUserData] = useState({});
   const navigate = useNavigate();
+  const { userId } = useParams();
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
@@ -82,7 +88,13 @@ const Home = () => {
       }`}
     >
       <div
-        className={`z-20 ${position} top-0 h-14 flex ${
+        className={`z-20 ${position} top-0 h-14 ${
+          (location.pathname === "/userChats/" ||
+          location.pathname === "/userChats" ||
+          location.pathname === `/userChats/${userId}/messages`)
+            ? "hidden"
+            : "flex"
+        } ${
           theme === "dark" ? "bg-gray-900" : "bg-white"
         }  justify-between items-center bg-opacity-60 p-4 w-full max-w-[430px] backdrop-blur-3xl`}
       >
@@ -131,7 +143,13 @@ const Home = () => {
         <Outlet />
       </div>
       <div
-        className={`z-10 ${position} bottom-0 h-12 flex justify-between items-center p-4 w-full max-w-[430px] ${
+        className={`z-10 ${position} bottom-0 h-12 ${
+          (location.pathname === "/userChats/" ||
+          location.pathname === "/userChats" ||
+          location.pathname === `/userChats/${userId}/messages`)
+            ? "hidden"
+            : "flex"
+        } justify-between items-center p-4 w-full max-w-[430px] ${
           theme === "dark" ? "bg-gray-900" : "bg-white"
         } bg-opacity-60 backdrop-blur-3xl `}
       >
@@ -153,6 +171,14 @@ const Home = () => {
           }}
         >
           <FaPlusCircle size={25} />
+        </Link>
+        <Link
+          to="/userChats"
+          onClick={() => {
+            window.scrollTo(0, 0);
+          }}
+        >
+          <AiFillMessage size={25} />
         </Link>
         <Link
           to="/userProfile/yourPosts"

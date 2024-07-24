@@ -151,37 +151,35 @@ const Post = () => {
                     return (
                       <div key={index} className=" relative">
                         {fileURL.includes(".mp4") ? (
-                          <div
-                            onClick={() => handlePlayPause()}
-                            className="relative w-full h-full cursor-pointer"
+                          <video
+                            onClick={() => {
+                              handlePlayPause(index);
+                            }}
+                            onEnded={handleEnded}
+                            ref={videoRef}
+                            autoFocus={true}
+                            className="h-[80%] w-full object-contain rounded-sm "
                           >
-                            <video
-                              autoFocus={true}
-                              ref={videoRef}
-                              onEnded={handleEnded}
-                              className="video h-full w-full object-contain rounded-sm "
-                            >
-                              <source src={fileURL} type="video/mp4" />
-                            </video>
-                            {fileURL.includes(".mp4") && (
-                              <button
-                                onClick={() => handlePlayPause()}
-                                className="z-20 absolute top-[50%]"
-                              >
-                                {isPlaying ? (
-                                  <BiPause className="z-20" size={40} />
-                                ) : (
-                                  <BiPlay className="z-20" size={40} />
-                                )}
-                              </button>
-                            )}
-                          </div>
+                            <source src={fileURL} type="video/mp4" />
+                          </video>
                         ) : (
                           <img
                             src={fileURL}
                             alt="post media"
-                            className="h-full w-full object-contain rounded-sm "
+                            className="h-fit w-fit object-contain rounded-sm"
                           />
+                        )}
+                        {fileURL.includes(".mp4") && (
+                          <button
+                            onClick={() => handlePlayPause()}
+                            className="z-20 absolute top-[50%]"
+                          >
+                            {isPlaying ? (
+                              <BiPause className="z-20" size={40} />
+                            ) : (
+                              <BiPlay className="z-20" size={40} />
+                            )}
+                          </button>
                         )}
                       </div>
                     );
