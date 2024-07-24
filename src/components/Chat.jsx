@@ -96,7 +96,7 @@ const Chat = () => {
     <div className="h-[100vh] flex flex-col">
       <div
         ref={messageContainerRef}
-        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-full scroll-smooth"
+        className="flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit scroll-smooth"
       >
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
