@@ -263,7 +263,7 @@ const Chat = () => {
     };
     // eslint-disable-next-line
   }, []);
-  
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
@@ -303,7 +303,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[82vh] scroll-smooth pb-2 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-2 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
