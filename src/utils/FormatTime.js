@@ -40,19 +40,19 @@ export const formatTime = (timestamp) => {
     return `${timeDifference} secs ago`;
   } else if (timeDifference < 3600) {
     const minutes = Math.floor(timeDifference / 60);
-    return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
+    return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 86400) {
     const hours = Math.floor(timeDifference / 3600);
-    return `${hours} hr${hours > 1 ? "s" : ""} ago`;
+    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 7 * 86400) {
     const days = Math.floor(timeDifference / 86400);
-    return `${days} d${days > 1 ? "s" : ""} ago`;
+    return `${days} day${days > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 30 * 86400) {
     const weeks = Math.floor(timeDifference / (7 * 86400));
-    return `${weeks} w${weeks > 1 ? "s" : ""} ago`;
+    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 365 * 86400) {
     const months = Math.floor(timeDifference / (30 * 86400));
-    return `${months} m${months > 1 ? "s" : ""} ago`;
+    return `${months} month${months > 1 ? "s" : ""} ago`;
   } else {
     const years = Math.floor(timeDifference / (365 * 86400));
     if (years === 1) {

@@ -66,20 +66,20 @@ const Chat = () => {
     }
   };
 
-  // seen functionality
-  const markMessagesAsSeen = async (chatId, userId) => {
-    const q = query(
-      collection(db, "messages"),
-      where("chatId", "==", chatId),
-      where("receiverId", "==", userId),
-      where("seen", "==", false)
-    );
+  // // seen functionality
+  // const markMessagesAsSeen = async (chatId, userId) => {
+  //   const q = query(
+  //     collection(db, "messages"),
+  //     where("chatId", "==", chatId),
+  //     where("receiverId", "==", userId),
+  //     where("seen", "==", false)
+  //   );
 
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach(async (doc) => {
-      await updateDoc(doc.ref, { seen: true });
-    });
-  };
+  //   const querySnapshot = await getDocs(q);
+  //   querySnapshot.forEach(async (doc) => {
+  //     await updateDoc(doc.ref, { seen: true });
+  //   });
+  // };
 
   const handleSendMessage = () => {
     sendMessage(userId);
@@ -99,26 +99,26 @@ const Chat = () => {
     }
   };
 
-  const handleTouchStart = (e) => {
-    const touch = e.touches[0];
-    setMenuPosition({ top: touch.clientY, left: touch.clientX });
+  // const handleTouchStart = (e) => {
+  //   const touch = e.touches[0];
+  //   setMenuPosition({ top: touch.clientY, left: touch.clientX });
 
-    holdTimeout.current = setTimeout(() => {
-      setShowMenu(true);
-    }, 500); // Adjust the hold time as needed (500ms in this case)
-  };
+  //   holdTimeout.current = setTimeout(() => {
+  //     setShowMenu(true);
+  //   }, 500); // Adjust the hold time as needed (500ms in this case)
+  // };
 
-  const handleTouchEnd = () => {
-    clearTimeout(holdTimeout.current);
-  };
+  // const handleTouchEnd = () => {
+  //   clearTimeout(holdTimeout.current);
+  // };
 
-  const handleTouchMove = () => {
-    clearTimeout(holdTimeout.current);
-  };
+  // const handleTouchMove = () => {
+  //   clearTimeout(holdTimeout.current);
+  // };
 
-  const handleCloseMenu = () => {
-    setShowMenu(false);
-  };
+  // const handleCloseMenu = () => {
+  //   setShowMenu(false);
+  // };
 
   const highlightLinks = (text) => {
     // Regex to match URLs including those that start with "www." or include domains like "vercel.app"
@@ -211,16 +211,16 @@ const Chat = () => {
         className={`flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-20 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
-        onClick={handleCloseMenu}
+        // onClick={handleCloseMenu}
       >
         {messages
           ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
           ?.map((message) => {
             return (
               <div
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                onTouchMove={handleTouchMove}
+                // onTouchStart={handleTouchStart}
+                // onTouchEnd={handleTouchEnd}
+                // onTouchMove={handleTouchMove}
                 className={`flex space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
                   message.senderId === currentUser.uid
                     ? "self-end"
@@ -230,7 +230,11 @@ const Chat = () => {
               >
                 <div className="flex flex-col space-y-1 justify-center items-start">
                   <p
-                    className={`break-words whitespace-pre-wrap text-sm ${
+                    className={`${
+                      currentUser.uid === message.senderId
+                        ? "self-end"
+                        : "self-start"
+                    } break-words whitespace-pre-wrap text-sm ${
                       theme === "dark"
                         ? message.senderId === currentUser.uid
                           ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
@@ -249,7 +253,11 @@ const Chat = () => {
                   ></p>
 
                   <span
-                    className={`text-xs ${
+                    className={` ${
+                      currentUser.uid === message.senderId
+                        ? "self-end"
+                        : "self-start"
+                    } text-xs ${
                       theme === "dark" ? "text-gray-400" : "text-gray-400"
                     } mt-1`}
                   >
@@ -260,7 +268,7 @@ const Chat = () => {
             );
           })}
       </div>
-      {showMenu && (
+      {/* {showMenu && (
         <div
           className="absolute p-2 bg-white shadow-lg rounded-lg z-10"
           style={{ top: menuPosition.top, left: menuPosition.left }}
@@ -271,7 +279,7 @@ const Chat = () => {
             <li className="p-2 hover:bg-gray-100">Edit</li>
           </ul>
         </div>
-      )}
+      )} */}
       {/* input */}
       <div
         className={`absolute bottom-0 py-3 ${

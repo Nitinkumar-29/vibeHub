@@ -79,7 +79,7 @@ const Chats = () => {
             alt=""
           />
           <div className="flex items-end space-x-1">
-            <span className="text-xl">{currentUserData?.name}</span>
+            <span className="text-xl font-semibold">{currentUserData?.name}</span>
             <span className={`${theme === "dark" ? "text-gray-600" : ""}`}>
               @{currentUserData?.user_name}
             </span>
@@ -133,21 +133,28 @@ const Chats = () => {
                   {otherParticipant && (
                     <Link
                       to={`/userChats/${otherParticipant.id}/messages`}
-                      className="flex space-x-4"
+                      className="flex flex-col space-y-1 w-full max-w-[90%]"
                     >
-                      <div>
+                      <div className="flex space-x-2">
                         <img
                           src={otherParticipant?.img}
-                          className="h-12 w-12 rounded-full"
+                          className="h-12 w-12 object-cover rounded-full"
                           alt=""
                         />
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex flex-col justify-center -space-y-1">
                           <span className="text-lg font-semibold">
                             {otherParticipant?.name}
                           </span>
+                          <span
+                            className={`${
+                              theme === "dark"
+                                ? "text-gray-600"
+                                : "text-gray-600"
+                            }`}
+                          >@{otherParticipant?.user_name}</span>
                         </div>
+                      </div>
+                      <div className="flex flex-col">
                         <span className="font-sans text-sm">
                           {chat?.lastMessage?.message &&
                           chat?.lastMessage?.message.length > 50

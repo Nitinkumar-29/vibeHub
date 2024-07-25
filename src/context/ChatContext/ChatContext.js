@@ -14,6 +14,7 @@ import {
 import { createContext, useContext, useState, useEffect } from "react";
 import { db } from "../../firebase";
 import { AuthContext } from "../AuthContext";
+import toast from "react-hot-toast";
 
 const ChatContext = createContext();
 
@@ -234,6 +235,7 @@ export const ChatProvider = ({ children }) => {
       });
       setMessageSent(true);
       console.log("Message sent!");
+      toast.success("Message sent!")
       setMessageText(""); // Clear the message input after sending
     } catch (error) {
       console.error("Error sending message: ", error);
