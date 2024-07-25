@@ -4,10 +4,11 @@ import {
   getDoc,
   getDocs,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import ChatContext from "../context/ChatContext/ChatContext";
@@ -15,16 +16,25 @@ import { AuthContext } from "../context/AuthContext";
 import { formatTime } from "../utils/FormatTime";
 import { BiLoader } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
-import { IoSend } from "react-icons/io5";
+import {
+  IoArrowBackCircle,
+  IoArrowBackCircleSharp,
+  IoSend,
+} from "react-icons/io5";
+import EmojiPicker from "emoji-picker-react";
+import { TiAttachmentOutline } from "react-icons/ti";
+import { MdArrowBackIos } from "react-icons/md";
 
 const Chat = () => {
   const { userId } = useParams();
   const [chatUserData, setChatUserData] = useState(null);
   const { theme } = useContext(ThemeContext);
   const messageContainerRef = useRef(null);
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const holdTimeout = useRef(null);
+  const fileRef = useRef(null);
   const [currentUserData, setCurrentUserData] = useState([]);
   const {
     sendMessage,
@@ -35,6 +45,7 @@ const Chat = () => {
     messageSent,
   } = useContext(ChatContext);
   const { currentUser } = useContext(AuthContext);
+  const messageInputRef = useRef(null);
 
   const handleFetchChatUserData = async () => {
     try {
@@ -53,6 +64,21 @@ const Chat = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  // seen functionality
+  const markMessagesAsSeen = async (chatId, userId) => {
+    const q = query(
+      collection(db, "messages"),
+      where("chatId", "==", chatId),
+      where("receiverId", "==", userId),
+      where("seen", "==", false)
+    );
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      await updateDoc(doc.ref, { seen: true });
+    });
   };
 
   const handleSendMessage = () => {
@@ -94,6 +120,44 @@ const Chat = () => {
     setShowMenu(false);
   };
 
+  const highlightLinks = (text) => {
+    // Regex to match URLs including those that start with "www." or include domains like "vercel.app"
+    const urlPattern =
+      /(?:\b(?:https?:\/\/|ftp:\/\/|file:\/\/|www\.)\S+|\b\S+\.\S+)(?=\b|$)/gi;
+
+    return text.replace(urlPattern, (url) => {
+      // Ensure URLs are prefixed with 'http://' if they don't already include 'http', 'https', or 'ftp'
+      const formattedUrl =
+        !/^https?:\/\//i.test(url) &&
+        !/^ftp:\/\//i.test(url) &&
+        !/^file:\/\//i.test(url) &&
+        !/^www\./i.test(url)
+          ? `http://${url}`
+          : url;
+
+      return `<a href="${formattedUrl}" target="_blank" class="text-blue-500 underline">${url}</a>`;
+    });
+  };
+
+  const focusMessageInput = () => {
+    messageInputRef.current.focus();
+  };
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  // Event listener to trigger focus on "/" key press
+  const handleKeyPress = (e) => {
+    if (e.key === "ctrl" || (e.ctrlKey && e.key === "/")) {
+      e.preventDefault();
+      focusMessageInput();
+    }
+  };
+
   useEffect(() => {
     currentUser.uid && handleFetchUserData();
     // eslint-disable-next-line
@@ -117,10 +181,34 @@ const Chat = () => {
   }, [userId]);
 
   return (
-    <div className="h-screen flex flex-col relative">
+    <div className="h-screen flex flex-col">
+      <div
+        className={`flex items-center space-x-2 p-4 shadow-lg ${
+          theme === "dark" ? "shadow-gray-800" : "shadow-gray-200"
+        }`}
+      >
+        <MdArrowBackIos
+          onClick={() => {
+            navigate(-1);
+          }}
+          className="cursor-pointer"
+          size={25}
+        />
+        <Link
+          to={`/users/${userId && userId}/profile`}
+          className="flex items-center space-x-2"
+        >
+          <img
+            src={chatUserData?.img}
+            className="h-7 w-7 rounded-full "
+            alt=""
+          />
+          <span>{chatUserData?.user_name}</span>
+        </Link>
+      </div>
       <div
         ref={messageContainerRef}
-        className={`flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth ${
+        className={`flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-20 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         onClick={handleCloseMenu}
@@ -140,43 +228,27 @@ const Chat = () => {
                 }`}
                 key={message.id}
               >
-                <div
-                  className={`flex flex-col items-start space-y-1 w-fit ${
-                    theme === "dark" ? "bg-gray-800" : "bg-gray-100"
-                  } rounded-md p-3`}
-                >
-                  <div className="flex space-x-2 justify-center items-center">
-                    <div className="flex space-x-1">
-                      {message.senderId === currentUser.uid ? (
-                        <>
-                          <img
-                            src={currentUserData?.img}
-                            className="h-6 w-6 rounded-full object-cover"
-                            alt=""
-                          />
-                          <span>{currentUserData?.name}</span>
-                        </>
-                      ) : (
-                        <>
-                          <img
-                            src={chatUserData?.img}
-                            className="h-6 w-6 rounded-full object-cover"
-                            alt=""
-                          />
-                          <span>{chatUserData?.name}</span>
-                        </>
-                      )}
-                    </div>
-                    <span
-                      className={`text-sm ${
-                        theme === "dark" ? "text-gray-400" : "text-gray-400"
-                      } mt-1`}
-                    >
-                      {formatTime(message?.timeStamp)}
-                    </span>
-                  </div>
-                  <span className={`whitespace-pre-wrap text-sm`}>
-                    {message.message}
+                <div className="flex flex-col space-y-1 justify-center items-start">
+                  <span
+                    className={`whitespace-pre-wrap text-sm ${
+                      theme === "dark"
+                        ? message.senderId === currentUser.uid
+                          ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
+                          : "bg-gray-800"
+                        : message.senderId === currentUser.uid
+                        ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
+                        : "bg-gray-200"
+                    } rounded-xl px-3 py-2`}
+                    dangerouslySetInnerHTML={{
+                      __html: highlightLinks(message.message),
+                    }}
+                  ></span>
+                  <span
+                    className={`text-xs ${
+                      theme === "dark" ? "text-gray-400" : "text-gray-400"
+                    } mt-1`}
+                  >
+                    {formatTime(message?.timeStamp)}
                   </span>
                 </div>
               </div>
@@ -189,41 +261,58 @@ const Chat = () => {
           style={{ top: menuPosition.top, left: menuPosition.left }}
         >
           <ul>
-            <li className="p-2 hover:bg-gray-100">Option 1</li>
-            <li className="p-2 hover:bg-gray-100">Option 2</li>
-            <li className="p-2 hover:bg-gray-100">Option 3</li>
+            <li className="p-2 hover:bg-gray-100">Delete</li>
+            <li className="p-2 hover:bg-gray-100">Copy</li>
+            <li className="p-2 hover:bg-gray-100">Edit</li>
           </ul>
         </div>
       )}
       {/* input */}
       <div
-        className={`absolute bottom-0 mt-2 py-2 ${
-          theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-white text-black"
+        className={`absolute bottom-0 py-3 ${
+          theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
         } w-full px-2`}
       >
         <div
-          className={`flex ${
+          className={`flex items-center ${
             theme === "dark"
               ? "bg-gray-800 text-white"
               : "bg-gray-200 text-black"
           } rounded-3xl space-x-2 w-full justify-center h-12`}
         >
-          <input
+          <textarea
+            ref={messageInputRef}
             type="text"
-            placeholder="Message..."
+            placeholder="Message... ctrl + /"
             value={messageText}
+            rows={1}
             onChange={(e) => setMessageText(e.target.value)}
-            className={`bg-inherit rounded-3xl w-[90%]  px-3 focus:outline-none`}
+            className={` resize-none hideScrollbar appearance-none bg-inherit rounded-3xl w-[90%]  px-3 focus:outline-none`}
+          />
+          <input
+            type="file"
+            hidden
+            ref={fileRef}
+            onChange={() => {
+              // setMessageContent
+            }}
+          />
+          <TiAttachmentOutline
+            onClick={() => {
+              fileRef.current.click();
+            }}
+            className="cursor-pointer"
+            size={25}
           />
           <button
             onClick={handleSendMessage}
-            disabled={messageText?.length === 0}
+            disabled={messageText.trim("")?.length === 0}
             className={`flex items-center py-2 rounded-md ${
               theme === "dark"
                 ? "border-gray-400 text-white"
                 : "border-gray-900 text-black"
             } ${
-              messageText?.length === 0
+              messageText.trim("")?.length === 0
                 ? "cursor-not-allowed opacity-50"
                 : "cursor-pointer opacity-100"
             }`}

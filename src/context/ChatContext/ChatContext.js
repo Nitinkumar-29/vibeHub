@@ -148,6 +148,7 @@ export const ChatProvider = ({ children }) => {
       });
 
       setMessages(messages); // Update the state with fetched messages
+      console.log(messages);
     } catch (error) {
       console.error("Error fetching chat messages:", error);
     }
@@ -239,6 +240,22 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // seen functionality
+  const markMessagesAsSeen = async () => {
+    let chatId = activeChatId;
+    const q = query(
+      collection(db, "messages"),
+      where("chatId", "==", chatId),
+      where("receiverId", "==", currentUser.uid),
+      where("seen", "==", false)
+    );
+
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (doc) => {
+      await updateDoc(doc.ref, { seen: true });
+    });
+  };
+
   //   delete a chat
   const deleteChat = async (chatId) => {
     const chatRef = doc(db, "chats", chatId);
@@ -258,6 +275,7 @@ export const ChatProvider = ({ children }) => {
         messageSent,
         handleFetchChatMessages,
         deleteChat,
+        markMessagesAsSeen,
       }}
     >
       {children}
