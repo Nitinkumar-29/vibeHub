@@ -25,6 +25,7 @@ import EmojiPicker from "emoji-picker-react";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { MdArrowBackIos } from "react-icons/md";
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -33,12 +34,14 @@ const Chat = () => {
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const [currentScroll, setCurrentScroll] = useState(0);
+  const [scrollInterval, setScrollInterval] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
-  const holdTimeout = useRef(null);
   const fileRef = useRef(null);
   const [currentUserData, setCurrentUserData] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const [loading, setLoading] = useState(true);
   const {
     sendMessage,
     messageText,
@@ -59,11 +62,23 @@ const Chat = () => {
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
   };
 
-  const handleBackgroundClick = (e) => {
-    if (e.target.id === "modal-background" || e.target.id === "modal-image") {
+  const handleClickOutside = (event) => {
+    console.log(typeof event.target.id);
+    if (
+      typeof event.target.id === "string" &&
+      (event?.target?.id === "modal-background" ||
+        event?.target?.id === "modal-image")
+    ) {
       handleCloseModal();
     }
   };
+
+  const handleEscapeKey = (event) => {
+    if (event.key === "Escape") {
+      handleCloseModal();
+    }
+  };
+
   const handleImageClick = (url) => {
     setSelectedImage(url);
   };
@@ -131,6 +146,53 @@ const Chat = () => {
     }
   };
 
+  const startScrolling = (direction) => {
+    const scrollStep = 200; // Adjust the scroll step as needed
+    const intervalTime = 50; // Adjust the interval time as needed
+
+    setScrollInterval(
+      setInterval(() => {
+        if (!messageContainerRef.current) return;
+
+        const container = messageContainerRef.current;
+        let newScroll;
+
+        if (direction === "down") {
+          newScroll = container.scrollTop + scrollStep;
+          container.scrollTop = newScroll;
+          setCurrentScroll(newScroll);
+        } else if (direction === "up") {
+          newScroll = container.scrollTop - scrollStep;
+          container.scrollTop = newScroll;
+          setCurrentScroll(newScroll);
+        }
+      }, intervalTime)
+    );
+  };
+
+  const stopScrolling = () => {
+    clearInterval(scrollInterval);
+    setScrollInterval(null);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "ArrowDown") {
+      if (!scrollInterval) {
+        startScrolling("down");
+      }
+    } else if (event.key === "ArrowUp") {
+      if (!scrollInterval) {
+        startScrolling("up");
+      }
+    }
+  };
+
+  const handleKeyUp = (event) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      stopScrolling();
+    }
+  };
+
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
     if (isPlaying === false) {
@@ -148,49 +210,10 @@ const Chat = () => {
     setIsPlaying(false);
   };
 
-  // const handleTouchStart = (e) => {
-  //   const touch = e.touches[0];
-  //   setMenuPosition({ top: touch.clientY, left: touch.clientX });
-
-  //   holdTimeout.current = setTimeout(() => {
-  //     setShowMenu(true);
-  //   }, 500); // Adjust the hold time as needed (500ms in this case)
-  // };
-
-  // const handleTouchEnd = () => {
-  //   clearTimeout(holdTimeout.current);
-  // };
-
-  // const handleTouchMove = () => {
-  //   clearTimeout(holdTimeout.current);
-  // };
-
-  // const handleCloseMenu = () => {
-  //   setShowMenu(false);
-  // };
-
-  const highlightLinks = (text) => {
-    // Regex to match URLs including those that start with "www." or include domains like "vercel.app"
-    const urlPattern =
-      /(?:\b(?:https?:\/\/|ftp:\/\/|file:\/\/|www\.)\S+|\b\S+\.\S+)(?=\b|$)/gi;
-
-    return text.replace(urlPattern, (url) => {
-      // Ensure URLs are prefixed with 'http://' if they don't already include 'http', 'https', or 'ftp'
-      const formattedUrl =
-        !/^https?:\/\//i.test(url) &&
-        !/^ftp:\/\//i.test(url) &&
-        !/^file:\/\//i.test(url) &&
-        !/^www\./i.test(url)
-          ? `http://${url}`
-          : url;
-
-      return `<a href="${formattedUrl}" target="_blank" class="text-blue-500 underline underline-offset-2">${url}</a>`;
-    });
-  };
-
   const focusMessageInput = () => {
     messageInputRef.current.focus();
   };
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => {
@@ -221,6 +244,7 @@ const Chat = () => {
 
   useEffect(() => {
     handleFetchChatMessages(userId);
+    setLoading(false);
     // eslint-disable-next-line
   }, [userId]);
 
@@ -228,6 +252,28 @@ const Chat = () => {
     handleFetchChatUserData();
     // eslint-disable-next-line
   }, [userId]);
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscapeKey);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+    // eslint-disable-next-line
+  }, []);
+  
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
+    };
+    // eslint-disable-next-line
+  }, [scrollInterval]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -257,7 +303,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-full max-h-[90vh] scroll-smooth pb-20 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[82vh] scroll-smooth pb-2 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
@@ -278,23 +324,33 @@ const Chat = () => {
                 key={message.id}
               >
                 <div className="flex flex-col space-y-1 justify-center items-start">
-                  <div className="flex flex-wrap w-fit justify-end">
+                  <div
+                    className={`flex flex-wrap w-fit ${
+                      message.senderId === currentUser.uid
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
                     {message.fileURLs &&
                       message.fileURLs.map((fileURL, index) => (
                         <div key={index} className="relative m-1">
                           {fileURL?.includes(".mp4") ? (
                             <div>
-                              {fileURL?.length>0?<video
-                                onClick={() => {
-                                  handlePlayPause(index);
-                                }}
-                                onEnded={handleEnded}
-                                ref={videoRef}
-                                autoFocus={true}
-                                className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
-                              >
-                                <source src={fileURL} type="video/mp4" />
-                              </video>:"loading"}
+                              {fileURL?.length > 0 ? (
+                                <video
+                                  onClick={() => {
+                                    handlePlayPause(index);
+                                  }}
+                                  onEnded={handleEnded}
+                                  ref={videoRef}
+                                  autoFocus={true}
+                                  className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                                >
+                                  <source src={fileURL} type="video/mp4" />
+                                </video>
+                              ) : (
+                                "loading"
+                              )}
                             </div>
                           ) : (
                             <img
@@ -303,7 +359,7 @@ const Chat = () => {
                               onClick={() => {
                                 handleImageClick(fileURL);
                               }}
-                              className="max-w-60 self-end max-h-60 rounded-md object-cover"
+                              className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
                             />
                           )}
                         </div>
@@ -329,7 +385,7 @@ const Chat = () => {
                         overflowWrap: "break-word",
                       }}
                       dangerouslySetInnerHTML={{
-                        __html: highlightLinks(message?.message),
+                        __html: HighLightLinks(message?.message),
                       }}
                     ></p>
                   )}
@@ -353,35 +409,35 @@ const Chat = () => {
         {/* Modal */}
         {selectedImage && (
           <div
-            onClick={handleBackgroundClick}
+            onClick={handleClickOutside}
+            id="modal-background"
             className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-full backdrop-blur-md rounded-md p-4`}
           >
-            <div className="relative w-fit">
-              <div className="relative ">
-                <div className="flex self-start relative w-fit">
-                  <img
-                    src={selectedImage}
-                    alt="preview"
-                    className="w-full h-fit max-h-[80] object-cover rounded-md"
-                  />
-                  <span
-                    onClick={handleCloseModal}
-                    className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
-                  >
-                    <AiOutlineClose size={16} />
-                  </span>
-                </div>
-
-                <button
-                  onClick={handleDownload}
-                  download
-                  className={`absolute bottom-1 right-1 ${
-                    theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-                  }  p-2 rounded`}
+            <div className="relative ">
+              <div className="flex self-start relative w-fit">
+                <img
+                  src={selectedImage}
+                  alt="preview"
+                  id="modal-image"
+                  className="w-full h-fit max-h-[30rem] object-cover rounded-md"
+                />
+                <span
+                  onClick={handleCloseModal}
+                  className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
                 >
-                  <AiOutlineDownload size={25} />
-                </button>
+                  <AiOutlineClose size={16} />
+                </span>
               </div>
+
+              <button
+                onClick={handleDownload}
+                download
+                className={`absolute bottom-1 right-1 ${
+                  theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                }  p-2 rounded`}
+              >
+                <AiOutlineDownload size={25} />
+              </button>
             </div>
           </div>
         )}
