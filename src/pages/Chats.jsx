@@ -5,7 +5,12 @@ import { formatTime } from "../utils/FormatTime";
 import { BiArrowBack, BiDotsVertical, BiImage, BiSearch } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { IoAlarmSharp, IoAlbums, IoAlbumsOutline, IoEllipsisVerticalSharp } from "react-icons/io5";
+import {
+  IoAlarmSharp,
+  IoAlbums,
+  IoAlbumsOutline,
+  IoEllipsisVerticalSharp,
+} from "react-icons/io5";
 import toast from "react-hot-toast";
 import { MdArrowBackIos } from "react-icons/md";
 import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
@@ -135,7 +140,7 @@ const Chats = () => {
                   {otherParticipant && (
                     <Link
                       to={`/userChats/${otherParticipant.id}/messages`}
-                      className="flex flex-col space-y-1 w-full max-w-[90%]"
+                      className="flex flex-col space-y-2 w-full max-w-[90%]"
                     >
                       <div className="flex space-x-2">
                         <img
@@ -158,7 +163,7 @@ const Chats = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col -space-y-1">
                         <span className="font-sans text-sm">
                           {chat?.lastMessage?.message &&
                           chat?.lastMessage?.message.length > 50 ? (

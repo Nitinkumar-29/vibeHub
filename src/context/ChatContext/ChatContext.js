@@ -259,8 +259,8 @@ export const ChatProvider = ({ children }) => {
       const fileURLs = files && (await handleUploadFiles());
       let messageData = {
         senderId: currentUser.uid,
-        message: messageText,
         fileURLs: fileURLs,
+        message: messageText,
         receiverId: userId,
         timeStamp: serverTimestamp(),
         chatId: chatId,

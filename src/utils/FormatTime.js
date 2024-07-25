@@ -37,7 +37,7 @@ export const formatTime = (timestamp) => {
   if (timeDifference < 0) {
     return `just now`;
   } else if (timeDifference < 60) {
-    return `${timeDifference} secs ago`;
+    return `${timeDifference} sec ago`;
   } else if (timeDifference < 3600) {
     const minutes = Math.floor(timeDifference / 60);
     return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;

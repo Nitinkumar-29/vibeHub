@@ -14,7 +14,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import ChatContext from "../context/ChatContext/ChatContext";
 import { AuthContext } from "../context/AuthContext";
 import { formatTime } from "../utils/FormatTime";
-import { BiLoader } from "react-icons/bi";
+import { BiLoader, BiPause, BiPlay } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
 import {
   IoArrowBackCircle,
@@ -37,6 +37,8 @@ const Chat = () => {
   const holdTimeout = useRef(null);
   const fileRef = useRef(null);
   const [currentUserData, setCurrentUserData] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef(null);
   const {
     sendMessage,
     messageText,
@@ -127,6 +129,23 @@ const Chat = () => {
         setCurrentUserData(userData, currentUser.uid);
       });
     }
+  };
+
+  const handlePlayPause = (index) => {
+    videoRef.current.click(index);
+    if (isPlaying === false) {
+      videoRef.current.play(index);
+      console.log(isPlaying);
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause(index);
+      console.log(isPlaying);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
   };
 
   // const handleTouchStart = (e) => {
@@ -230,7 +249,7 @@ const Chat = () => {
         >
           <img
             src={chatUserData?.img}
-            className="h-7 w-7 rounded-full "
+            className="h-7 w-7 rounded-full object-cover "
             alt=""
           />
           <span>{chatUserData?.user_name}</span>
@@ -238,7 +257,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-20 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-full max-h-[90vh] scroll-smooth pb-20 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
@@ -259,6 +278,37 @@ const Chat = () => {
                 key={message.id}
               >
                 <div className="flex flex-col space-y-1 justify-center items-start">
+                  <div className="flex flex-wrap w-fit justify-end">
+                    {message.fileURLs &&
+                      message.fileURLs.map((fileURL, index) => (
+                        <div key={index} className="relative m-1">
+                          {fileURL?.includes(".mp4") ? (
+                            <div>
+                              {fileURL?.length>0?<video
+                                onClick={() => {
+                                  handlePlayPause(index);
+                                }}
+                                onEnded={handleEnded}
+                                ref={videoRef}
+                                autoFocus={true}
+                                className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                              >
+                                <source src={fileURL} type="video/mp4" />
+                              </video>:"loading"}
+                            </div>
+                          ) : (
+                            <img
+                              src={fileURL}
+                              alt={`file-${index}`}
+                              onClick={() => {
+                                handleImageClick(fileURL);
+                              }}
+                              className="max-w-60 self-end max-h-60 rounded-md object-cover"
+                            />
+                          )}
+                        </div>
+                      ))}
+                  </div>
                   {message.message && (
                     <p
                       className={`${
@@ -283,21 +333,7 @@ const Chat = () => {
                       }}
                     ></p>
                   )}
-                  <div className="flex flex-wrap">
-                    {message.fileURLs &&
-                      message.fileURLs.map((fileURL, index) => (
-                        <div key={index} className="m-1">
-                          <img
-                            src={fileURL}
-                            alt={`file-${index}`}
-                            onClick={() => {
-                              handleImageClick(fileURL);
-                            }}
-                            className="w-20 h-20 rounded-md object-cover"
-                          />
-                        </div>
-                      ))}
-                  </div>
+
                   <span
                     className={` ${
                       currentUser.uid === message.senderId
@@ -318,7 +354,7 @@ const Chat = () => {
         {selectedImage && (
           <div
             onClick={handleBackgroundClick}
-            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-[95%] mx-auto h-[80vh] backdrop-blur-md rounded-md p-4`}
+            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-full backdrop-blur-md rounded-md p-4`}
           >
             <div className="relative w-fit">
               <div className="relative ">
@@ -326,7 +362,7 @@ const Chat = () => {
                   <img
                     src={selectedImage}
                     alt="preview"
-                    className="w-full h-fit object-cover rounded-md"
+                    className="w-full h-fit max-h-[80] object-cover rounded-md"
                   />
                   <span
                     onClick={handleCloseModal}
