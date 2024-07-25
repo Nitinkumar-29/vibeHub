@@ -12,9 +12,15 @@ import {
   where,
 } from "firebase/firestore";
 import { createContext, useContext, useState, useEffect } from "react";
-import { db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import { AuthContext } from "../AuthContext";
 import toast from "react-hot-toast";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 const ChatContext = createContext();
 
@@ -25,6 +31,7 @@ export const ChatProvider = ({ children }) => {
   const { currentUser } = useContext(AuthContext);
   const [messageSent, setMessageSent] = useState(true);
   const [messageText, setMessageText] = useState("");
+  const [files, setFiles] = useState([]);
 
   const handleFetchAllChats = async () => {
     try {
@@ -99,7 +106,6 @@ export const ChatProvider = ({ children }) => {
         `Chat already exists for users ${currentUser.uid} and ${userId}`
       );
     }
-
     return chatId;
   };
 
@@ -210,14 +216,51 @@ export const ChatProvider = ({ children }) => {
     }
   }, [currentUser]);
 
+  const removeFile = (indexToRemove) => {
+    setFiles((prevFiles) =>
+      prevFiles.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+  const handleUploadFiles = async () => {
+    if (files.length === 0) return [];
+    const uploadPromises = files.map((file) => {
+      const name = new Date().getTime() + "_" + file.name;
+      const storageRef = ref(storage, name);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          },
+          (error) => {
+            console.log(error);
+            reject(error);
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(downloadURL);
+          }
+        );
+      });
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   const sendMessage = async (userId) => {
     setMessageSent(false);
     const chatId = await findOrCreateChat(userId);
     if (!chatId) return; // If no chatId, exit
     try {
+      const fileURLs = files && (await handleUploadFiles());
       let messageData = {
         senderId: currentUser.uid,
         message: messageText,
+        fileURLs: fileURLs,
         receiverId: userId,
         timeStamp: serverTimestamp(),
         chatId: chatId,
@@ -229,13 +272,15 @@ export const ChatProvider = ({ children }) => {
       const chatRef = doc(db, "chats", chatId);
       await updateDoc(chatRef, {
         "lastMessage.message": messageText, // Update only the text field of lastMessage
+        "lastMessage.fileURLS": fileURLs,
         "lastMessage.senderId": currentUser.uid, // Update senderId
         "lastMessage.receiverId": userId, // Update receiverId
         lastUpdated: serverTimestamp(),
       });
       setMessageSent(true);
       console.log("Message sent!");
-      toast.success("Message sent!")
+      toast.success("Message sent!");
+      setFiles([]);
       setMessageText(""); // Clear the message input after sending
     } catch (error) {
       console.error("Error sending message: ", error);
@@ -260,9 +305,47 @@ export const ChatProvider = ({ children }) => {
 
   //   delete a chat
   const deleteChat = async (chatId) => {
-    const chatRef = doc(db, "chats", chatId);
-    chatRef && (await deleteDoc(chatRef));
-    handleFetchAllChats();
+    try {
+      const chatRef = doc(db, "chats", chatId);
+
+      // Fetch all chat messages for the given chat ID
+      const messagesQuery = query(
+        collection(db, "chat_messages"),
+        where("chatId", "==", chatId)
+      );
+      const messagesSnapshot = await getDocs(messagesQuery);
+
+      // Collect all file URLs from messages
+      const fileUrls = [];
+      messagesSnapshot.forEach((doc) => {
+        const messageData = doc.data();
+        if (messageData.fileURLs) {
+          fileUrls.push(...messageData.fileURLs);
+        }
+      });
+
+      // Delete each storage media file
+      for (const url of fileUrls) {
+        const fileRef = ref(storage, url);
+        await deleteObject(fileRef);
+      }
+
+      // Delete all chat messages
+      const deleteMessagesPromises = messagesSnapshot.docs.map((messageDoc) =>
+        deleteDoc(messageDoc.ref)
+      );
+      await Promise.all(deleteMessagesPromises);
+
+      // Delete the chat document
+      if (chatRef) {
+        await deleteDoc(chatRef);
+      }
+
+      // Fetch all chats again (assuming you have a function for this)
+      handleFetchAllChats();
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+    }
   };
 
   return (
@@ -278,6 +361,9 @@ export const ChatProvider = ({ children }) => {
         handleFetchChatMessages,
         deleteChat,
         markMessagesAsSeen,
+        files,
+        setFiles,
+        removeFile,
       }}
     >
       {children}

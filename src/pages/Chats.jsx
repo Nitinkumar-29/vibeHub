@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import ChatContext from "../context/ChatContext/ChatContext";
 import PostContext from "../context/PostContext/PostContext";
 import { formatTime } from "../utils/FormatTime";
-import { BiArrowBack, BiDotsVertical, BiSearch } from "react-icons/bi";
+import { BiArrowBack, BiDotsVertical, BiImage, BiSearch } from "react-icons/bi";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { IoEllipsisVerticalSharp } from "react-icons/io5";
+import { IoAlarmSharp, IoAlbums, IoAlbumsOutline, IoEllipsisVerticalSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { MdArrowBackIos } from "react-icons/md";
 import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
@@ -79,7 +79,9 @@ const Chats = () => {
             alt=""
           />
           <div className="flex items-end space-x-1">
-            <span className="text-xl font-semibold">{currentUserData?.name}</span>
+            <span className="text-xl font-semibold">
+              {currentUserData?.name}
+            </span>
             <span className={`${theme === "dark" ? "text-gray-600" : ""}`}>
               @{currentUserData?.user_name}
             </span>
@@ -151,16 +153,24 @@ const Chats = () => {
                                 ? "text-gray-600"
                                 : "text-gray-600"
                             }`}
-                          >@{otherParticipant?.user_name}</span>
+                          >
+                            @{otherParticipant?.user_name}
+                          </span>
                         </div>
                       </div>
                       <div className="flex flex-col">
                         <span className="font-sans text-sm">
                           {chat?.lastMessage?.message &&
-                          chat?.lastMessage?.message.length > 50
-                            ? chat?.lastMessage?.message.slice(0, 48).trim("") +
-                              `...`
-                            : chat?.lastMessage?.message}
+                          chat?.lastMessage?.message.length > 50 ? (
+                            chat?.lastMessage?.message.slice(0, 48).trim("") +
+                            `...`
+                          ) : chat?.lastMessage?.message ? (
+                            chat?.lastMessage?.message
+                          ) : (
+                            <div className="flex  items-center space-x-1">
+                              <IoAlbumsOutline /> <span>media</span>
+                            </div>
+                          )}
                         </span>
                         {chat.timeStamp && (
                           <div

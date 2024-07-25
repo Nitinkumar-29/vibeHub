@@ -24,6 +24,7 @@ import {
 import EmojiPicker from "emoji-picker-react";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { MdArrowBackIos } from "react-icons/md";
+import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -43,9 +44,38 @@ const Chat = () => {
     handleFetchChatMessages,
     messages,
     messageSent,
+    files,
+    setFiles,
+    removeFile,
   } = useContext(ChatContext);
   const { currentUser } = useContext(AuthContext);
   const messageInputRef = useRef(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+  };
+
+  const handleBackgroundClick = (e) => {
+    if (e.target.id === "modal-background" || e.target.id === "modal-image") {
+      handleCloseModal();
+    }
+  };
+  const handleImageClick = (url) => {
+    setSelectedImage(url);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedImage(null);
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = selectedImage;
+    link.download = "image.jpg"; // You can set a dynamic filename if needed
+    link.click();
+  };
 
   const handleFetchChatUserData = async () => {
     try {
@@ -208,7 +238,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-20 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-20 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
@@ -229,29 +259,45 @@ const Chat = () => {
                 key={message.id}
               >
                 <div className="flex flex-col space-y-1 justify-center items-start">
-                  <p
-                    className={`${
-                      currentUser.uid === message.senderId
-                        ? "self-end"
-                        : "self-start"
-                    } break-words whitespace-pre-wrap text-sm ${
-                      theme === "dark"
-                        ? message.senderId === currentUser.uid
-                          ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
-                          : "bg-gray-800"
-                        : message.senderId === currentUser.uid
-                        ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
-                        : "bg-gray-200"
-                    } rounded-xl px-3 py-2`}
-                    style={{
-                      wordBreak: "break-word",
-                      overflowWrap: "break-word",
-                    }}
-                    dangerouslySetInnerHTML={{
-                      __html: highlightLinks(message.message),
-                    }}
-                  ></p>
-
+                  {message.message && (
+                    <p
+                      className={`${
+                        currentUser.uid === message.senderId
+                          ? "self-end"
+                          : "self-start"
+                      } break-words whitespace-pre-wrap text-sm ${
+                        theme === "dark"
+                          ? message.senderId === currentUser.uid
+                            ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
+                            : "bg-gray-800"
+                          : message.senderId === currentUser.uid
+                          ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
+                          : "bg-gray-200"
+                      } rounded-xl px-3 py-2`}
+                      style={{
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word",
+                      }}
+                      dangerouslySetInnerHTML={{
+                        __html: highlightLinks(message?.message),
+                      }}
+                    ></p>
+                  )}
+                  <div className="flex flex-wrap">
+                    {message.fileURLs &&
+                      message.fileURLs.map((fileURL, index) => (
+                        <div key={index} className="m-1">
+                          <img
+                            src={fileURL}
+                            alt={`file-${index}`}
+                            onClick={() => {
+                              handleImageClick(fileURL);
+                            }}
+                            className="w-20 h-20 rounded-md object-cover"
+                          />
+                        </div>
+                      ))}
+                  </div>
                   <span
                     className={` ${
                       currentUser.uid === message.senderId
@@ -267,6 +313,42 @@ const Chat = () => {
               </div>
             );
           })}
+
+        {/* Modal */}
+        {selectedImage && (
+          <div
+            onClick={handleBackgroundClick}
+            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-[95%] mx-auto h-[80vh] backdrop-blur-md rounded-md p-4`}
+          >
+            <div className="relative w-fit">
+              <div className="relative ">
+                <div className="flex self-start relative w-fit">
+                  <img
+                    src={selectedImage}
+                    alt="preview"
+                    className="w-full h-fit object-cover rounded-md"
+                  />
+                  <span
+                    onClick={handleCloseModal}
+                    className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
+                  >
+                    <AiOutlineClose size={16} />
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleDownload}
+                  download
+                  className={`absolute bottom-1 right-1 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                  }  p-2 rounded`}
+                >
+                  <AiOutlineDownload size={25} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       {/* {showMenu && (
         <div
@@ -281,18 +363,70 @@ const Chat = () => {
         </div>
       )} */}
       {/* input */}
+
       <div
         className={`absolute bottom-0 py-3 ${
           theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
         } w-full px-2`}
       >
         <div
-          className={`flex items-center ${
+          className={`relative flex items-center ${
             theme === "dark"
               ? "bg-gray-800 text-white"
               : "bg-gray-200 text-black"
           } rounded-3xl space-x-2 w-full justify-center h-12`}
         >
+          {files.length > 0 && (
+            <div
+              className={`grid ${
+                files.length === 1 ? "grid-cols-1" : "grid-cols-2"
+              } gap-2 absolute left-0 bottom-20 p-4 rounded-md w-fit max-h-[60vh] overflow-y-auto hideScrollbar ${
+                theme === "dark"
+                  ? "bg-gray-800 backdrop-blur-3xl bg-opacity-40"
+                  : "bg-gray-200"
+              }`}
+            >
+              {files?.map((file, index) => (
+                <div key={index} className={` w-fit`}>
+                  {file.type.startsWith("image/") && (
+                    <div className="flex self-start relative w-fit">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt="preview"
+                        className="w-40 h-40 object-cover rounded-md"
+                      />
+                      <span
+                        onClick={() => removeFile(index)}
+                        className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
+                      >
+                        <AiOutlineClose size={16} />
+                      </span>
+                    </div>
+                  )}
+                  {file.type.startsWith("video/") && (
+                    <div className="relative w-[11.8rem] h-[9.1rem]">
+                      <video
+                        controls
+                        className="w-full h-full object-contain rounded-md"
+                      >
+                        <source
+                          src={URL.createObjectURL(file)}
+                          type={file.type}
+                        />
+                      </video>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="absolute -top-2 right-2 p-1 bg-gray-800 text-white rounded-full"
+                      >
+                        <AiOutlineClose size={20} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
           <textarea
             ref={messageInputRef}
             type="text"
@@ -303,12 +437,12 @@ const Chat = () => {
             className={`w-[90%] h-full place-content-center resize-none hideScrollbar appearance-none bg-inherit rounded-3xl px-3 focus:outline-none`}
           />
           <input
-            type="file"
-            hidden
             ref={fileRef}
-            onChange={() => {
-              // setMessageContent
-            }}
+            hidden
+            type="file"
+            multiple
+            accept="image/*, video/*"
+            onChange={handleFileChange}
           />
           <TiAttachmentOutline
             onClick={() => {
@@ -319,13 +453,13 @@ const Chat = () => {
           />
           <button
             onClick={handleSendMessage}
-            disabled={messageText.trim("")?.length === 0}
+            disabled={messageText.trim("")?.length === 0 && files?.length === 0}
             className={`flex items-center py-2 rounded-md ${
               theme === "dark"
                 ? "border-gray-400 text-white"
                 : "border-gray-900 text-black"
             } ${
-              messageText.trim("")?.length === 0
+              messageText.trim("")?.length === 0 && files?.length === 0
                 ? "cursor-not-allowed opacity-50"
                 : "cursor-pointer opacity-100"
             }`}
