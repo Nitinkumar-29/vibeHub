@@ -67,7 +67,7 @@ const Chats = () => {
             navigate(-1);
           }}
           className="cursor-pointer"
-          size={25}
+          size={20}
         />
         <Link
           to={`/userProfile/yourPosts`}
@@ -75,14 +75,19 @@ const Chats = () => {
         >
           <img
             src={currentUserData?.img}
-            className="h-7 w-7 rounded-full "
+            className="h-6 w-6 object-cover rounded-full "
             alt=""
           />
-          <span>{currentUserData?.user_name}</span>
+          <div className="flex items-end space-x-1">
+            <span className="text-xl">{currentUserData?.name}</span>
+            <span className={`${theme === "dark" ? "text-gray-600" : ""}`}>
+              @{currentUserData?.user_name}
+            </span>
+          </div>
         </Link>
       </div>
       <div
-      // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
+        // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
         className={`flex items-center mt-4 border-b-[0px] w-[95%] px-2 rounded-md ${
           theme === "dark" ? "bg-gray-800" : "bg-gray-200"
         } ${theme === "dark" ? "border-white" : "border-black"}`}
@@ -142,25 +147,6 @@ const Chats = () => {
                           <span className="text-lg font-semibold">
                             {otherParticipant?.name}
                           </span>
-                          {chat.timeStamp && (
-                            <div
-                              className={`${
-                                theme === "dark"
-                                  ? "text-gray-400"
-                                  : "text-gray-400"
-                              } text-sm mt-1`}
-                            >
-                              <span>
-                                {currentUser.uid === chat.lastMessage.senderId
-                                  ? "sent"
-                                  : "received"}
-                                &nbsp;
-                              </span>
-                              <span className={``}>
-                                {formatTime(chat?.lastUpdated)}
-                              </span>
-                            </div>
-                          )}
                         </div>
                         <span className="font-sans text-sm">
                           {chat?.lastMessage?.message &&
@@ -169,6 +155,25 @@ const Chats = () => {
                               `...`
                             : chat?.lastMessage?.message}
                         </span>
+                        {chat.timeStamp && (
+                          <div
+                            className={`${
+                              theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-400"
+                            } text-sm mt-1`}
+                          >
+                            <span>
+                              {currentUser.uid === chat.lastMessage.senderId
+                                ? "sent"
+                                : "received"}
+                              &nbsp;
+                            </span>
+                            <span className={``}>
+                              {formatTime(chat?.lastUpdated)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </Link>
                   )}

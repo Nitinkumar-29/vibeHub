@@ -135,7 +135,7 @@ const Chat = () => {
           ? `http://${url}`
           : url;
 
-      return `<a href="${formattedUrl}" target="_blank" class="text-blue-500 underline">${url}</a>`;
+      return `<a href="${formattedUrl}" target="_blank" class="text-blue-500 underline underline-offset-2">${url}</a>`;
     });
   };
 
@@ -229,8 +229,8 @@ const Chat = () => {
                 key={message.id}
               >
                 <div className="flex flex-col space-y-1 justify-center items-start">
-                  <span
-                    className={`whitespace-pre-wrap text-sm ${
+                  <p
+                    className={`break-words whitespace-pre-wrap text-sm ${
                       theme === "dark"
                         ? message.senderId === currentUser.uid
                           ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
@@ -239,10 +239,15 @@ const Chat = () => {
                         ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
                         : "bg-gray-200"
                     } rounded-xl px-3 py-2`}
+                    style={{
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
                     dangerouslySetInnerHTML={{
                       __html: highlightLinks(message.message),
                     }}
-                  ></span>
+                  ></p>
+
                   <span
                     className={`text-xs ${
                       theme === "dark" ? "text-gray-400" : "text-gray-400"
@@ -287,7 +292,7 @@ const Chat = () => {
             value={messageText}
             rows={1}
             onChange={(e) => setMessageText(e.target.value)}
-            className={` resize-none hideScrollbar appearance-none bg-inherit rounded-3xl w-[90%]  px-3 focus:outline-none`}
+            className={`w-[90%] h-full place-content-center resize-none hideScrollbar appearance-none bg-inherit rounded-3xl px-3 focus:outline-none`}
           />
           <input
             type="file"

@@ -37,22 +37,22 @@ export const formatTime = (timestamp) => {
   if (timeDifference < 0) {
     return `just now`;
   } else if (timeDifference < 60) {
-    return `${timeDifference} seconds ago`;
+    return `${timeDifference} secs ago`;
   } else if (timeDifference < 3600) {
     const minutes = Math.floor(timeDifference / 60);
     return `${minutes} min${minutes > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 86400) {
     const hours = Math.floor(timeDifference / 3600);
-    return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    return `${hours} hr${hours > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 7 * 86400) {
     const days = Math.floor(timeDifference / 86400);
-    return `${days} day${days > 1 ? "s" : ""} ago`;
+    return `${days} d${days > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 30 * 86400) {
     const weeks = Math.floor(timeDifference / (7 * 86400));
-    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+    return `${weeks} w${weeks > 1 ? "s" : ""} ago`;
   } else if (timeDifference < 365 * 86400) {
     const months = Math.floor(timeDifference / (30 * 86400));
-    return `${months} month${months > 1 ? "s" : ""} ago`;
+    return `${months} m${months > 1 ? "s" : ""} ago`;
   } else {
     const years = Math.floor(timeDifference / (365 * 86400));
     if (years === 1) {
