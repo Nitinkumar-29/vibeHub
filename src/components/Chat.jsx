@@ -296,7 +296,7 @@ const Chat = () => {
   }, [scrollInterval]);
 
   return (
-    <div className="max-h-screen min-h-[90vh] sm:min-h-screen border-2 relative flex flex-col">
+    <div className="max-h-screen min-h-[90vh] sm:min-h-screen relative flex flex-col">
       <div
         className={`border-2 sticky top-0 flex items-center space-x-2 p-4 shadow-lg ${
           theme === "dark" ? "shadow-gray-800" : "shadow-gray-200"
