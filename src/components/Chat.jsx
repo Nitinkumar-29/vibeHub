@@ -88,41 +88,25 @@ const Chat = () => {
   };
 
   const handleDownload = async (event) => {
-    // Prevent the default button behavior
     event.preventDefault();
 
     try {
-      // Check if selectedImage is a valid URL
       if (!selectedImage) {
         throw new Error("Selected image URL is not valid.");
       }
-
-      // Fetch the image as a blob
       const response = await fetch(selectedImage, {
         mode: "cors", // Ensure CORS mode is enabled
       });
-
       if (!response.ok) {
         throw new Error("Failed to fetch image.");
       }
-
       const blob = await response.blob();
-
-      // Create a temporary URL for the blob
       const blobUrl = URL.createObjectURL(blob);
-
-      // Create an anchor element
       const link = document.createElement("a");
       link.href = blobUrl;
       link.download = "image.jpg"; // You can set a dynamic filename if needed
-
-      // Append the link to the body (not visible to the user)
       document.body.appendChild(link);
-
-      // Programmatically click the link to trigger the download
       link.click();
-
-      // Remove the link from the document and revoke the blob URL
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
@@ -457,12 +441,6 @@ const Chat = () => {
                   id="modal-image"
                   className="w-full h-fit max-h-[30rem] object-cover rounded-md"
                 />
-                <span
-                  onClick={handleCloseModal}
-                  className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
-                >
-                  <AiOutlineClose size={16} />
-                </span>
               </div>
 
               <button
@@ -492,7 +470,7 @@ const Chat = () => {
       {/* input */}
 
       <div
-        className={`absolute bottom-0 py-3 ${
+        className={`absolute bottom-0 py-3 w-full ${
           theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
         } w-full px-2`}
       >
