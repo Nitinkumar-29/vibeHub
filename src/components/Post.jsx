@@ -10,10 +10,10 @@ import PostContext from "../context/PostContext/PostContext";
 import { Link, useParams } from "react-router-dom";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { GoPaperAirplane } from "react-icons/go";
-import { FaSpinner } from "react-icons/fa6";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { formatTime } from "../utils/FormatTime";
 import { CgSpinner } from "react-icons/cg";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const Post = () => {
   const {
@@ -69,16 +69,16 @@ const Post = () => {
   }, [id]);
 
   return (
-    <div className="flex flex-col items-center pb-14 w-full min-h-screen max-w-[447px]">
+    <div className="flex flex-col items-center pb-14 w-full h-full max-w-[447px]">
       {postData ? (
         <div className="flex flex-col items-center py-2 w-full">
           {postData?.userId && (
             <div className="flex flex-col w-full h-fit">
-              <div className="h-16 border-t-[1px] border-blue-950 flex items-center space-x-4 w-full justify-start p-4">
+              <div className="h-16 flex items-center space-x-2 w-full justify-start p-4">
                 {userDataWithPostId?.img ? (
                   <img
                     src={userDataWithPostId?.img}
-                    className="h-12 w-12 duration-200 rounded-full border-[1px] border-blue-900"
+                    className="h-12 w-12 duration-200 rounded-full"
                     alt=""
                   />
                 ) : (
@@ -114,9 +114,12 @@ const Post = () => {
                 </div>
               </div>
               <div className="flex flex-wrap">
-                <p className="px-4 whitespace-pre-wrap">
-                  {postData.postCaption}
-                </p>
+                <p
+                  className="px-4 whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{
+                    __html: HighLightLinks(postData?.postCaption),
+                  }}
+                />
                 {postData?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}

@@ -18,6 +18,6 @@ export const HighLightLinks = (text) => {
       return url;
     }
 
-    return `<a href="${formattedUrl}" target="_blank" class="text-blue-300 underline underline-offset-2">${url}</a>`;
+    return `<a href="${formattedUrl}" target="_blank" class="text-blue-300">${url}</a>`;
   });
 };

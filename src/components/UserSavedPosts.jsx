@@ -47,19 +47,19 @@ const UserSavedPosts = () => {
   }, [currentUser?.uid]);
 
   return (
-    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-14">
+    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-1">
       {savedPosts && savedPosts.length === 0 ? (
         <div className="mt-4">
           0 posts? <Link to="/">Try saving a post now</Link>
         </div>
       ) : (
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-3">
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
               className="flex flex-col -space-y-1 w-full h-fit"
             >
-              <div className="h-16 flex items-center space-x-4 w-full justify-start p-4">
+              <div className="h-16 flex items-center space-x-4 w-full justify-start px-3">
                 {savedPost.user?.img ? (
                   <img
                     src={savedPost.user.img}
@@ -203,7 +203,7 @@ const UserSavedPosts = () => {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col items-start pb-2  w-fit px-4">
+              <div className="flex flex-col items-start pb-2 -space-y-1 w-fit px-4">
                 {savedPost?.likes?.length !== 0 && (
                   <span className="w-fit">
                     {savedPost?.likes?.length !== 0 && savedPost?.likes?.length}

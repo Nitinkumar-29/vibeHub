@@ -9,6 +9,7 @@ import { Carousel } from "react-responsive-carousel";
 import { BiCopy, BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const UserLikedPosts = () => {
   const {
@@ -97,7 +98,12 @@ const UserLikedPosts = () => {
                   </div>
                 </div>
                 <div className="flex flex-wrap">
-                  <p className="px-4 pb-2">{likedPost.postCaption}</p>
+                  <p
+                    className="px-4 pb-2"
+                    dangerouslySetInnerHTML={{
+                      __html: HighLightLinks(likedPost?.postCaption),
+                    }}
+                  />
                   {likedPost?.mentionedUsers?.map((user, index) => (
                     <Link
                       key={index}
@@ -166,7 +172,7 @@ const UserLikedPosts = () => {
                       </div>
                     ))}
                 </Carousel>
-                <div className="flex items-center justify-between h-10 px-4 w-full">
+                <div className="flex items-center justify-between py-1 px-4 w-full">
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-1">
                       <span onClick={() => handleLikePost(likedPost.id)}>
@@ -209,7 +215,7 @@ const UserLikedPosts = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col items-start pb-2  w-fit px-4">
+                <div className="flex flex-col items-start pb-2 -space-y-1  w-fit px-4">
                   {likedPost?.likes?.length !== 0 && (
                     <span className="w-fit">
                       {likedPost?.likes?.length !== 0 &&

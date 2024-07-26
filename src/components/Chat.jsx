@@ -63,12 +63,8 @@ const Chat = () => {
   };
 
   const handleClickOutside = (event) => {
-    console.log(typeof event.target.id);
-    if (
-      typeof event.target.id === "string" &&
-      (event?.target?.id === "modal-background" ||
-        event?.target?.id === "modal-image")
-    ) {
+    const modal = document.getElementById("modal-image");
+    if (modal && !modal.contains(event.target)) {
       handleCloseModal();
     }
   };
@@ -296,12 +292,8 @@ const Chat = () => {
   }, [scrollInterval]);
 
   return (
-    <div className="max-h-screen min-h-[90vh] sm:min-h-screen relative flex flex-col">
-      <div
-        className={`sticky top-0 flex items-center space-x-2 p-4 shadow-lg ${
-          theme === "dark" ? "shadow-gray-800" : "shadow-gray-200"
-        }`}
-      >
+    <div className="h-full w-full flex flex-col">
+      <div className={`flex items-center space-x-2 p-4 `}>
         <MdArrowBackIos
           onClick={() => {
             navigate(-1);
@@ -323,7 +315,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[90vh] scroll-smooth pb-8 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
@@ -431,7 +423,7 @@ const Chat = () => {
           <div
             onClick={handleClickOutside}
             id="modal-background"
-            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-full backdrop-blur-md rounded-md p-4`}
+            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-[90%] backdrop-blur-md rounded-md p-4`}
           >
             <div className="relative ">
               <div className="flex self-start relative w-fit">
@@ -470,14 +462,14 @@ const Chat = () => {
       {/* input */}
 
       <div
-        className={`absolute bottom-0 py-3 w-full ${
-          theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
+        className={`absolute flex items-center bottom-0 py-3 ${
+          theme === "dark" ? "bg-black text-white" : "bg-white text-black"
         } w-full px-2`}
       >
         <div
           className={`relative flex items-center ${
             theme === "dark"
-              ? "bg-gray-800 text-white"
+              ? "bg-zinc-900 text-white"
               : "bg-gray-200 text-black"
           } rounded-3xl space-x-2 w-full justify-center h-12`}
         >

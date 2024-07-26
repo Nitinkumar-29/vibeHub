@@ -15,6 +15,7 @@ import { BiLoaderCircle, BiPause, BiPlay } from "react-icons/bi";
 import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const Home = () => {
   const {
@@ -27,9 +28,24 @@ const Home = () => {
     otherPublicPostsHomePage,
   } = useContext(PostContext);
   const { theme } = useContext(ThemeContext);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const [position, setPosition] = useState("fixed");
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  const handlePosition = () => {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY < lastScrollY) {
+      // Scrolling down
+      setPosition("fixed");
+    } else {
+      // Scrolling up
+      setPosition("static");
+    }
+
+    setLastScrollY(currentScrollY);
+  };
 
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
@@ -53,11 +69,39 @@ const Home = () => {
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    window.addEventListener("scroll", handlePosition);
+
+    return () => {
+      window.removeEventListener("scroll", handlePosition);
+    };
+    // eslint-disable-next-line
+  }, [lastScrollY]);
+
   return (
     <>
       {!postsLoading ? (
-        <div className="flex flex-col justify-center items-center min-h-[83.75vh]">
-          <div className="flex justify-center w-full h-full pb-2">
+        <div className="flex flex-col justify-center items-center h-fit">
+          <div
+            className={`z-20 ${position} top-0 ${
+              theme === "dark" ? "bg-black" : "bg-white"
+            }  justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
+          >
+            <Link className="flex space-x-3 items-center text-2xl" to="/">
+              <img
+                src={`/images/logo.png`}
+                className="h-8 w-8 rounded-md"
+                alt=""
+              />
+              <span
+                style={{ fontFamily: "sans-serif" }}
+                className={`font-bold bg-clip-text text-transparent bg-gradient-to-tr from-red-600 via-blue-600 to-indigo-600`}
+              >
+                Vibehub
+              </span>
+            </Link>
+          </div>
+          <div className="flex justify-center w-full h-full pb-2 pt-12">
             <div className="flex flex-col w-full h-fit space-y-6">
               {homePagePosts.length > 0 ? (
                 homePagePosts
@@ -107,9 +151,12 @@ const Home = () => {
                       </div>
                       <div className="w-full h-full ">
                         {post?.postCaption && (
-                          <p className="whitespace-pre-wrap. px-4 py-2">
-                            {post?.postCaption}
-                          </p>
+                          <p
+                            className="whitespace-pre-wrap. px-4 py-2"
+                            dangerouslySetInnerHTML={{
+                              __html: HighLightLinks(post?.postCaption),
+                            }}
+                          ></p>
                         )}
                         <div className="px-2 my-1 flex flex-wrap">
                           {post?.mentionedUsers?.map((user, index) => {

@@ -52,11 +52,9 @@ const Chats = () => {
 
   // close modal
   const handleClickOutside = (event) => {
-    if (
-      searchModelRef.current &&
-      !searchModelRef.current.contains(event.target)
-    ) {
-      setIsSearchUsers(!isSearchUsers);
+    const modal = document.getElementById("user_search");
+    if (modal && !modal.contains(event.target)) {
+      setIsSearchUsers((prev) => !prev);
     }
   };
 
@@ -116,14 +114,13 @@ const Chats = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    // eslint-disable-next-line
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start w-full">
+    <div className="h-full flex flex-col items-center justify-start w-full">
       <div
-        className={`relative flex space-x-1 items-center justify-between w-full ${
-          theme === "dark" ? "shadow-gray-800" : "shadow-gray-200"
-        } p-4`}
+        className={`relative flex space-x-1 items-center justify-between w-full px-4 py-2`}
       >
         <div className={`flex items-center space-x-2 shadow-lg`}>
           <MdArrowBackIos
@@ -165,8 +162,8 @@ const Chats = () => {
           <div
             onClick={handleClickOutside}
             id="user_search"
-            className={`absolute left-1 right-2 top-16 border-[1px] ${
-              theme === "dark" ? "border-gray-800" : "border-gray-200"
+            className={`absolute left-1 right-2 top-14 border-[1px] ${
+              theme === "dark" ? "border-zinc-800" : "border-zinc-200"
             } rounded-md self-center min-h-40 p-3 backdrop-blur-3xl bg-opacity-30`}
           >
             <input
@@ -177,7 +174,7 @@ const Chats = () => {
                 setUserQuery(e.target.value);
               }}
               className={`w-full p-2 rounded-md ${
-                theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
               }`}
             />
             {allUsers?.filter(
@@ -242,9 +239,9 @@ const Chats = () => {
       </div>
       <div
         // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
-        className={`flex items-center mt-4 border-b-[0px] w-[95%] px-2 rounded-md ${
-          theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-        } ${theme === "dark" ? "border-white" : "border-black"}`}
+        className={`flex items-center mt-4 w-[95%] px-2 rounded-md ${
+          theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+        }`}
       >
         <input
           type="text"
@@ -258,7 +255,7 @@ const Chats = () => {
         />
       </div>
       {!isSearchUsers && (
-        <div className="flex flex-col space-y-3 w-full mt-10 px-2">
+        <div className="flex flex-col space-y-2 w-full mt-4 border-t-[1px] border-zinc-900 px-2">
           {allChats && allChats.length > 0 ? (
             allChats
               ?.filter(
@@ -282,10 +279,10 @@ const Chats = () => {
                 return (
                   <div
                     key={chat.id}
-                    className={`group flex w-full items-center justify-between p-2 rounded-md ${
+                    className={`group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
                       theme === "dark"
-                        ? "hover:bg-gray-800"
-                        : "hover:bg-gray-200"
+                        ? "hover:bg-zinc-900"
+                        : "hover:bg-zinc-100"
                     } duration-200`}
                   >
                     {otherParticipant?.img && (
@@ -332,7 +329,7 @@ const Chats = () => {
                               `...`
                             ) : chat?.lastMessage?.message ? (
                               <span
-                                className="font-sans"
+                                className="font-sans text-zinc-400"
                                 dangerouslySetInnerHTML={{
                                   __html: HighLightLinks(
                                     chat?.lastMessage.message

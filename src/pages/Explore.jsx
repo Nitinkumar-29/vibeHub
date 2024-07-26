@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import PostContext from "../context/PostContext/PostContext";
 import { GiSpinningSword } from "react-icons/gi";
 import ThemeContext from "../context/Theme/ThemeContext";
+import "../styles/overflow_scroll.css";
 
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -109,23 +110,19 @@ const Explore = () => {
     <>
       {allUsers && explorePosts ? (
         <div
-          className={`relative w-full ${
-            theme === "dark" ? "bg-gray-900" : "bg-white"
-          } space-y-2 pb-20 min-h-[85.95vh]`}
+          className={`relative w-full bg-inherit pb-20 min-h-[92vh] overflow-y-auto hideScrollbar`}
         >
           <div
             ref={componentRef}
-            className={`${
-              isSticky ? "z-10 sticky top-0 " : "static"
-            }  flex justify-between items-center w-full ${
-              theme === "dark" ? "bg-gray-900" : "bg-white"
-            } max-w-[430px]  h-12 border-y-[1px] border-gray-400`}
+            className={`flex justify-between items-center w-full max-w-[430px] py-4 px-2`}
           >
             <input
               onClickCapture={() => {}}
               type="text"
               ref={searchInputRef}
-              className="bg-inherit w-full focus:outline-none placeholder:text-zinc-500 focus:placeholder:text-zinc-300 px-4 py-2"
+              className={`${
+                theme === "dark" ? "bg-zinc-900" : "bg-zinc-100"
+              } w-full p-3 outline-none rounded-md`}
               placeholder="Search @username, name.... with '/ '"
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -133,7 +130,8 @@ const Explore = () => {
             />
           </div>
           {query.trim(" ").length > 0 && (
-            <div className="flex flex-col px-2 space-y-3 pb-2">
+            <div className="flex flex-col px-4 space-y-3">
+              <span>Users</span>
               {query.length > 0 &&
                 allUsers
                   ?.filter((user) =>
@@ -205,7 +203,7 @@ const Explore = () => {
                       {post?.fileURLs && post?.fileURLs.length > 0 && (
                         <div key={post.id}>
                           {post?.fileURLs[0].includes(".mp4") ? (
-                            <video className="h-40 w-40 object-cover rounded-sm">
+                            <video className="h-40 w-40 object-cover rounded-[1px]">
                               <source src={post.fileURLs[0]} type="video/mp4" />
                             </video>
                           ) : (

@@ -17,9 +17,13 @@ import {
   where,
 } from "firebase/firestore";
 import { deleteObject, listAll, ref } from "firebase/storage";
+import { IoSunnyOutline } from "react-icons/io5";
+import { MdDarkMode } from "react-icons/md";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Settings = () => {
   const [error, setError] = useState("");
+  const { toggleTheme, theme } = useContext(ThemeContext);
   const { dispatch, currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const handleLogOut = async () => {
@@ -105,7 +109,22 @@ const Settings = () => {
           className="border-[1px] rounded-md px-4 py-2"
           onClick={handleDeleteAccount}
         >
-         Delete Account
+          Delete Account
+        </button>
+        <button
+          onClick={toggleTheme}
+          className={`relative flex items-center p-2 rounded-md border-[1px] ${
+            theme === "dark" ? "border-zinc-300" : "border-zinc-950"
+          }`}
+        >
+          <IoSunnyOutline
+            className={`${theme === "light" ? "hidden" : "flex"}`}
+            size={20}
+          />
+          <MdDarkMode
+            className={`${theme === "dark" ? "hidden" : "flex"}`}
+            size={20}
+          />
         </button>
       </div>
     </div>

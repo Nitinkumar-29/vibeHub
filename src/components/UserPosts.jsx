@@ -17,6 +17,7 @@ import { formatTime } from "../utils/FormatTime";
 import { FaCircleLeft, FaCircleRight } from "react-icons/fa6";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { BiPause, BiPlay } from "react-icons/bi";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const UserPosts = () => {
   const audioControl = useRef();
@@ -124,12 +125,12 @@ const UserPosts = () => {
   }, [currentUser]);
 
   return (
-    <div className="pb-10 space-y-4 w-full">
+    <div className="pb-2 space-y-3 w-full">
       {userPosts?.length > 0 ? (
         userPosts?.map((post) => {
           return (
             <div key={post.id} className="w-full rounded-md">
-              <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-3">
+              <div className="h-16 flex items-center rounded-sm space-x-2 w-full justify-start px-3">
                 {currentUserData?.img ? (
                   <img
                     src={currentUserData?.img}
@@ -199,31 +200,34 @@ const UserPosts = () => {
                 <div
                   contentEditable={isEdit}
                   suppressContentEditableWarning={true}
-                  className="px-4 pb-2 whitespace-pre-wrap"
-                >
-                  {post?.postCaption}
-                </div>
-                <div className="px-2 flex flex-wrap">
-                  {post?.mentionedUsers?.map((user, index) => {
-                    return (
-                      <Link
-                        key={index}
-                        className="text-zinc-500 px-2"
-                        onClick={() => {}}
-                        to={`/users/${user?.userId || user}/profile`}
-                      >
-                        {currentUser.uid === user?.userId && post.userId ? (
-                          <div className="flex items-center">
-                            @{user?.username}
-                            <span className="text-sm">&nbsp;(author)</span>
-                          </div>
-                        ) : (
-                          <span>@{user?.username}</span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
+                  className="px-4 whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={{
+                    __html: HighLightLinks(post?.postCaption),
+                  }}
+                ></div>
+                {post?.mentionedUsers.length > 0 && (
+                  <div className="px-2 flex flex-wrap">
+                    {post?.mentionedUsers?.map((user, index) => {
+                      return (
+                        <Link
+                          key={index}
+                          className="text-zinc-500 px-2"
+                          onClick={() => {}}
+                          to={`/users/${user?.userId || user}/profile`}
+                        >
+                          {currentUser.uid === user?.userId && post.userId ? (
+                            <div className="flex items-center">
+                              @{user?.username}
+                              <span className="text-sm">&nbsp;(author)</span>
+                            </div>
+                          ) : (
+                            <span>@{user?.username}</span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
                 <Carousel
                   className="carousel"
                   showThumbs={false}
@@ -272,7 +276,7 @@ const UserPosts = () => {
                     </div>
                   ))}
                 </Carousel>
-                <div className="flex items-center justify-between h-12 px-4">
+                <div className="flex items-center justify-between h-fit px-4 py-1">
                   <div className="flex items-center space-x-6">
                     <div
                       className="flex space-x-1 items-center cursor-pointer"
@@ -311,7 +315,7 @@ const UserPosts = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex flex-col space-y-1 px-4">
+                <div className="flex flex-col -space-y-1 px-4">
                   {post?.likes?.length !== 0 && (
                     <div className="flex items-center">
                       {post?.likes?.length !== 0 && (

@@ -4,20 +4,16 @@ import {
   Link,
   Outlet,
   useLocation,
-  redirect,
   useNavigate,
   useParams,
 } from "react-router-dom";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
 import PostContext from "../context/PostContext/PostContext";
-import { FiSettings } from "react-icons/fi";
 import { MdDarkMode, MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { IoSunnyOutline } from "react-icons/io5";
-import { FaMessage } from "react-icons/fa6";
-import { BiMessage } from "react-icons/bi";
-import { BsChatSquare } from "react-icons/bs";
+import "../styles/overflow_scroll.css";
+
 import { AiFillMessage } from "react-icons/ai";
 
 const Home = () => {
@@ -46,32 +42,6 @@ const Home = () => {
     // eslint-disable-next-line
   }, [currentUser.uid]);
 
-  const [position, setPosition] = useState("sticky");
-  const [lastScrollY, setLastScrollY] = useState(0);
-
-  const handlePosition = () => {
-    const currentScrollY = window.scrollY;
-
-    if (currentScrollY < lastScrollY) {
-      // Scrolling down
-      setPosition("sticky");
-    } else {
-      // Scrolling up
-      setPosition("static");
-    }
-
-    setLastScrollY(currentScrollY);
-  };
-
-  useEffect(() => {
-    window.addEventListener("scroll", handlePosition);
-
-    return () => {
-      window.removeEventListener("scroll", handlePosition);
-    };
-    // eslint-disable-next-line
-  }, [lastScrollY]);
-
   useEffect(() => {
     if (
       location.pathname === "/userProfile" ||
@@ -81,122 +51,80 @@ const Home = () => {
     }
     // eslint-disable-next-line
   }, [location.pathname === "/userProfile"]);
+
   return (
     <div
-      className={`relative w-full max-w-[430px] h-fit  ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-      }`}
+      className={`relative w-full max-w-[430px] h-screen ${
+        theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+      } backdrop-blur-3xl `}
     >
       <div
-        className={`z-20 ${position} top-0 h-14 ${
-          location.pathname === "/userChats/" ||
-          location.pathname === "/userChats" ||
-          location.pathname === `/userChats/${userId}/messages`
-            ? "hidden"
-            : "flex"
-        } ${
-          theme === "dark" ? "bg-gray-900" : "bg-white"
-        }  justify-between items-center bg-opacity-60 p-4 w-full max-w-[430px] backdrop-blur-3xl`}
-      >
-        <Link to="/">
-          <img
-            src={`/images/logo.png`}
-            className="h-10 w-10 rounded-md"
-            alt=""
-          />
-        </Link>
-        {location.pathname === "/" && <span>Home</span>}
-        {location.pathname === "/createPost" && (
-          <span>Share your thoughts</span>
-        )}
-
-        {location.pathname === "/explore" && <span>Explore</span>}
-        {(location.pathname === "/userProfile/yourPosts" ||
-          location.pathname === `/userProfile/${currentUser.uid}/followers` ||
-          location.pathname ===
-            `/userProfile/${currentUser.uid}/following`) && (
-          <Link to="/userProfile/settings">
-            <FiSettings className="cursor-pointer" size={20} />
-          </Link>
-        )}
-        {location.pathname === "/userProfile/settings" && <span>Settings</span>}
-        <button
-          onClick={toggleTheme}
-          className={`relative flex items-center p-2 rounded-md border-[1px] ${
-            theme === "dark" ? "border-zinc-300" : "border-zinc-950"
-          }`}
-        >
-          <IoSunnyOutline
-            className={`${theme === "light" ? "hidden" : "flex"}`}
-            size={20}
-          />
-          <MdDarkMode
-            className={`${theme === "dark" ? "hidden" : "flex"}`}
-            size={20}
-          />
-        </button>
-      </div>
-      <div
-        className={`w-full ${postLoading ? "h-screen" : "h-full"} 
+        className={`w-full h-[92vh] overflow-y-auto hideScrollbar
         `}
       >
         <Outlet />
       </div>
-      <div
-        className={`z-10 sticky bottom-0 h-14 ${
-          location.pathname === "/userChats/" ||
-          location.pathname === "/userChats" ||
-          location.pathname === `/userChats/${userId}/messages`
-            ? "hidden"
-            : "flex"
-        } justify-between items-center p-4 w-full max-w-[430px] ${
-          theme === "dark" ? "bg-gray-900" : "bg-white"
-        } bg-opacity-60 backdrop-blur-3xl `}
-      >
-        <Link className="flex flex-col items-center" to="/">
-          <FaHome size={25} />
-        </Link>
-        <Link
-          to="/explore"
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
+      {!(
+        location.pathname === "/userChats/" ||
+        location.pathname === "/userChats" ||
+        location.pathname === `/location/${userId}/messages`
+      ) && (
+        <div
+          className={`flex z-10 fixed bottom-0 ${
+            location.pathname === "/userChats/" ||
+            location.pathname === "/userChats" ||
+            location.pathname === `/userChats/${userId}/messages`
+              ? "hidden"
+              : "flex"
+          } justify-between items-center px-4 pt-2 pb-6 w-full max-w-[430px] ${
+            theme === "dark" ? "bg-black" : "bg-white"
+          } bg-opacity-80 backdrop-blur-3xl border-gray-900 border-t-[.5px]`}
         >
-          <MdOutlineExplore size={28} />
-        </Link>
-        <Link
-          to="/createPost"
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
-        >
-          <FaPlusCircle size={25} />
-        </Link>
-        <Link
-          to="/userChats"
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
-        >
-          <AiFillMessage size={25} />
-        </Link>
-        <Link
-          to="/userProfile/yourPosts"
-          onClick={() => {
-            window.scrollTo(0, 0);
-          }}
-        >
-          {loggedInUserData.img ? (
-            <img
-              src={loggedInUserData?.img}
-              className="h-7 w-7 rounded-full object-cover"
-              alt=""
-            />
-          ) : (
-            <FaUser size={25} />
-          )}
-        </Link>
-      </div>
+          <Link className="flex flex-col items-center" to="/">
+            <FaHome size={25} />
+          </Link>
+          <Link
+            to="/explore"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            <MdOutlineExplore size={28} />
+          </Link>
+          <Link
+            to="/createPost"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            <FaPlusCircle size={25} />
+          </Link>
+          <Link
+            to="/userChats"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            <AiFillMessage size={25} />
+          </Link>
+          <Link
+            to="/userProfile/yourPosts"
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            {loggedInUserData.img ? (
+              <img
+                src={loggedInUserData?.img}
+                className="h-7 w-7 rounded-full object-cover"
+                alt=""
+              />
+            ) : (
+              <FaUser size={25} />
+            )}
+          </Link>
+        </div>
+      )}
     </div>
   );
 };

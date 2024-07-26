@@ -14,7 +14,14 @@ import { Link, Outlet, useLocation, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { BsGrid3X3, BsHeartFill } from "react-icons/bs";
-import { BiCopy, BiLockAlt, BiPause, BiPlay, BiUserPin } from "react-icons/bi";
+import {
+  BiArrowBack,
+  BiCopy,
+  BiLockAlt,
+  BiPause,
+  BiPlay,
+  BiUserPin,
+} from "react-icons/bi";
 import PostContext from "../context/PostContext/PostContext";
 import toast from "react-hot-toast";
 import { TfiLayoutListPost } from "react-icons/tfi";
@@ -25,6 +32,8 @@ import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { Carousel } from "react-responsive-carousel";
 import FollowingList from "../components/FollowingList";
+import { FiSettings } from "react-icons/fi";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const OtherUsersProfile = () => {
   const { userId, username } = useParams();
@@ -222,17 +231,17 @@ const OtherUsersProfile = () => {
           updatedPosts = otherUserPosts.map((post) =>
             post.id === id
               ? {
-                ...post,
-                likes: post.likes.filter((uid) => uid !== currentUser.uid),
-              }
+                  ...post,
+                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                }
               : post
           );
           updatedTaggedPosts = taggedPosts.map((post) =>
             post.id === id
               ? {
-                ...post,
-                likes: post.likes.filter((uid) => uid !== currentUser.uid),
-              }
+                  ...post,
+                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                }
               : post
           );
           setOtherUserPosts(updatedPosts);
@@ -248,17 +257,17 @@ const OtherUsersProfile = () => {
           updatedPosts = otherUserPosts.map((post) =>
             post.id === id
               ? {
-                ...post,
-                likes: [...post.likes, currentUser.uid],
-              }
+                  ...post,
+                  likes: [...post.likes, currentUser.uid],
+                }
               : post
           );
           updatedTaggedPosts = taggedPosts.map((post) =>
             post.id === id
               ? {
-                ...post,
-                likes: [...post.likes, currentUser.uid],
-              }
+                  ...post,
+                  likes: [...post.likes, currentUser.uid],
+                }
               : post
           );
           setOtherUserPosts(updatedPosts);
@@ -294,11 +303,11 @@ const OtherUsersProfile = () => {
             prevPosts?.map((post) =>
               post?.id === id
                 ? {
-                  ...post,
-                  saves: post?.saves?.filter(
-                    (uid) => uid !== currentUser?.uid
-                  ),
-                }
+                    ...post,
+                    saves: post?.saves?.filter(
+                      (uid) => uid !== currentUser?.uid
+                    ),
+                  }
                 : post
             )
           );
@@ -306,11 +315,11 @@ const OtherUsersProfile = () => {
             prevPosts?.map((post) =>
               post?.id === id
                 ? {
-                  ...post,
-                  saves: post?.saves?.filter(
-                    (uid) => uid !== currentUser?.uid
-                  ),
-                }
+                    ...post,
+                    saves: post?.saves?.filter(
+                      (uid) => uid !== currentUser?.uid
+                    ),
+                  }
                 : post
             )
           );
@@ -325,9 +334,9 @@ const OtherUsersProfile = () => {
             prevPosts?.map((post) =>
               post?.id === id
                 ? {
-                  ...post,
-                  saves: [...post?.saves, currentUser?.uid],
-                }
+                    ...post,
+                    saves: [...post?.saves, currentUser?.uid],
+                  }
                 : post
             )
           );
@@ -335,9 +344,9 @@ const OtherUsersProfile = () => {
             prevPosts?.map((post) =>
               post?.id === id
                 ? {
-                  ...post,
-                  saves: [...post?.saves, currentUser?.uid],
-                }
+                    ...post,
+                    saves: [...post?.saves, currentUser?.uid],
+                  }
                 : post
             )
           );
@@ -387,116 +396,141 @@ const OtherUsersProfile = () => {
   return (
     <div className={`flex flex-col items-center w-full min-h-[86.5vh]`}>
       <div className="flex flex-col items-center w-full">
-        <div className="flex flex-col items-center h-[60vh] space-y-10 px-4">
-          <div className="flex flex-col items-center space-y-2 mt-10">
-            <div>
+        <div
+          className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 ${
+            theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+          }`}
+        >
+          <div className="flex space-x-2 items-center">
+            <BiArrowBack size={20} className="cursor-pointer" />
+            <span className={` `}>
+              {data?.user_name && (
+                <span className={`text-xl font-semibold`}>
+                  {data?.user_name}
+                </span>
+              )}
+            </span>
+          </div>
+          <Link
+            to={`/userProfile/settings`}
+            onClick={() => {
+              window.scrollTo(0, 0);
+            }}
+          >
+            <FiSettings size={20} />
+          </Link>
+        </div>
+        <div className="flex flex-col  jsutify-center items-center space-y-4 h-fit w-full p-4">
+          <div className="flex justify-between w-full h-fit">
+            <div className="flex flex-col items-center space-y-1">
               <img
                 src={data?.img}
-                className="h-32 w-32 object-cover rounded-full"
+                className="h-16 w-16 object-cover rounded-full"
                 alt=""
               />
+              <span className="">{data?.name}</span>
             </div>
-            <div className="space-x-2">
-              <span className="text-xl font-semibold">{data?.name}</span>
-              <span className={` `}>
-                {data?.user_name && (
-                  <span className={`text-gray-400`}>@{data?.user_name}</span>
-                )}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col items-center space-y-6">
-            <div className="flex space-x-3">
+            <div className="flex justify-between">
               <div className="flex flex-col items-center">
-                <span className="text-2xl">{otherUserPosts.length}</span>
-                <Link to={`/users/${userId}/profile`} className={`px-3 py-1 `}>
+                <span className="text-3xl">{otherUserPosts.length}</span>
+                <Link
+                  to={`/users/${userId}/profile`}
+                  className={`text-sm font-semibold px-3 py-1 `}
+                >
                   Posts
                 </Link>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl">{data?.followers?.length || 0}</span>
+                <span className="text-3xl">{data?.followers?.length || 0}</span>
                 <Link
                   to={`/users/${userId}/profile/followers`}
-                  className={`px-3 py-1 `}
+                  className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Followers
                 </Link>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl">{data?.following?.length || 0}</span>
+                <span className="text-3xl">{data?.following?.length || 0}</span>
                 <Link
                   to={`/users/${userId}/profile/following`}
-                  className={`px-3 py-1 `}
+                  className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Following
                 </Link>
               </div>
             </div>
-            <div className="flex justify-between space-x-6 w-full">
-              <button
-                onClick={() => handleFollow(currentUser?.uid)}
-                className={` px-3 py-1 border-[.5px] ${theme === "dark" ? "" : "bg-orange-700 text-white"
-                  } rounded-md w-full text-center`}
-              >
-                {data?.followers?.includes(currentUser.uid) ? (
-                  <span
-                    className={`${theme === "dark" ? "text-orange-600" : ""}`}
-                  >
-                    Following
-                  </span>
-                ) : (
-                  "Follow"
-                )}
-              </button>
-              {(data.accountType !== "private" || data?.followers?.includes(currentUser.uid)) && < Link
+          </div>
+          <div className="flex justify-between space-x-6 w-full">
+            <button
+              onClick={() => handleFollow(currentUser?.uid)}
+              className={` px-3 py-1 border-[.5px] ${
+                theme === "dark" ? "" : "bg-orange-700 text-white"
+              } rounded-md w-full text-center`}
+            >
+              {data?.followers?.includes(currentUser.uid) ? (
+                <span
+                  className={`${theme === "dark" ? "text-orange-600" : ""}`}
+                >
+                  Following
+                </span>
+              ) : (
+                "Follow"
+              )}
+            </button>
+            {(data.accountType !== "private" ||
+              data?.followers?.includes(currentUser.uid)) && (
+              <Link
                 to={`/userChats/${data?.userId}/messages`}
-
-                className={`px-3 py-1 border-[.5px] ${theme === "dark" ? "" : "bg-orange-700 text-white"
-                  } rounded-md w-full text-center`}
+                className={`px-3 py-1 border-[.5px] ${
+                  theme === "dark" ? "" : "bg-orange-700 text-white"
+                } rounded-md w-full text-center`}
               >
                 Message
-              </Link>}
-            </div>
+              </Link>
+            )}
           </div>
         </div>
         {data?.accountType !== "private" ||
-          data?.followers?.includes(currentUser.uid) ? (
+        data?.followers?.includes(currentUser.uid) ? (
           <div className="w-full">
             <div className="w-full">
               {(location.pathname === `/users/${userId}/profile/followers` ||
                 location.pathname === `/users/${userId}/profile/following`) && (
-                  <div
-                    className={`w-full flex justify-evenly border-b-[1px] ${theme === "dark" ? "border-gray-400" : "border-black"
-                      }`}
-                  >
-                    <span className="w-full flex justify-center">
-                      <Link
-                        to={`/users/${userId}/profile/followers`}
-                        className={`${location.pathname ===
-                          `/users/${userId}/profile/followers`
+                <div
+                  className={`w-full flex justify-evenly border-b-[1px] ${
+                    theme === "dark" ? "border-gray-400" : "border-black"
+                  }`}
+                >
+                  <span className="w-full flex justify-center">
+                    <Link
+                      to={`/users/${userId}/profile/followers`}
+                      className={`${
+                        location.pathname ===
+                        `/users/${userId}/profile/followers`
                           ? `${theme === "dark" ? "text-white" : "text-black"}`
                           : "text-gray-400"
-                          } p-2  text-center`}
-                      >
-                        {/* <TfiLayoutListPost size={25} /> */}
-                        Followers
-                      </Link>
-                    </span>
-                    <span className="w-full flex justify-center">
-                      <Link
-                        to={`/users/${userId}/profile/following`}
-                        className={`${location.pathname ===
-                          `/users/${userId}/profile/following`
+                      } p-2  text-center`}
+                    >
+                      {/* <TfiLayoutListPost size={25} /> */}
+                      Followers
+                    </Link>
+                  </span>
+                  <span className="w-full flex justify-center">
+                    <Link
+                      to={`/users/${userId}/profile/following`}
+                      className={`${
+                        location.pathname ===
+                        `/users/${userId}/profile/following`
                           ? `${theme === "dark" ? "text-white" : "text-black"}`
                           : "text-gray-400"
-                          } p-2  text-center`}
-                      >
-                        {/* <TfiLayoutListPost size={25} /> */}
-                        Following
-                      </Link>
-                    </span>
-                  </div>
-                )}
+                      } p-2  text-center`}
+                    >
+                      {/* <TfiLayoutListPost size={25} /> */}
+                      Following
+                    </Link>
+                  </span>
+                </div>
+              )}
             </div>
             {(otherUserImagePosts && otherUserPosts).length > 0 && (
               <div className="w-full">
@@ -504,61 +538,70 @@ const OtherUsersProfile = () => {
                   <div className="flex flex-col items-center w-full">
                     {(data?.accountType !== "private" ||
                       data?.followers?.includes(currentUser.uid)) && (
-                        <div className="flex w-full justify-around my-2">
-                          <button
-                            onClick={() => handleFocus(1)}
-                            className={`${focusedSection === 1
-                              ? `${theme === "dark" ? "text-white" : "text-black"
-                              }`
+                      <div className="flex w-full justify-around my-2">
+                        <button
+                          onClick={() => handleFocus(1)}
+                          className={`${
+                            focusedSection === 1
+                              ? `${
+                                  theme === "dark" ? "text-white" : "text-black"
+                                }`
                               : "text-gray-400"
-                              } `}
-                          >
-                            <BsGrid3X3 size={20} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleFocus(2);
-                              handleOtherUserPostsData(userId);
-                            }}
-                            className={`${focusedSection === 2
-                              ? `${theme === "dark" ? "text-white" : "text-black"
-                              }`
+                          } `}
+                        >
+                          <BsGrid3X3 size={20} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleFocus(2);
+                            handleOtherUserPostsData(userId);
+                          }}
+                          className={`${
+                            focusedSection === 2
+                              ? `${
+                                  theme === "dark" ? "text-white" : "text-black"
+                                }`
                               : "text-gray-400"
-                              } `}
-                          >
-                            <TfiLayoutListPost size={25} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleFocus(3);
-                              handleTaggedPosts();
-                            }}
-                            className={`${focusedSection === 3
-                              ? `${theme === "dark" ? "text-white" : "text-black"
-                              }`
+                          } `}
+                        >
+                          <TfiLayoutListPost size={25} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleFocus(3);
+                            handleTaggedPosts();
+                          }}
+                          className={`${
+                            focusedSection === 3
+                              ? `${
+                                  theme === "dark" ? "text-white" : "text-black"
+                                }`
                               : "text-gray-400"
-                              } `}
-                          >
-                            <BiUserPin size={25} />
-                          </button>
-                        </div>
-                      )}
+                          } `}
+                        >
+                          <BiUserPin size={25} />
+                        </button>
+                      </div>
+                    )}
 
                     <div
-                      className={`flex w-full border-t-[1px] ${theme === "dark" ? "border-gray-400" : "border-black"
-                        }`}
+                      className={`flex w-full border-t-[1px] ${
+                        theme === "dark" ? "border-gray-400" : "border-black"
+                      }`}
                     >
                       <div
-                        className={`${focusedSection === 1
-                          ? `${otherUserImagePosts.length > 0
-                            ? "grid grid-cols-3 gap-[.125rem]"
-                            : "flex items-center justify-center w-full"
-                          }`
-                          : "hidden"
-                          }`}
+                        className={`${
+                          focusedSection === 1
+                            ? `${
+                                otherUserImagePosts.length > 0
+                                  ? "grid grid-cols-3 gap-[.125rem]"
+                                  : "flex items-center justify-center w-full"
+                              }`
+                            : "hidden"
+                        }`}
                       >
                         {otherUserImagePosts &&
-                          otherUserImagePosts.length > 0 ? (
+                        otherUserImagePosts.length > 0 ? (
                           otherUserImagePosts
                             .filter((post) => post.fileURLs.length > 0)
                             .sort((a, b) => b.timeStamp - a.timeStamp)
@@ -595,8 +638,9 @@ const OtherUsersProfile = () => {
                       </div>
                       {/* text based posts */}
                       <div
-                        className={`w-full flex flex-col items-center space-y-6 pt-2 ${focusedSection === 2 ? "flex" : "hidden"
-                          }`}
+                        className={`w-full flex flex-col items-center space-y-6 pt-2 ${
+                          focusedSection === 2 ? "flex" : "hidden"
+                        }`}
                       >
                         {otherUserPosts && otherUserPosts.length > 0 ? (
                           otherUserPosts
@@ -638,9 +682,12 @@ const OtherUsersProfile = () => {
                                       </Link>
                                     </div>
                                   </div>
-                                  <p className="whitespace-pre-wrap">
-                                    {post?.postCaption}
-                                  </p>
+                                  <p
+                                    className="whitespace-pre-wrap"
+                                    dangerouslySetInnerHTML={{
+                                      __html: HighLightLinks(post?.postCaption),
+                                    }}
+                                  />
                                   <div className="mb-1 flex flex-wrap">
                                     {post?.mentionedUsers?.map(
                                       (user, index) => {
@@ -747,8 +794,8 @@ const OtherUsersProfile = () => {
                                     <span className="w-full text-sm text-zinc-400">
                                       {post?.timeStamp
                                         ? formatTime(post?.timeStamp, "PPpp", {
-                                          addSuffix: true,
-                                        })
+                                            addSuffix: true,
+                                          })
                                         : "not provided"}
                                     </span>
                                   </div>
@@ -763,8 +810,9 @@ const OtherUsersProfile = () => {
                       {/*  tagged posts*/}
                       {data?.followers.includes(currentUser.uid) ? (
                         <div
-                          className={`w-full flex justify-center pt-2 ${focusedSection === 3 ? "flex" : "hidden"
-                            }`}
+                          className={`w-full flex justify-center pt-2 ${
+                            focusedSection === 3 ? "flex" : "hidden"
+                          }`}
                         >
                           {taggedPosts && taggedPosts.length > 0 ? (
                             <div className="w-full h-full space-y-6">
@@ -788,7 +836,7 @@ const OtherUsersProfile = () => {
                                           }}
                                           to={
                                             currentUser?.uid ===
-                                              taggedPost?.userId
+                                            taggedPost?.userId
                                               ? `/userProfile/yourPosts`
                                               : `/users/${taggedPost?.userId}/profile`
                                           }
@@ -802,9 +850,14 @@ const OtherUsersProfile = () => {
                                         </Link>
                                       </div>
                                     </div>
-                                    <p className="whitespace-pre-wrap px-4">
-                                      {taggedPost?.postCaption}
-                                    </p>
+                                    <p
+                                      className="whitespace-pre-wrap px-4"
+                                      dangerouslySetInnerHTML={{
+                                        __html: HighLightLinks(
+                                          taggedPost?.postCaption
+                                        ),
+                                      }}
+                                    />
                                     <div className="px-2 mb-1 flex flex-wrap">
                                       {taggedPost?.mentionedUsers?.map(
                                         (user, index) => {
@@ -822,7 +875,7 @@ const OtherUsersProfile = () => {
                                               }
                                             >
                                               {taggedPost.userId ===
-                                                user?.userId ? (
+                                              user?.userId ? (
                                                 <div className="flex items-center">
                                                   @{user?.username || user}{" "}
                                                   <span className="text-sm">
@@ -854,7 +907,7 @@ const OtherUsersProfile = () => {
                                         showArrows={true}
                                         showIndicators={
                                           taggedPost &&
-                                            taggedPost?.fileURLs.length > 1
+                                          taggedPost?.fileURLs.length > 1
                                             ? true
                                             : false
                                         }
@@ -984,12 +1037,12 @@ const OtherUsersProfile = () => {
                                       <span className="w-full text-sm text-zinc-400">
                                         {taggedPost?.timeStamp
                                           ? formatTime(
-                                            taggedPost?.timeStamp,
-                                            "PPpp",
-                                            {
-                                              addSuffix: true,
-                                            }
-                                          )
+                                              taggedPost?.timeStamp,
+                                              "PPpp",
+                                              {
+                                                addSuffix: true,
+                                              }
+                                            )
                                           : "not provided"}
                                       </span>
                                     </div>
@@ -1002,7 +1055,11 @@ const OtherUsersProfile = () => {
                           )}
                         </div>
                       ) : (
-                        <div className={`w-full ${focusedSection === 3 ? "flex" : "hidden"} justify-center pt-4`}>
+                        <div
+                          className={`w-full ${
+                            focusedSection === 3 ? "flex" : "hidden"
+                          } justify-center pt-4`}
+                        >
                           <span>Follow this user to see tagged posts</span>
                         </div>
                       )}
@@ -1023,7 +1080,7 @@ const OtherUsersProfile = () => {
           </div>
         )}
       </div>
-    </div >
+    </div>
   );
 };
 

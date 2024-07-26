@@ -33,7 +33,7 @@ import {
   TfiLocationPin,
   TfiMobile,
 } from "react-icons/tfi";
-import { BiImageAdd, BiLogOut } from "react-icons/bi";
+import { BiArrowBack, BiImageAdd, BiLogOut } from "react-icons/bi";
 import { CgUserRemove } from "react-icons/cg";
 import PostContext from "../context/PostContext/PostContext";
 import { TbBackground } from "react-icons/tb";
@@ -42,6 +42,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { MdSavedSearch } from "react-icons/md";
 import { IoSaveSharp } from "react-icons/io5";
 import { BsHeartFill } from "react-icons/bs";
+import { FiSettings } from "react-icons/fi";
 
 const UserProfile = () => {
   const imageRef = useRef();
@@ -52,6 +53,7 @@ const UserProfile = () => {
   const [fetchedUserData, setFetchedUserData] = useState(null);
   const { dispatch } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [position, setPosition] = useState("static");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const {
@@ -176,59 +178,71 @@ const UserProfile = () => {
 
   return (
     <div
-      className={`flex flex-col items-center space-y-6 ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-      } min-h-screen w-full max-w-[430px] py-1`}
+      className={`flex flex-col items-center space-y-6 h-full overflow-auto hideScrollbar w-full max-w-[430px]`}
     >
+      <div
+        className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 ${
+          theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+        }`}
+      >
+        <div className="flex space-x-2 items-center">
+          <BiArrowBack size={20} className="cursor-pointer" />
+          <span className={` `}>
+            {fetchedUserData?.user_name && (
+              <span className={`text-xl font-semibold`}>
+                {fetchedUserData?.user_name}
+              </span>
+            )}
+          </span>
+        </div>
+        <Link
+          to={`/userProfile/settings`}
+          onClick={() => {
+            window.scrollTo(0, 0);
+          }}
+        >
+          <FiSettings size={20} />
+        </Link>
+      </div>
       {fetchedUserData && (
-        <div className="flex flex-col items-center h-fit space-y-10 px-4">
-          <div className="flex flex-col items-center space-y-2 mt-10">
-            <div>
+        <div className="relative flex flex-col items-center justify-center h-fit space-y-3 px-4 w-full">
+          <div className="flex items-start justify-between px-4 w-full">
+            <div className="flex flex-col items-center space-y-1">
               <img
                 src={fetchedUserData?.img}
-                className="h-32 w-32 object-cover rounded-full duration-300"
+                className="h-16 w-16 object-cover rounded-full duration-300"
                 alt=""
               />
+              <span>{fetchedUserData.name}</span>
             </div>
-            <div className="space-x-2">
-              <span className="text-xl font-semibold">
-                {fetchedUserData?.name}
-              </span>
-              <span className={` `}>
-                {fetchedUserData?.user_name && (
-                  <span className={`text-gray-400`}>
-                    @{fetchedUserData?.user_name}
-                  </span>
-                )}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col items-center space-y-6">
-            <div className="flex space-x-3">
+            <div className="flex justify-between">
               <div className="flex flex-col items-center">
-                <span className="text-2xl">{userPosts?.length || 0}</span>
-                <Link to="/userProfile/yourPosts" className={`px-3 py-1 `}>
+                <span className="text-3xl">{userPosts?.length || 0}</span>
+                <Link
+                  to="/userProfile/yourPosts"
+                  className={`text-sm font-semibold px-3 py-1 `}
+                >
                   Posts
                 </Link>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl">
+                <span className="text-3xl">
                   {fetchedUserData?.followers?.length || 0}
                 </span>
                 <Link
                   to={`/userProfile/${currentUser.uid}/followers`}
-                  className={`px-3 py-1 `}
+                  className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Followers
                 </Link>
               </div>
               <div className="flex flex-col items-center">
-                <span className="text-2xl">
+                <span className="text-3xl">
                   {fetchedUserData?.following?.length || 0}
                 </span>
                 <Link
                   to={`/userProfile/${currentUser.uid}/following`}
-                  className={`px-3 py-1 `}
+                  className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Following
                 </Link>

@@ -30,6 +30,7 @@ import { MdClearAll } from "react-icons/md";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { toBeDisabled } from "@testing-library/jest-dom/matchers";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const CreatePost = () => {
   const inputRef = useRef();
@@ -242,15 +243,11 @@ const CreatePost = () => {
   };
 
   return (
-    <div
-      className={` flex justify-center w-full ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"
-      } h-full`}
-    >
+    <div className={` flex justify-center w-full h-full`}>
       <div className="flex flex-col items-center justify-center w-full h-full">
-        <div className="min-h-screen h-full w-full bg-inherit rounded-md pb-16">
+        <div className="h-full w-full bg-inherit rounded-md pb-16">
           <form className="relative w-full h-full mt-2">
-            <div className="h-16 flex space-x-4 w-full justify-start p-3 border-t-[1px] border-blue-950">
+            <div className="border-b-[1px] border-b-zinc-900 flex items-center space-x-3 w-full justify-start p-3">
               {currentUserData?.img && (
                 <img
                   src={currentUserData.img}
@@ -330,20 +327,21 @@ const CreatePost = () => {
             <div className="flex flex-col items-center w-full h-fit p-2">
               <textarea
                 type="textarea"
-                className={`w-full focus:outline-none p-2 my-1 ${
-                  theme === "dark" ? "bg-gray-800" : "bg-gray-100"
-                } rounded-md placeholder:text-zinc-400 overflow-y-auto`}
+                className={`w-full focus:outline-none resize-none overflow-y-auto hideScrollbar p-2 my-1 ${
+                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                } rounded-md placeholder:text-zinc-600 overflow-y-auto`}
                 placeholder={`What's on your mind, ${currentUserData?.name} ?`}
                 rows={6}
                 name="postCaption"
                 onChange={onChange}
                 required
                 value={newPostData.postCaption || ""}
+              
               />
               {mentionedUsers.length > 0 ? (
                 <div
                   className={`flex flex-wrap space-x-1 h-32 duration-150 p-2 ${
-                    theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                    theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
                   } w-full rounded-md`}
                 >
                   {mentionedUsers.map((user, index) => (
@@ -373,9 +371,9 @@ const CreatePost = () => {
                 </div>
               ) : (
                 <span
-                  className={`h-32 text-zinc-700 rounded-md ${
+                  className={`h-32 text-zinc-600 rounded-md ${
                     theme === "dark"
-                      ? "bg-gray-800 text-gray-600"
+                      ? "bg-zinc-900 text-gray-600"
                       : "bg-gray-100"
                   } w-full p-2`}
                 >
@@ -392,7 +390,7 @@ const CreatePost = () => {
               />
               <div
                 className={`relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md ${
-                  theme === "dark" ? "bg-gray-800" : "bg-gray-100"
+                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
                 } w-full`}
               >
                 <div className="flex items-center w-full justify-between">
@@ -437,8 +435,8 @@ const CreatePost = () => {
                 </div>
                 <div
                   className={`${displayUsersdata} z-10 absolute top-12 ${
-                    theme === "dark" ? "bg-gray-800" : "bg-gray-100"
-                  } rounded-md h-64 overflow-y-auto w-full flex-col items-start space-y-3 p-2`}
+                    theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  } rounded-md h-56 overflow-y-auto hideScrollbar w-full flex-col items-start space-y-3 p-2`}
                 >
                   <CgClose
                     className="absolute top-2 border-[1px] rounded-full right-2 cursor-pointer"
@@ -479,16 +477,7 @@ const CreatePost = () => {
                       !mentionedUsers.some(
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
-                  ).length >= 1 && (
-                    <span>
-                      Total Users&nbsp;{" "}
-                      {
-                        allUsers.filter((user) => user.id !== currentUser.uid)
-                          .length
-                      }{" "}
-                    </span>
-                  )}
-
+                  ).length >= 1 && <span>Users</span>}
                   <div className="space-y-3">
                     {allUsers
                       .filter(
