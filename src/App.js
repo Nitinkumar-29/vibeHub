@@ -122,18 +122,18 @@ function App() {
     }
   }, []);
 
-  useEffect(() => {
-    // Request full-screen mode when the component mounts
-    const requestFullScreen = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((err) => {
-          console.log("Error attempting to enable full-screen mode:", err);
-        });
-      }
-    };
+  // useEffect(() => {
+  //   // Request full-screen mode when the component mounts
+  //   const requestFullScreen = () => {
+  //     if (!document.fullscreenElement) {
+  //       document.documentElement.requestFullscreen().catch((err) => {
+  //         console.log("Error attempting to enable full-screen mode:", err);
+  //       });
+  //     }
+  //   };
 
-    requestFullScreen();
-  }, []);
+  //   requestFullScreen();
+  // }, []);
 
   return (
     <>
