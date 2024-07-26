@@ -89,9 +89,9 @@ const Home = () => {
     >
       <div
         className={`z-20 ${position} top-0 h-14 ${
-          (location.pathname === "/userChats/" ||
+          location.pathname === "/userChats/" ||
           location.pathname === "/userChats" ||
-          location.pathname === `/userChats/${userId}/messages`)
+          location.pathname === `/userChats/${userId}/messages`
             ? "hidden"
             : "flex"
         } ${
@@ -143,10 +143,10 @@ const Home = () => {
         <Outlet />
       </div>
       <div
-        className={`z-10 ${position} bottom-0 h-16 ${
-          (location.pathname === "/userChats/" ||
+        className={`z-10 sticky bottom-0 h-14 ${
+          location.pathname === "/userChats/" ||
           location.pathname === "/userChats" ||
-          location.pathname === `/userChats/${userId}/messages`)
+          location.pathname === `/userChats/${userId}/messages`
             ? "hidden"
             : "flex"
         } justify-between items-center p-4 w-full max-w-[430px] ${

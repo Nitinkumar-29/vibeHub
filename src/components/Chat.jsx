@@ -296,9 +296,9 @@ const Chat = () => {
   }, [scrollInterval]);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="max-h-screen min-h-[90vh] sm:min-h-screen border-2 relative flex flex-col">
       <div
-        className={`flex items-center space-x-2 p-4 shadow-lg ${
+        className={`border-2 sticky top-0 flex items-center space-x-2 p-4 shadow-lg ${
           theme === "dark" ? "shadow-gray-800" : "shadow-gray-200"
         }`}
       >
@@ -323,7 +323,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
+        className={`border-2 relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
