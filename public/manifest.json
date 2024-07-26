@@ -1,6 +1,6 @@
 {
-  "short_name": "App",
-  "name": "My Full-Screen App",
+  "short_name": "vibeHub",
+  "name": "vibeHub - a social platform",
   "icons": [
     {
       "src": "/images/logo.png",
