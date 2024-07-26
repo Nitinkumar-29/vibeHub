@@ -1,0 +1,47 @@
+[debug] [2024-07-26T04:55:46.880Z] ----------------------------------------------------------------------
+[debug] [2024-07-26T04:55:46.888Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\nimbl\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only storage
+[debug] [2024-07-26T04:55:46.889Z] CLI Version:   13.14.1
+[debug] [2024-07-26T04:55:46.889Z] Platform:      win32
+[debug] [2024-07-26T04:55:46.889Z] Node Version:  v20.9.0
+[debug] [2024-07-26T04:55:46.889Z] Time:          Fri Jul 26 2024 10:25:46 GMT+0530 (India Standard Time)
+[debug] [2024-07-26T04:55:46.889Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-07-26T04:55:46.952Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-07-26T04:55:46.953Z] > authorizing via signed-in user (nimble2905@gmail.com)
+[debug] [2024-07-26T04:55:46.953Z] [iam] checking project chat--application-158a5 for permissions ["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]
+[debug] [2024-07-26T04:55:46.955Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/chat--application-158a5:testIamPermissions [none]
+[debug] [2024-07-26T04:55:46.955Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/chat--application-158a5:testIamPermissions x-goog-quota-user=projects/chat--application-158a5
+[debug] [2024-07-26T04:55:46.955Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chat--application-158a5:testIamPermissions {"permissions":["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2024-07-26T04:55:48.860Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/chat--application-158a5:testIamPermissions 200
+[debug] [2024-07-26T04:55:48.861Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/chat--application-158a5:testIamPermissions {"permissions":["firebase.projects.get","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[info] 
+[info] === Deploying to 'chat--application-158a5'...
+[info] 
+[info] i  deploying storage 
+[info] i  storage: ensuring required API firebasestorage.googleapis.com is enabled... 
+[debug] [2024-07-26T04:55:48.865Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/chat--application-158a5/services/firebasestorage.googleapis.com [none]
+[debug] [2024-07-26T04:55:48.866Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/chat--application-158a5/services/firebasestorage.googleapis.com x-goog-quota-user=projects/chat--application-158a5
+[debug] [2024-07-26T04:55:49.705Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/chat--application-158a5/services/firebasestorage.googleapis.com 200
+[debug] [2024-07-26T04:55:49.705Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/chat--application-158a5/services/firebasestorage.googleapis.com [omitted]
+[info] +  storage: required API firebasestorage.googleapis.com is enabled 
+[debug] [2024-07-26T04:55:49.706Z] >>> [apiv2][query] GET https://firebasestorage.googleapis.com/v1alpha/projects/chat--application-158a5/defaultBucket [none]
+[debug] [2024-07-26T04:55:50.922Z] <<< [apiv2][status] GET https://firebasestorage.googleapis.com/v1alpha/projects/chat--application-158a5/defaultBucket 200
+[debug] [2024-07-26T04:55:50.922Z] <<< [apiv2][body] GET https://firebasestorage.googleapis.com/v1alpha/projects/chat--application-158a5/defaultBucket {"name":"projects/chat--application-158a5/defaultBucket","location":"US","bucket":{"name":"projects/chat--application-158a5/buckets/chat--application-158a5.appspot.com"}}
+[info] i  firebase.storage: checking storage.rules for compilation errors... 
+[debug] [2024-07-26T04:55:50.924Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/chat--application-158a5:test [none]
+[debug] [2024-07-26T04:55:50.924Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/chat--application-158a5:test [omitted]
+[debug] [2024-07-26T04:55:52.645Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/chat--application-158a5:test 200
+[debug] [2024-07-26T04:55:52.645Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/chat--application-158a5:test {}
+[info] +  firebase.storage: rules file storage.rules compiled successfully 
+[debug] [2024-07-26T04:55:52.649Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/releases pageSize=10&pageToken=
+[debug] [2024-07-26T04:55:54.073Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/releases 200
+[debug] [2024-07-26T04:55:54.073Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/releases {"releases":[{"name":"projects/chat--application-158a5/releases/cloud.firestore","rulesetName":"projects/chat--application-158a5/rulesets/52349e58-1820-4542-b247-a70434d3436a","createTime":"2024-06-10T12:56:58.618204Z","updateTime":"2024-06-10T12:58:08.404938Z"},{"name":"projects/chat--application-158a5/releases/firebase.storage/chat--application-158a5.appspot.com","rulesetName":"projects/chat--application-158a5/rulesets/9a7c3fed-181a-4631-b97c-24f5e0c12d9d","createTime":"2024-06-11T07:34:19.358070Z","updateTime":"2024-07-05T05:12:20.420171Z"}]}
+[debug] [2024-07-26T04:55:54.101Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/rulesets/9a7c3fed-181a-4631-b97c-24f5e0c12d9d [none]
+[debug] [2024-07-26T04:55:54.473Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/rulesets/9a7c3fed-181a-4631-b97c-24f5e0c12d9d 200
+[debug] [2024-07-26T04:55:54.473Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/chat--application-158a5/rulesets/9a7c3fed-181a-4631-b97c-24f5e0c12d9d [omitted]
+[debug] [2024-07-26T04:55:54.475Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/chat--application-158a5 [none]
+[debug] [2024-07-26T04:55:55.325Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/chat--application-158a5 200
+[debug] [2024-07-26T04:55:55.326Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/chat--application-158a5 {"projectId":"chat--application-158a5","projectNumber":"138139203489","displayName":"Chat -application","name":"projects/chat--application-158a5","resources":{"hostingSite":"chat--application-158a5","storageBucket":"chat--application-158a5.appspot.com","locationId":"us-central"},"state":"ACTIVE","etag":"1_468873cd-6455-4720-8099-b2b38063704e"}
+[debug] [2024-07-26T04:55:55.326Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/138139203489:getIamPolicy [none]
+[debug] [2024-07-26T04:55:57.077Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/138139203489:getIamPolicy 200
+[debug] [2024-07-26T04:55:57.078Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/138139203489:getIamPolicy {"version":1,"etag":"BwYcUMtD2VY=","bindings":[{"role":"roles/editor","members":["serviceAccount:138139203489@cloudservices.gserviceaccount.com","serviceAccount:chat--application-158a5@appspot.gserviceaccount.com","user:nimble2905@gmail.com"]},{"role":"roles/firebase.managementServiceAgent","members":["serviceAccount:firebase-service-account@firebase-sa-management.iam.gserviceaccount.com","serviceAccount:service-138139203489@gcp-sa-firebase.iam.gserviceaccount.com"]},{"role":"roles/firebase.sdkAdminServiceAgent","members":["serviceAccount:firebase-adminsdk-7328s@chat--application-158a5.iam.gserviceaccount.com"]},{"role":"roles/firebaseauth.admin","members":["serviceAccount:firebase-adminsdk-7328s@chat--application-158a5.iam.gserviceaccount.com","user:nimble2905@gmail.com"]},{"role":"roles/firebasemods.serviceAgent","members":["serviceAccount:service-138139203489@gcp-sa-firebasemods.iam.gserviceaccount.com"]},{"role":"roles/firebaserules.system","members":["serviceAccount:service-138139203489@firebase-rules.iam.gserviceaccount.com"]},{"role":"roles/firebasestorage.serviceAgent","members":["serviceAccount:service-138139203489@gcp-sa-firebasestorage.iam.gserviceaccount.com"]},{"role":"roles/firestore.serviceAgent","members":["serviceAccount:service-138139203489@gcp-sa-firestore.iam.gserviceaccount.com"]},{"role":"roles/iam.serviceAccountTokenCreator","members":["serviceAccount:firebase-adminsdk-7328s@chat--application-158a5.iam.gserviceaccount.com"]},{"role":"roles/owner","members":["user:nimble2905@gmail.com"]},{"role":"roles/storage.admin","members":["serviceAccount:firebase-adminsdk-7328s@chat--application-158a5.iam.gserviceaccount.com","user:nimble2905@gmail.com"]}]}

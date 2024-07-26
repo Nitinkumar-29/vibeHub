@@ -34,12 +34,14 @@ const Chats = () => {
   const [query, setQuery] = useState("");
   const [userQuery, setUserQuery] = useState("");
   const searchInputRef = useRef(null);
+  const searchModelRef = useRef(null);
   const [allUsers, setAllUsers] = useState([]);
   const [isSearchUsers, setIsSearchUsers] = useState(false);
 
   const focusSearchInput = () => {
     searchInputRef.current.focus();
   };
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => {
@@ -47,6 +49,16 @@ const Chats = () => {
     };
     // eslint-disable-next-line
   }, []);
+
+  // close modal
+  const handleClickOutside = (event) => {
+    if (
+      searchModelRef.current &&
+      !searchModelRef.current.contains(event.target)
+    ) {
+      setIsSearchUsers(!isSearchUsers);
+    }
+  };
 
   // Event listener to trigger focus on "/" key press
   const handleKeyPress = (e) => {
@@ -97,6 +109,15 @@ const Chats = () => {
   useEffect(() => {
     handleFetchUsersData();
   }, []);
+
+  // to close the search model
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start w-full">
       <div
@@ -142,6 +163,8 @@ const Chats = () => {
         </div>
         {isSearchUsers && (
           <div
+            onClick={handleClickOutside}
+            id="user_search"
             className={`absolute left-1 right-2 top-16 border-[1px] ${
               theme === "dark" ? "border-gray-800" : "border-gray-200"
             } rounded-md self-center min-h-40 p-3 backdrop-blur-3xl bg-opacity-30`}
@@ -159,17 +182,18 @@ const Chats = () => {
             />
             {allUsers?.filter(
               (user) =>
-                (user?.followers.includes(currentUser.uid) ||
-                  user?.accountType !== "private") &&
-                user?.name
-                  .toLowerCase()
-                  .includes(userQuery.trim("").toLowerCase())
+                user.id !== currentUser.uid && // Exclude current user
+                (user.accountType !== "private" || // Include public accounts
+                  (user.accountType === "private" &&
+                    user.followers.includes(currentUser.uid))) && // Include private accounts only if the current user is a follower
+                user.name.toLowerCase().includes(userQuery.trim().toLowerCase()) // Filter by user query
             ).length > 0 ? (
               <div className="flex flex-col my-4 space-y-3">
                 <span>Users</span>
                 {allUsers
                   ?.filter(
                     (user) =>
+                      user?.id !== currentUser.uid &&
                       (user?.followers.includes(currentUser.uid) ||
                         user?.accountType !== "private") &&
                       user?.name
@@ -179,6 +203,7 @@ const Chats = () => {
                   ?.map((user) => {
                     return (
                       <Link
+                        key={user.id}
                         to={`/userChats/${user.id}/messages`}
                         className="flex items-center space-x-2"
                       >
@@ -232,112 +257,117 @@ const Chats = () => {
           className={`p-2 bg-transparent  w-full focus:outline-none focus:placeholder:text-gray-300`}
         />
       </div>
-      <div className="flex flex-col space-y-3 w-full mt-10 px-2">
-        {allChats && allChats.length > 0 ? (
-          allChats
-            ?.filter(
-              (chat) =>
-                chat?.participants.some(
-                  (participant) =>
-                    participant.id !== currentUser.uid &&
-                    participant?.name
-                      ?.toLowerCase()
-                      .includes(query.trim().toLowerCase())
-                ) ||
-                chat?.lastMessage.message
-                  .toLowerCase()
-                  .includes(query.trim().toLowerCase())
-            )
-            ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
-            ?.map((chat) => {
-              let otherParticipant = chat.participants.find(
-                (participant) => participant.id !== currentUser.uid
-              );
-              return (
-                <div
-                  key={chat.id}
-                  className={`group flex w-full items-center justify-between p-2 rounded-md ${
-                    theme === "dark" ? "hover:bg-gray-800" : "hover:bg-gray-200"
-                  } duration-200`}
-                >
-                  {otherParticipant?.img && (
-                    <Link
-                      to={`/userChats/${otherParticipant.id}/messages`}
-                      className="flex flex-col space-y-0 w-full max-w-[90%]"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={otherParticipant?.img}
-                          className="h-12 w-12 object-cover rounded-full"
-                          alt=""
-                        />
-                        <div className="flex flex-col justify-center -space-y-1">
-                          <div className="flex space-x-3">
-                            <span className="font-semibold">
-                              {otherParticipant?.name}
-                            </span>
-                            {chat.timeStamp && (
-                              <div
-                                className={`${
-                                  theme === "dark"
-                                    ? "text-gray-400"
-                                    : "text-gray-400"
-                                } text-sm mt-1`}
-                              >
-                                <span>
-                                  {currentUser.uid === chat.lastMessage.senderId
-                                    ? "sent"
-                                    : "received"}
-                                  &nbsp;
-                                </span>
-                                <span className={``}>
-                                  {formatTime(chat?.lastUpdated)}
-                                </span>
+      {!isSearchUsers && (
+        <div className="flex flex-col space-y-3 w-full mt-10 px-2">
+          {allChats && allChats.length > 0 ? (
+            allChats
+              ?.filter(
+                (chat) =>
+                  chat?.participants.some(
+                    (participant) =>
+                      participant.id !== currentUser.uid &&
+                      participant?.name
+                        ?.toLowerCase()
+                        .includes(query.trim().toLowerCase())
+                  ) ||
+                  chat?.lastMessage.message
+                    .toLowerCase()
+                    .includes(query.trim().toLowerCase())
+              )
+              ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
+              ?.map((chat) => {
+                let otherParticipant = chat.participants.find(
+                  (participant) => participant.id !== currentUser.uid
+                );
+                return (
+                  <div
+                    key={chat.id}
+                    className={`group flex w-full items-center justify-between p-2 rounded-md ${
+                      theme === "dark"
+                        ? "hover:bg-gray-800"
+                        : "hover:bg-gray-200"
+                    } duration-200`}
+                  >
+                    {otherParticipant?.img && (
+                      <Link
+                        to={`/userChats/${otherParticipant.id}/messages`}
+                        className="flex flex-col space-y-0 w-full max-w-[90%]"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={otherParticipant?.img}
+                            className="h-12 w-12 object-cover rounded-full"
+                            alt=""
+                          />
+                          <div className="flex flex-col justify-center -space-y-1">
+                            <div className="flex space-x-3">
+                              <span className="font-semibold">
+                                {otherParticipant?.name}
+                              </span>
+                              {chat.timeStamp && (
+                                <div
+                                  className={`${
+                                    theme === "dark"
+                                      ? "text-gray-400"
+                                      : "text-gray-400"
+                                  } text-sm mt-1`}
+                                >
+                                  <span>
+                                    {currentUser.uid ===
+                                    chat.lastMessage.senderId
+                                      ? "sent"
+                                      : "received"}
+                                    &nbsp;
+                                  </span>
+                                  <span className={``}>
+                                    {formatTime(chat?.lastUpdated)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {chat?.lastMessage?.message &&
+                            chat?.lastMessage?.message.length > 50 ? (
+                              chat?.lastMessage?.message.slice(0, 48).trim("") +
+                              `...`
+                            ) : chat?.lastMessage?.message ? (
+                              <span
+                                className="font-sans"
+                                dangerouslySetInnerHTML={{
+                                  __html: HighLightLinks(
+                                    chat?.lastMessage.message
+                                  ),
+                                }}
+                              />
+                            ) : (
+                              <div className="flex  items-center space-x-1">
+                                <IoAlbumsOutline /> <span>media</span>
                               </div>
                             )}
                           </div>
-
-                          {chat?.lastMessage?.message &&
-                          chat?.lastMessage?.message.length > 50 ? (
-                            chat?.lastMessage?.message.slice(0, 48).trim("") +
-                            `...`
-                          ) : chat?.lastMessage?.message ? (
-                            <span
-                              className="font-sans"
-                              dangerouslySetInnerHTML={{
-                                __html: HighLightLinks(
-                                  chat?.lastMessage.message
-                                ),
-                              }}
-                            />
-                          ) : (
-                            <div className="flex  items-center space-x-1">
-                              <IoAlbumsOutline /> <span>media</span>
-                            </div>
-                          )}
                         </div>
-                      </div>
-                      {/* <div className="flex flex-col -space-y-1"></div> */}
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => {
-                      deleteChat(chat.id);
-                      console.log(chat.id);
-                    }}
-                    className="opacity-0 group-hover:opacity-100 z-10"
-                  >
-                    <IoEllipsisVerticalSharp size={25} />
-                  </button>
-                </div>
-              );
-            })
-        ) : (
-          <div className="flex flex-col">
-            <span>No chat found</span>
-          </div>
-        )}
-      </div>
+                        {/* <div className="flex flex-col -space-y-1"></div> */}
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        deleteChat(chat.id);
+                        console.log(chat.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 z-10"
+                    >
+                      <IoEllipsisVerticalSharp size={25} />
+                    </button>
+                  </div>
+                );
+              })
+          ) : (
+            <div className="flex flex-col">
+              <span>No chat found</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

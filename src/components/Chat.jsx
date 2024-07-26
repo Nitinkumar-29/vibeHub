@@ -87,11 +87,47 @@ const Chat = () => {
     setSelectedImage(null);
   };
 
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = selectedImage;
-    link.download = "image.jpg"; // You can set a dynamic filename if needed
-    link.click();
+  const handleDownload = async (event) => {
+    // Prevent the default button behavior
+    event.preventDefault();
+
+    try {
+      // Check if selectedImage is a valid URL
+      if (!selectedImage) {
+        throw new Error("Selected image URL is not valid.");
+      }
+
+      // Fetch the image as a blob
+      const response = await fetch(selectedImage, {
+        mode: "cors", // Ensure CORS mode is enabled
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch image.");
+      }
+
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Create an anchor element
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "image.jpg"; // You can set a dynamic filename if needed
+
+      // Append the link to the body (not visible to the user)
+      document.body.appendChild(link);
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Remove the link from the document and revoke the blob URL
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading the image:", error.message);
+    }
   };
 
   const handleFetchChatUserData = async () => {
@@ -303,7 +339,7 @@ const Chat = () => {
       </div>
       <div
         ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-2 pt-4 ${
+        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
           showMenu ? "blur-sm" : ""
         }`}
         // onClick={handleCloseMenu}
@@ -431,7 +467,6 @@ const Chat = () => {
 
               <button
                 onClick={handleDownload}
-                download
                 className={`absolute bottom-1 right-1 ${
                   theme === "dark" ? "bg-gray-800" : "bg-gray-200"
                 }  p-2 rounded`}
