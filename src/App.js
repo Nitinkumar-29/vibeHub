@@ -30,94 +30,16 @@ import Chat from "./components/Chat";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [toastId, setToastId] = useState(null);
-  // const currentUser = null
+
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e);
-      // Show the install promotion toast
-      if (!toastId) {
-        showInstallPromotion();
-      }
-    };
-
-    const showInstallPromotion = () => {
-      const id = toast(
-        () => (
-          <div className="flex space-x-2 w-full">
-            <button
-              className="text-blue-600"
-              onClick={() => {
-                hideInstallPromotion();
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                  if (choiceResult.outcome === "accepted") {
-                    console.log("User accepted the install prompt");
-                  } else {
-                    console.log("User dismissed the install prompt");
-                  }
-                  setDeferredPrompt(null);
-                });
-              }}
-            >
-              Install App
-            </button>
-            <button
-              className="bg-gray-200 border-[1px] rounded-md p-2"
-              onClick={() => hideInstallPromotion()}
-            >
-              Dismiss
-            </button>
-          </div>
-        ),
-        { duration: Infinity }
-      );
-      setToastId(id);
-    };
-
-    const hideInstallPromotion = () => {
-      toast.dismiss(toastId);
-      setToastId(null); // Reset the toastId after dismissal
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-    // Cleanup event listener on component unmount
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-    };
-  }, [deferredPrompt, toastId]);
-
-  // Service worker registration
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .then((registration) => {
-            console.log(
-              "ServiceWorker registration successful with scope: ",
-              registration.scope
-            );
-          })
-          .catch((error) => {
-            console.log("ServiceWorker registration failed: ", error);
-          });
-      });
-    }
-  }, []);
-
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      // This hides the address bar:
+      window.scrollTo(0, 1);
+    }, 0);
+  });
   return (
     <>
       <Router>
