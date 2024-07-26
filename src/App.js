@@ -34,12 +34,7 @@ function App() {
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
-  window.addEventListener("load", function () {
-    setTimeout(function () {
-      // This hides the address bar:
-      window.scrollTo(0, 1);
-    }, 0);
-  });
+  
   return (
     <>
       <Router>
