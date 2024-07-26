@@ -3,8 +3,6 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
-  redirect,
 } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./authentication/Login";
@@ -24,7 +22,6 @@ import Explore from "./pages/Explore";
 import Notfound from "./pages/Notfound";
 import OtherUsersProfile from "./pages/OtherUsersProfile";
 import UserLikedPosts from "./components/UserLikedPosts";
-import ThemeContext, { ThemeProvider } from "./context/Theme/ThemeContext";
 import FollowersList from "./components/FollowersList";
 import FollowingList from "./components/FollowingList";
 import Chats from "./pages/Chats";
@@ -33,7 +30,6 @@ import Chat from "./components/Chat";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
-  const { theme } = useContext(ThemeContext);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [toastId, setToastId] = useState(null);
   // const currentUser = null
@@ -120,19 +116,6 @@ function App() {
           });
       });
     }
-  }, []);
-
-  useEffect(() => {
-    // Request full-screen mode when the component mounts
-    const requestFullScreen = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch((err) => {
-          console.log("Error attempting to enable full-screen mode:", err);
-        });
-      }
-    };
-
-    requestFullScreen();
   }, []);
 
   return (
