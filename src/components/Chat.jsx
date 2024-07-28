@@ -21,11 +21,15 @@ import {
   IoArrowBackCircleSharp,
   IoSend,
 } from "react-icons/io5";
-import EmojiPicker from "emoji-picker-react";
-import { TiAttachmentOutline } from "react-icons/ti";
+import EmojiPicker, { Emoji, EmojiStyle } from "emoji-picker-react";
+import { TiAttachmentOutline, TiTickOutline } from "react-icons/ti";
 import { MdArrowBackIos } from "react-icons/md";
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { format } from "date-fns";
+import { FaDeleteLeft } from "react-icons/fa6";
+import { FiDelete, FiTrash } from "react-icons/fi";
+import { CgSpinner } from "react-icons/cg";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -52,10 +56,15 @@ const Chat = () => {
     files,
     setFiles,
     removeFile,
+    loadingMessages,
+    deleteMessage,
+    addReaction,
+    removeReaction,
   } = useContext(ChatContext);
   const { currentUser } = useContext(AuthContext);
   const messageInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -107,6 +116,9 @@ const Chat = () => {
       URL.revokeObjectURL(blobUrl);
     } catch (error) {
       console.error("Error downloading the image:", error.message);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
     }
   };
 
@@ -126,6 +138,9 @@ const Chat = () => {
       }
     } catch (error) {
       console.error(error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
     }
   };
 
@@ -150,15 +165,21 @@ const Chat = () => {
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        setCurrentUserData(userData, currentUser.uid);
-      });
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", currentUser.email)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          setCurrentUserData(userData, currentUser.uid);
+        });
+      } catch (error) {
+        if (error.code === "resource-exhausted") {
+          console.error("Quota exceeded. Please try again later.");
+        }
+      }
     }
   };
 
@@ -262,7 +283,7 @@ const Chat = () => {
     handleFetchChatMessages(userId);
     setLoading(false);
     // eslint-disable-next-line
-  }, [userId]);
+  }, [userId, location.pathname]);
 
   useEffect(() => {
     handleFetchChatUserData();
@@ -291,6 +312,9 @@ const Chat = () => {
     // eslint-disable-next-line
   }, [scrollInterval]);
 
+  const convertToMillis = (seconds, nanoseconds) =>
+    seconds * 1000 + nanoseconds / 1000000;
+
   return (
     <div className="h-full w-full flex flex-col">
       <div className={`flex items-center space-x-2 p-4 `}>
@@ -313,140 +337,225 @@ const Chat = () => {
           <span>{chatUserData?.user_name}</span>
         </Link>
       </div>
-      <div
-        ref={messageContainerRef}
-        className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
-          showMenu ? "blur-sm" : ""
-        }`}
-        // onClick={handleCloseMenu}
-      >
-        {messages
-          ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
-          ?.map((message) => {
-            return (
-              <div
-                // onTouchStart={handleTouchStart}
-                // onTouchEnd={handleTouchEnd}
-                // onTouchMove={handleTouchMove}
-                className={`flex space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
-                  message.senderId === currentUser.uid
-                    ? "self-end"
-                    : "self-start"
-                }`}
-                key={message.id}
-              >
-                <div className="flex flex-col space-y-1 justify-center items-start">
+      {!loadingMessages ? (
+        <div
+          ref={messageContainerRef}
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
+            showMenu ? "blur-sm" : ""
+          }`}
+          // onClick={handleCloseMenu}
+        >
+          {messages
+            ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
+            ?.map((message) => {
+              return (
+                <div
+                  className={`group flex items-center space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
+                    message.senderId === currentUser.uid
+                      ? "self-end"
+                      : "self-start"
+                  }`}
+                  key={message.id}
+                >
                   <div
-                    className={`flex flex-wrap w-fit ${
-                      message.senderId === currentUser.uid
-                        ? "justify-end"
-                        : "justify-start"
+                    className={`flex flex-col space-y-1 justify-center ${
+                      currentUser.uid === message.senderId
+                        ? "items-end"
+                        : "items-start"
                     }`}
                   >
-                    {message.fileURLs &&
-                      message.fileURLs.map((fileURL, index) => (
-                        <div key={index} className="relative m-1">
-                          {fileURL?.includes(".mp4") ? (
-                            <div>
-                              {fileURL?.length > 0 ? (
-                                <video
+                    <div className="group flex items-center relative space-y-1">
+                      <div className="">
+                        {currentUser.uid === message.senderId && (
+                          <button
+                            onClick={() => {
+                              deleteMessage(message.id);
+                              console.log(message.id);
+                            }}
+                            className={`px-2 hidden group-hover:inline-block duration-300 transition-transform`}
+                          >
+                            <FiTrash />
+                          </button>
+                        )}
+                      </div>
+                      <div
+                        className={`flex flex-col ${
+                          message.senderId === currentUser.uid
+                            ? "items-end"
+                            : "items-start"
+                        }`}
+                      >
+                        {" "}
+                        {message.reactions && (
+                          <div
+                            className={`absolute  z-10 -top-2 rounded-full -right-1  `}
+                          >
+                            {Object.entries(message.reactions).map(
+                              ([userId, reaction]) => (
+                                <span
+                                  className="text-sm cursor-pointer"
                                   onClick={() => {
-                                    handlePlayPause(index);
+                                    removeReaction(message.id);
+                                    console.log(reaction, message.id);
                                   }}
-                                  onEnded={handleEnded}
-                                  ref={videoRef}
-                                  autoFocus={true}
-                                  className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                                  key={userId}
                                 >
-                                  <source src={fileURL} type="video/mp4" />
-                                </video>
-                              ) : (
-                                "loading"
-                              )}
-                            </div>
-                          ) : (
-                            <img
-                              src={fileURL}
-                              alt={`file-${index}`}
-                              onClick={() => {
-                                handleImageClick(fileURL);
+                                  {reaction}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                        {message.fileURLs && (
+                          <div
+                            className={`flex flex-wrap w-fit ${
+                              message.senderId === currentUser.uid
+                                ? "justify-end"
+                                : "justify-start"
+                            }`}
+                          >
+                            {message.fileURLs &&
+                              message.fileURLs.map((fileURL, index) => (
+                                <div key={index} className="relative">
+                                  {fileURL?.includes(".mp4") ? (
+                                    <div>
+                                      {fileURL?.length > 0 ? (
+                                        <video
+                                          onClick={() => {
+                                            handlePlayPause(index);
+                                          }}
+                                          onEnded={handleEnded}
+                                          ref={videoRef}
+                                          autoFocus={true}
+                                          className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                                        >
+                                          <source
+                                            src={fileURL}
+                                            type="video/mp4"
+                                          />
+                                        </video>
+                                      ) : (
+                                        "loading"
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <img
+                                      src={fileURL}
+                                      alt={`file-${index}`}
+                                      onClick={() => {
+                                        handleImageClick(fileURL);
+                                      }}
+                                      className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
+                                    />
+                                  )}
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                        <div className={`flex relative justify-end mb-1 w-fit`}>
+                          {message.message && (
+                            <span
+                              className={`${
+                                currentUser.uid === message.senderId
+                                  ? "self-end"
+                                  : "self-start"
+                              } break-words whitespace-pre-wrap text-sm ${
+                                theme === "dark"
+                                  ? message.senderId === currentUser.uid
+                                    ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
+                                    : "bg-gray-800"
+                                  : message.senderId === currentUser.uid
+                                  ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
+                                  : "bg-gray-200"
+                              } rounded-xl px-3 py-2`}
+                              style={{
+                                wordBreak: "break-word",
+                                overflowWrap: "break-word",
                               }}
-                              className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
-                            />
+                              dangerouslySetInnerHTML={{
+                                __html: HighLightLinks(message?.message),
+                              }}
+                            ></span>
                           )}
                         </div>
-                      ))}
-                  </div>
-                  {message.message && (
-                    <p
-                      className={`${
+                      </div>
+                      {currentUser.uid === message.receiverId && (
+                        <div
+                          className={`z-10 absolute ${
+                            message.senderId === currentUser.uid
+                              ? "top-1 right-0"
+                              : "-top-[53px] left-0"
+                          } hidden group-hover:inline-flex`}
+                        >
+                          <EmojiPicker
+                            reactionsDefaultOpen
+                            onEmojiClick={(event) => {
+                              addReaction(message.id, event.emoji);
+                              console.log("reaction: ", event.emoji);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`flex flex-col space-y-1 ${
                         currentUser.uid === message.senderId
                           ? "self-end"
                           : "self-start"
-                      } break-words whitespace-pre-wrap text-sm ${
-                        theme === "dark"
-                          ? message.senderId === currentUser.uid
-                            ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
-                            : "bg-gray-800"
-                          : message.senderId === currentUser.uid
-                          ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
-                          : "bg-gray-200"
-                      } rounded-xl px-3 py-2`}
-                      style={{
-                        wordBreak: "break-word",
-                        overflowWrap: "break-word",
-                      }}
-                      dangerouslySetInnerHTML={{
-                        __html: HighLightLinks(message?.message),
-                      }}
-                    ></p>
-                  )}
-
-                  <span
-                    className={` ${
-                      currentUser.uid === message.senderId
-                        ? "self-end"
-                        : "self-start"
-                    } text-xs ${
-                      theme === "dark" ? "text-gray-400" : "text-gray-400"
-                    } mt-1`}
-                  >
-                    {formatTime(message?.timeStamp)}
-                  </span>
+                      }`}
+                    >
+                      <span
+                        className={` ${
+                          currentUser.uid === message.senderId
+                            ? "self-end"
+                            : "self-start"
+                        } text-xs ${
+                          theme === "dark" ? "text-gray-400" : "text-gray-400"
+                        }`}
+                      >
+                        {formatTime(message?.timeStamp)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-        {/* Modal */}
-        {selectedImage && (
-          <div
-            onClick={handleClickOutside}
-            id="modal-background"
-            className={`fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-[90%] backdrop-blur-md rounded-md p-4`}
-          >
-            <div className="relative ">
-              <div className="flex self-start relative w-fit">
-                <img
-                  src={selectedImage}
-                  alt="preview"
-                  id="modal-image"
-                  className="w-full h-fit max-h-[30rem] object-cover rounded-md"
-                />
-              </div>
+          {/* Modal */}
+          {selectedImage && (
+            <div
+              onClick={handleClickOutside}
+              id="modal-background"
+              className={`z-20 fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-[90%] backdrop-blur-md rounded-md p-4`}
+            >
+              <div className="relative ">
+                <div className="flex self-start relative w-fit">
+                  <img
+                    src={selectedImage}
+                    alt="preview"
+                    id="modal-image"
+                    className="w-full h-fit max-h-[30rem] object-cover rounded-md"
+                  />
+                </div>
 
-              <button
-                onClick={handleDownload}
-                className={`absolute bottom-1 right-1 ${
-                  theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-                }  p-2 rounded`}
-              >
-                <AiOutlineDownload size={25} />
-              </button>
+                <button
+                  onClick={handleDownload}
+                  className={`absolute bottom-1 right-1 ${
+                    theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                  }  p-2 rounded`}
+                >
+                  <AiOutlineDownload size={25} />
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className="h-full w-full flex items-center justify-center">
+          <CgSpinner className="animate-spin " size={40} />
+        </div>
+      )}
       {/* {showMenu && (
         <div
           className="absolute p-2 bg-white shadow-lg rounded-lg z-10"
@@ -462,7 +571,7 @@ const Chat = () => {
       {/* input */}
 
       <div
-        className={`absolute flex items-center bottom-0 py-3 ${
+        className={`z-20 absolute flex items-center bottom-0 py-3 ${
           theme === "dark" ? "bg-black text-white" : "bg-white text-black"
         } w-full px-2`}
       >

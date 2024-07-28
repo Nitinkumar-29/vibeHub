@@ -7,39 +7,15 @@ import {
   where,
   getDocs,
   doc,
-  deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import {
-  deleteObject,
-  getDownloadURL,
-  listAll,
-  ref,
-  uploadBytesResumable,
-} from "firebase/storage";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { AuthContext } from "../context/AuthContext";
-import {
-  signOut,
-  deleteUser,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from "firebase/auth";
-import { FaEdit, FaPencilAlt, FaUserPlus } from "react-icons/fa";
-import { FaPencil } from "react-icons/fa6";
-import { VscLoading } from "react-icons/vsc";
-import {
-  TfiEmail,
-  TfiLayoutListPost,
-  TfiLocationPin,
-  TfiMobile,
-} from "react-icons/tfi";
-import { BiArrowBack, BiImageAdd, BiLogOut } from "react-icons/bi";
-import { CgUserRemove } from "react-icons/cg";
+
+import { TfiLayoutListPost } from "react-icons/tfi";
+import { BiArrowBack } from "react-icons/bi";
 import PostContext from "../context/PostContext/PostContext";
-import { TbBackground } from "react-icons/tb";
-import UserLikedPosts from "../components/UserLikedPosts";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { MdSavedSearch } from "react-icons/md";
 import { IoSaveSharp } from "react-icons/io5";
 import { BsHeartFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
@@ -47,13 +23,9 @@ import { FiSettings } from "react-icons/fi";
 const UserProfile = () => {
   const imageRef = useRef();
   const [file, setFile] = useState("");
-  const [bgImg, setBgImg] = useState("");
   const [bgImgPreview, setBgImgPreview] = useState("");
   const { currentUser } = useContext(AuthContext);
   const [fetchedUserData, setFetchedUserData] = useState(null);
-  const { dispatch } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const [position, setPosition] = useState("static");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const {
@@ -61,70 +33,9 @@ const UserProfile = () => {
     handleFetchLikedPosts,
     handleFetchSavedPosts,
     userPosts,
-    savedPosts,
-    likedPosts,
   } = useContext(PostContext);
   const location = useLocation();
-  const bgImgRef = useRef();
   const { theme } = useContext(ThemeContext);
-
-  const handleImageOnChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleBgImageOnChange = (e) => {
-    bgImgPreview.current.click();
-    if (e.target.files && e.target.files[0]) {
-      setBgImgPreview(e.target.files[0]);
-    }
-  };
-
-  const handleUploadFile = async () => {
-    if (!file) return;
-    setIsLoading(true);
-    const name = new Date().getTime() + "_" + file.name;
-    const storageRef = ref(storage, name);
-    const uploadTask = uploadBytesResumable(storageRef, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        console.log("Upload is " + progress + "% done");
-
-        switch (snapshot.state) {
-          case "paused":
-            console.log("Upload is paused");
-            break;
-          case "running":
-            console.log("Upload is running");
-            break;
-          default:
-            break;
-        }
-      },
-      (error) => {
-        console.log(error);
-        setError("File upload failed. Please try again.");
-        setIsLoading(false);
-      },
-      async () => {
-        try {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          console.log("File available at", downloadURL);
-          await updateUserData({ img: downloadURL });
-          setIsLoading(false);
-        } catch (err) {
-          console.error(err);
-          setError("Failed to update user data. Please try again.");
-          setIsLoading(false);
-        }
-      }
-    );
-  };
 
   const updateUserData = async (updatedData) => {
     try {
@@ -139,19 +50,26 @@ const UserProfile = () => {
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        setFetchedUserData(userData, currentUser.uid);
-        localStorage.setItem(
-          "loggedInUserData",
-          JSON.stringify(userData, currentUser.uid)
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", currentUser.email)
         );
-      });
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          setFetchedUserData(userData, currentUser.uid);
+          localStorage.setItem(
+            "loggedInUserData",
+            JSON.stringify(userData, currentUser.uid)
+          );
+        });
+      } catch (error) {
+        if (error.code === "resource-exhausted") {
+          console.error("Quota exceeded. Please try again later.");
+        }
+        setError("Server down, Please try again later");
+      }
     }
   };
 
@@ -161,13 +79,6 @@ const UserProfile = () => {
     }
     // eslint-disable-next-line
   }, [currentUser]);
-
-  useEffect(() => {
-    if (file) {
-      handleUploadFile();
-    }
-    // eslint-disable-next-line
-  }, [file]);
 
   useEffect(() => {
     handleFetchUserPosts();

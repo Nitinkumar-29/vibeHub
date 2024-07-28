@@ -480,7 +480,7 @@ const OtherUsersProfile = () => {
             {(data.accountType !== "private" ||
               data?.followers?.includes(currentUser.uid)) && (
               <Link
-                to={`/userChats/${data?.userId}/messages`}
+                to={`/chat/${data?.userId}/messages`}
                 className={`px-3 py-1 border-[.5px] ${
                   theme === "dark" ? "" : "bg-orange-700 text-white"
                 } rounded-md w-full text-center`}

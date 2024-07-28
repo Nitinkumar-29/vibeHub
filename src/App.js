@@ -25,82 +25,75 @@ import UserLikedPosts from "./components/UserLikedPosts";
 import FollowersList from "./components/FollowersList";
 import FollowingList from "./components/FollowingList";
 import Chats from "./pages/Chats";
-import { ChatProvider } from "./context/ChatContext/ChatContext";
 import Chat from "./components/Chat";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
-
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
-  
+
   return (
     <>
       <Router>
-        <ChatProvider>
-          <PostProvider>
-            <Toaster position="top-left" />
-            <Routes>
+        <PostProvider>
+          <Toaster position="top-left" />
+          <Routes>
+            <Route
+              exact
+              path="/"
+              element={
+                <RequireAuth>
+                  <Main />
+                </RequireAuth>
+              }
+            >
+              <Route path="/" element={<Home />} />
+              <Route path="/createPost" element={<CreatePost />} />
               <Route
-                exact
-                path="/"
+                path="/userProfile"
                 element={
                   <RequireAuth>
-                    <Main />
+                    <UserProfile />
                   </RequireAuth>
                 }
               >
-                <Route path="/" element={<Home />} />
-                <Route path="/createPost" element={<CreatePost />} />
+                <Route path="/userProfile/yourPosts" element={<UserPosts />} />
                 <Route
-                  path="/userProfile"
-                  element={
-                    <RequireAuth>
-                      <UserProfile />
-                    </RequireAuth>
-                  }
-                >
-                  <Route
-                    path="/userProfile/yourPosts"
-                    element={<UserPosts />}
-                  />
-                  <Route
-                    path="/userProfile/savedPosts"
-                    element={<UserSavedPosts />}
-                  />
-                  <Route
-                    path="/userProfile/likedPosts"
-                    element={<UserLikedPosts />}
-                  />
-                  <Route
-                    path="/userProfile/:userId?/followers"
-                    element={<FollowersList />}
-                  />
-                  <Route
-                    path="/userProfile/:userId?/following"
-                    element={<FollowingList />}
-                  />
-                </Route>
+                  path="/userProfile/savedPosts"
+                  element={<UserSavedPosts />}
+                />
                 <Route
-                  path="/users/:userId?/profile/"
-                  element={<OtherUsersProfile />}
-                >
-                  <Route path="followers" element={<FollowersList />} />
-                  <Route path="following" element={<FollowingList />} />
-                </Route>
-                <Route path="/userChats" element={<Chats />} />
-                <Route path="/userChats/:userId?/messages" element={<Chat />} />
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/posts/:id" element={<Post />} />
-                <Route path="/userProfile/settings" element={<Settings />} />
+                  path="/userProfile/likedPosts"
+                  element={<UserLikedPosts />}
+                />
+                <Route
+                  path="/userProfile/:userId?/followers"
+                  element={<FollowersList />}
+                />
+                <Route
+                  path="/userProfile/:userId?/following"
+                  element={<FollowingList />}
+                />
               </Route>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/*" element={<Notfound />} />
-            </Routes>
-          </PostProvider>
-        </ChatProvider>
+              <Route
+                path="/users/:userId?/profile/"
+                element={<OtherUsersProfile />}
+              >
+                <Route path="followers" element={<FollowersList />} />
+                <Route path="following" element={<FollowingList />} />
+              </Route>
+              <Route path="/user/:Id?/chats" element={<Chats />} />
+              <Route path="/chat/:userId?/messages" element={<Chat />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/posts/:id" element={<Post />} />
+              <Route path="/userProfile/settings" element={<Settings />} />
+            </Route>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/*" element={<Notfound />} />
+          </Routes>
+        </PostProvider>
       </Router>
     </>
   );

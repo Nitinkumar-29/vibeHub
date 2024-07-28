@@ -26,15 +26,22 @@ const Home = () => {
 
   const handleFetchUserData = async () => {
     if (currentUser && currentUser.email) {
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        setLoggedInUserData(userData, currentUser.uid);
-      });
+      try {
+        const q = query(
+          collection(db, "users"),
+          where("email", "==", currentUser.email)
+        );
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          setLoggedInUserData(userData, currentUser.uid);
+        });
+      } catch (error) {
+        console.error(error);
+        if (error.code === "resource-exhausted") {
+          console.error("Quota exceeded. Please try again later.");
+        }
+      }
     }
   };
   useEffect(() => {
@@ -67,7 +74,7 @@ const Home = () => {
       {!(
         location.pathname === "/userChats/" ||
         location.pathname === "/userChats" ||
-        location.pathname === `/location/${userId}/messages`
+        location.pathname === `/chat/${userId}/messages`
       ) && (
         <div
           className={`flex z-10 fixed bottom-0 ${
@@ -100,7 +107,7 @@ const Home = () => {
             <FaPlusCircle size={25} />
           </Link>
           <Link
-            to="/userChats"
+            to={`/user/${currentUser.uid}/chats`}
             onClick={() => {
               window.scrollTo(0, 0);
             }}

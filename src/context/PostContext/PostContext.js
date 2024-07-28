@@ -39,6 +39,7 @@ export const PostProvider = ({ children }) => {
   const [otherUserPosts, setOtherUserPosts] = useState([]);
   const [explorePosts, setExplorePosts] = useState([]);
   const [otherPublicPostsHomePage, setOtherPublicPostsHomePage] = useState([]);
+  const [error, setError] = useState("");
 
   const fetchPostById = async (id) => {
     const postRef = doc(db, "posts", id);
@@ -107,6 +108,10 @@ export const PostProvider = ({ children }) => {
       setPostComments(comments);
     } catch (error) {
       console.error("Error fetching comments: ", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
     }
   };
 
@@ -171,21 +176,28 @@ export const PostProvider = ({ children }) => {
   };
 
   const handleFetchUserPosts = async () => {
-    const queryPosts = [];
-    const q = query(
-      collection(db, "posts"),
-      where("userId", "==", currentUser.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      const allPosts = doc.data();
-      queryPosts.push({ id: doc.id, ...allPosts });
-      const sortedUserPosts = queryPosts.sort(
-        (a, b) => b.timeStamp - a.timeStamp
+    try {
+      const queryPosts = [];
+      const q = query(
+        collection(db, "posts"),
+        where("userId", "==", currentUser.uid)
       );
-      setUserPosts(sortedUserPosts);
-    });
-    handleFetchSavedPosts();
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        const allPosts = doc.data();
+        queryPosts.push({ id: doc.id, ...allPosts });
+        const sortedUserPosts = queryPosts.sort(
+          (a, b) => b.timeStamp - a.timeStamp
+        );
+        setUserPosts(sortedUserPosts);
+      });
+    } catch (error) {
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
+    }
+    // handleFetchSavedPosts();
   };
 
   const handleFetchSavedPosts = async () => {
@@ -258,6 +270,10 @@ export const PostProvider = ({ children }) => {
       handleFetchLikedPosts();
     } catch (error) {
       console.error("Error fetching saved posts: ", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
     }
   };
 
@@ -323,7 +339,11 @@ export const PostProvider = ({ children }) => {
       // Set the posts with user data to state
       setLikedPosts(allLikedPosts);
     } catch (error) {
-      console.error("Error fetching saved posts: ", error);
+      console.error("Error fetching liked posts: ", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
     }
   };
 
@@ -522,6 +542,11 @@ export const PostProvider = ({ children }) => {
       setOtherPublicPostsHomePage(otherUsersPosts);
     } catch (error) {
       console.error("Error fetching posts: ", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
+
       setPostsLoading(false);
     }
   };
@@ -561,6 +586,10 @@ export const PostProvider = ({ children }) => {
       setExplorePosts(publicPosts);
     } catch (error) {
       console.error("Error fetching posts: ", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+      }
+      setError("Server down, Please try again later");
     }
   };
 

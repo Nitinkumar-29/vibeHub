@@ -102,13 +102,13 @@ const Home = () => {
             </Link>
           </div>
           <div className="flex justify-center w-full h-full pb-2 pt-12">
-            <div className="flex flex-col w-full h-fit space-y-6">
+            <div className="flex flex-col w-full h-fit space-y-4">
               {homePagePosts.length > 0 ? (
                 homePagePosts
                   ?.sort((a, b) => b.timeStamp - a.timeStamp)
                   .map((post, index) => (
                     <div key={index} className="w-full rounded-md">
-                      <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-3">
+                      <div className="h-fit flex items-center rounded-sm space-x-4 w-full justify-start px-4 py-1">
                         {post?.userData?.img ? (
                           <img
                             src={post?.userData?.img}
@@ -152,13 +152,13 @@ const Home = () => {
                       <div className="w-full h-full ">
                         {post?.postCaption && (
                           <p
-                            className="whitespace-pre-wrap. px-4 py-2"
+                            className="whitespace-pre-wrap px-4"
                             dangerouslySetInnerHTML={{
                               __html: HighLightLinks(post?.postCaption),
                             }}
                           ></p>
                         )}
-                        <div className="px-2 my-1 flex flex-wrap">
+                        <div className="px-2 flex flex-wrap">
                           {post?.mentionedUsers?.map((user, index) => {
                             return (
                               <Link
@@ -187,7 +187,7 @@ const Home = () => {
                             );
                           })}
                         </div>
-                        <div className="flex w-full">
+                        <div className="flex w-full my-1">
                           <Carousel
                             className="carousel"
                             showThumbs={false}
@@ -240,7 +240,7 @@ const Home = () => {
                             ))}
                           </Carousel>
                         </div>
-                        <div className="flex items-center justify-between h-10 px-4 pt-2">
+                        <div className="flex items-center justify-between h-fit pt-1 px-4">
                           <div className="flex items-center space-x-6">
                             <div
                               className="flex items-center cursor-pointer"
@@ -288,7 +288,7 @@ const Home = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col">
+                        <div className="flex flex-col -space-y-1">
                           {/* {post?.likes?.length !== 0 && ( */}
                           {post?.likes?.length !== 0 && (
                             <span className="w-full px-4">
