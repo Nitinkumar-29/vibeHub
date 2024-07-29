@@ -4,11 +4,10 @@ import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-
 // Your web app's Firebase configuration
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDBfeWgaMp01lM4p7VldqV3E669ly5XGxI",
+  apiKey: process.env.REACT_APP_FIREBASE_KEY,
   authDomain: "chat--application-158a5.firebaseapp.com",
   projectId: "chat--application-158a5",
   storageBucket: "chat--application-158a5.appspot.com",
@@ -22,4 +21,3 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth();
 export const storage = getStorage(app);
-
