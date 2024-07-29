@@ -52,5 +52,10 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.4.4"
-  }
+  },
+  "main": "tailwind.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

@@ -353,16 +353,27 @@ const Chats = () => {
                                   ) : chat?.lastMessage?.message ? (
                                     <div>
                                       {chat.lastMessageDeleted ? (
-                                        <span className="text-red-700 font-semibold">message deleted!</span>
+                                        <span className="text-red-700 font-semibold">
+                                          message deleted!
+                                        </span>
                                       ) : (
-                                        <span
-                                          className="font-sans"
-                                          dangerouslySetInnerHTML={{
-                                            __html: HighLightLinks(
-                                              chat?.lastMessage?.message
-                                            ),
-                                          }}
-                                        />
+                                        <div>
+                                          {chat?.messageReaction ? (
+                                            <span className="text-sm">
+                                              reacted {chat.reaction} to a
+                                              message
+                                            </span>
+                                          ) : (
+                                            <span
+                                              className="font-sans"
+                                              dangerouslySetInnerHTML={{
+                                                __html: HighLightLinks(
+                                                  chat?.lastMessage?.message
+                                                ),
+                                              }}
+                                            />
+                                          )}
+                                        </div>
                                       )}
                                     </div>
                                   ) : chat?.lastMessage?.fileURLs &&

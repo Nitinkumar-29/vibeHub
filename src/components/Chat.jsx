@@ -23,7 +23,12 @@ import {
 } from "react-icons/io5";
 import EmojiPicker, { Emoji, EmojiStyle } from "emoji-picker-react";
 import { TiAttachmentOutline, TiTickOutline } from "react-icons/ti";
-import { MdArrowBackIos } from "react-icons/md";
+import {
+  MdArrowBackIos,
+  MdEmojiEmotions,
+  MdEmojiFlags,
+  MdOutlineAddReaction,
+} from "react-icons/md";
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { format } from "date-fns";
@@ -40,12 +45,10 @@ const Chat = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [currentScroll, setCurrentScroll] = useState(0);
   const [scrollInterval, setScrollInterval] = useState(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const fileRef = useRef(null);
-  const [currentUserData, setCurrentUserData] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
-  const [loading, setLoading] = useState(true);
+  const [messageEmojiPicker, setMessageEmojiPicker] = useState(false);
   const {
     sendMessage,
     messageText,
@@ -64,7 +67,21 @@ const Chat = () => {
   const { currentUser } = useContext(AuthContext);
   const messageInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [showReactionMenu, setShowReactionMenu] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState(null);
+
+  //  message reaction picker
+  const handleReaction = (id) => {
+    setSelectedMessageId(id);
+    setShowReactionMenu(true);
+  };
+
+  const handleCloseReactionPicker = (event) => {
+    const position = document.getElementById("reaction-picker");
+    if (position && !position.contains(event.target)) {
+      setShowReactionMenu(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -144,21 +161,6 @@ const Chat = () => {
     }
   };
 
-  // // seen functionality
-  // const markMessagesAsSeen = async (chatId, userId) => {
-  //   const q = query(
-  //     collection(db, "messages"),
-  //     where("chatId", "==", chatId),
-  //     where("receiverId", "==", userId),
-  //     where("seen", "==", false)
-  //   );
-
-  //   const querySnapshot = await getDocs(q);
-  //   querySnapshot.forEach(async (doc) => {
-  //     await updateDoc(doc.ref, { seen: true });
-  //   });
-  // };
-
   const handleSendMessage = () => {
     sendMessage(userId);
   };
@@ -173,7 +175,6 @@ const Chat = () => {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
           const userData = doc.data();
-          setCurrentUserData(userData, currentUser.uid);
         });
       } catch (error) {
         if (error.code === "resource-exhausted") {
@@ -281,7 +282,6 @@ const Chat = () => {
 
   useEffect(() => {
     handleFetchChatMessages(userId);
-    setLoading(false);
     // eslint-disable-next-line
   }, [userId, location.pathname]);
 
@@ -372,130 +372,170 @@ const Chat = () => {
                               deleteMessage(message.id);
                               console.log(message.id);
                             }}
-                            className={`px-2 hidden group-hover:inline-block duration-300 transition-transform`}
+                            className={`absolute -left-8 px-2 hidden group-hover:inline-block duration-300 transition-transform`}
                           >
                             <FiTrash />
                           </button>
                         )}
                       </div>
-                      <div
-                        className={`flex flex-col ${
-                          message.senderId === currentUser.uid
-                            ? "items-end"
-                            : "items-start"
-                        }`}
-                      >
-                        {" "}
-                        {message.reactions && (
+                      <div className="relative flex items-center space-x-1">
+                        <div
+                          className={`flex flex-col space-y-1 ${
+                            message.senderId === currentUser.uid
+                              ? "items-end"
+                              : "items-start"
+                          }`}
+                        >
+                          {" "}
+                          {message.reactions && (
+                            <div
+                              className={`absolute  z-10 ${
+                                message.fileURLs.length > 0
+                                  ? "-top-1"
+                                  : "-top-0"
+                              } rounded-full ${
+                                currentUser.uid === message.senderId
+                                  ? "-left-2"
+                                  : "-right-2"
+                              }  `}
+                            >
+                              {Object.entries(message.reactions).map(
+                                ([userId, reaction]) => (
+                                  <span
+                                    className="text-sm cursor-pointer"
+                                    onClick={() => {
+                                      removeReaction(message.id);
+                                      console.log(reaction, message.id);
+                                    }}
+                                    key={userId}
+                                  >
+                                    {reaction}
+                                  </span>
+                                )
+                              )}
+                            </div>
+                          )}
+                          {message.fileURLs && (
+                            <div
+                              className={`flex flex-wrap w-fit ${
+                                message.senderId === currentUser.uid
+                                  ? "justify-end"
+                                  : "justify-start"
+                              }`}
+                            >
+                              {message.fileURLs &&
+                                message.fileURLs.map((fileURL, index) => (
+                                  <div key={index} className="relative">
+                                    {fileURL?.includes(".mp4") ? (
+                                      <div>
+                                        {fileURL?.length > 0 ? (
+                                          <video
+                                            onClick={() => {
+                                              handlePlayPause(index);
+                                            }}
+                                            onEnded={handleEnded}
+                                            ref={videoRef}
+                                            autoFocus={true}
+                                            className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                                          >
+                                            <source
+                                              src={fileURL}
+                                              type="video/mp4"
+                                            />
+                                          </video>
+                                        ) : (
+                                          "loading"
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <img
+                                        src={fileURL}
+                                        alt={`file-${index}`}
+                                        onClick={() => {
+                                          handleImageClick(fileURL);
+                                        }}
+                                        className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
+                                      />
+                                    )}
+                                  </div>
+                                ))}
+                            </div>
+                          )}
                           <div
-                            className={`absolute  z-10 -top-2 rounded-full -right-1  `}
+                            className={`flex relative justify-end mb-1 w-fit`}
                           >
-                            {Object.entries(message.reactions).map(
-                              ([userId, reaction]) => (
-                                <span
-                                  className="text-sm cursor-pointer"
-                                  onClick={() => {
-                                    removeReaction(message.id);
-                                    console.log(reaction, message.id);
-                                  }}
-                                  key={userId}
-                                >
-                                  {reaction}
-                                </span>
-                              )
+                            {message.message && (
+                              <span
+                                className={`${
+                                  currentUser.uid === message.senderId
+                                    ? "self-end"
+                                    : "self-start"
+                                } break-words whitespace-pre-wrap text-sm ${
+                                  theme === "dark"
+                                    ? message.senderId === currentUser.uid
+                                      ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
+                                      : "bg-gray-800"
+                                    : message.senderId === currentUser.uid
+                                    ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
+                                    : "bg-gray-200"
+                                } rounded-md px-3 py-2`}
+                                style={{
+                                  wordBreak: "break-word",
+                                  overflowWrap: "break-word",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: HighLightLinks(message?.message),
+                                }}
+                              ></span>
                             )}
                           </div>
+                        </div>
+                        {currentUser.uid === message.receiverId && (
+                          <span
+                            onClick={() => {
+                              handleReaction(message.id);
+                              console.log(
+                                message.id,
+                                currentUser.uid,
+                                message.receiverId
+                              );
+                            }}
+                            className={`absolute -right-6 mt-2 cursor-pointer px-1 ${
+                              currentUser.uid === message.receiverId && "m-auto"
+                            } hidden group-hover:inline-flex`}
+                          >
+                            <MdOutlineAddReaction />
+                          </span>
                         )}
-                        {message.fileURLs && (
+                      </div>
+
+                      {showReactionMenu === true &&
+                        currentUser.uid === message.receiverId &&
+                        selectedMessageId === message.id && (
                           <div
-                            className={`flex flex-wrap w-fit ${
+                            onClick={handleCloseReactionPicker}
+                            id="reaction-picker"
+                            className={`${
+                              message.id === selectedMessageId
+                                ? "flex"
+                                : "hidden"
+                            } z-10 absolute ${
                               message.senderId === currentUser.uid
-                                ? "justify-end"
-                                : "justify-start"
+                                ? "top-1 right-0"
+                                : "-top-[53px] left-0"
                             }`}
                           >
-                            {message.fileURLs &&
-                              message.fileURLs.map((fileURL, index) => (
-                                <div key={index} className="relative">
-                                  {fileURL?.includes(".mp4") ? (
-                                    <div>
-                                      {fileURL?.length > 0 ? (
-                                        <video
-                                          onClick={() => {
-                                            handlePlayPause(index);
-                                          }}
-                                          onEnded={handleEnded}
-                                          ref={videoRef}
-                                          autoFocus={true}
-                                          className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
-                                        >
-                                          <source
-                                            src={fileURL}
-                                            type="video/mp4"
-                                          />
-                                        </video>
-                                      ) : (
-                                        "loading"
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <img
-                                      src={fileURL}
-                                      alt={`file-${index}`}
-                                      onClick={() => {
-                                        handleImageClick(fileURL);
-                                      }}
-                                      className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
-                                    />
-                                  )}
-                                </div>
-                              ))}
+                            <EmojiPicker
+                              reactionsDefaultOpen
+                              searchDisabled
+                              onEmojiClick={(event) => {
+                                setShowReactionMenu(false);
+                                addReaction(message.id, event.emoji);
+                                console.log("reaction: ", event.emoji);
+                              }}
+                            />
                           </div>
                         )}
-                        <div className={`flex relative justify-end mb-1 w-fit`}>
-                          {message.message && (
-                            <span
-                              className={`${
-                                currentUser.uid === message.senderId
-                                  ? "self-end"
-                                  : "self-start"
-                              } break-words whitespace-pre-wrap text-sm ${
-                                theme === "dark"
-                                  ? message.senderId === currentUser.uid
-                                    ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
-                                    : "bg-gray-800"
-                                  : message.senderId === currentUser.uid
-                                  ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
-                                  : "bg-gray-200"
-                              } rounded-xl px-3 py-2`}
-                              style={{
-                                wordBreak: "break-word",
-                                overflowWrap: "break-word",
-                              }}
-                              dangerouslySetInnerHTML={{
-                                __html: HighLightLinks(message?.message),
-                              }}
-                            ></span>
-                          )}
-                        </div>
-                      </div>
-                      {currentUser.uid === message.receiverId && (
-                        <div
-                          className={`z-10 absolute ${
-                            message.senderId === currentUser.uid
-                              ? "top-1 right-0"
-                              : "-top-[53px] left-0"
-                          } hidden group-hover:inline-flex`}
-                        >
-                          <EmojiPicker
-                            reactionsDefaultOpen
-                            onEmojiClick={(event) => {
-                              addReaction(message.id, event.emoji);
-                              console.log("reaction: ", event.emoji);
-                            }}
-                          />
-                        </div>
-                      )}
                     </div>
 
                     <div
@@ -576,7 +616,7 @@ const Chat = () => {
         } w-full px-2`}
       >
         <div
-          className={`relative flex items-center ${
+          className={`relative border-2 flex items-center ${
             theme === "dark"
               ? "bg-zinc-900 text-white"
               : "bg-gray-200 text-black"
@@ -633,6 +673,22 @@ const Chat = () => {
               ))}
             </div>
           )}
+          <div
+            className={`${
+              messageEmojiPicker === false ? "hidden" : "flex"
+            } self-center absolute bottom-14 mx-auto w-5/6`}
+          >
+            <EmojiPicker
+              reactionsDefaultOpen={messageEmojiPicker}
+              emojiStyle="google"
+              onEmojiClick={(event) => {
+                setMessageEmojiPicker(false);
+                console.log(event.emoji);
+                setMessageText(messageText + event.emoji);
+                console.log(messageText);
+              }}
+            />
+          </div>
           <textarea
             ref={messageInputRef}
             type="text"
@@ -641,6 +697,13 @@ const Chat = () => {
             rows={1}
             onChange={(e) => setMessageText(e.target.value)}
             className={`w-[90%] h-full place-content-center resize-none hideScrollbar appearance-none bg-inherit rounded-3xl px-3 focus:outline-none`}
+          />
+          <MdEmojiEmotions
+            className="cursor-pointer"
+            onClick={() => {
+              setMessageEmojiPicker(!messageEmojiPicker);
+            }}
+            size={25}
           />
           <input
             ref={fileRef}

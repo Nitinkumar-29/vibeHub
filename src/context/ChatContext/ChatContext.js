@@ -31,6 +31,7 @@ export const ChatProvider = ({ children }) => {
   const { currentUser } = useContext(AuthContext);
   const [messageSent, setMessageSent] = useState(true);
   const [messageText, setMessageText] = useState("");
+  const [messageEmojiValue, setMessaeEmojiValue] = useState("");
   const [files, setFiles] = useState([]);
   const [particularChatMetaData, setParticularChatMetaData] = useState(null);
   const [error, setError] = useState("");
@@ -274,6 +275,7 @@ export const ChatProvider = ({ children }) => {
         "lastMessage.senderId": currentUser.uid, // Update senderId
         "lastMessage.receiverId": userId, // Update receiverId
         lastMessageDeleted: false,
+        messageReaction: false,
         lastUpdated: serverTimestamp(),
       });
 
@@ -304,40 +306,82 @@ export const ChatProvider = ({ children }) => {
         const messageData = messageSnapshot.data();
         const currentReactions = messageData.reactions || {};
 
-        // Update reactions with the new reaction
-        currentReactions[currentUser.uid] = reaction;
+        // Check if the message sender is not the current user
+        if (messageData.senderId !== currentUser.uid) {
+          // Update reactions with the new reaction
+          currentReactions[currentUser.uid] = reaction;
 
-        // Update the document with the new reactions
-        await updateDoc(messageRef, {
-          reactions: currentReactions,
-        });
+          // Update the document with the new reactions
+          await updateDoc(messageRef, {
+            reactions: currentReactions,
+          });
+
+          // Notify the chat about the reaction
+          const chatRef = doc(db, "chats", activeChatId);
+          await updateDoc(chatRef, {
+            messageReaction: true,
+            reaction: reaction,
+          });
+        } else {
+          console.log("Cannot react to your own message.");
+          // Handle case where user tries to react to their own message
+        }
+      } else {
+        console.log("Message not found.");
+        // Handle case where the message document doesn't exist
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error adding reaction:", error);
+      // Handle errors appropriately
     }
   };
 
   // remove a reaction
-  const removeReaction = async (messageId,) => {
+  const removeReaction = async (messageId) => {
     const messageRef = doc(db, "chat_messages", messageId);
 
     try {
-      // Fetch the current reactions
+      // Fetch the current message data
       const messageSnapshot = await getDoc(messageRef);
       if (messageSnapshot.exists()) {
         const messageData = messageSnapshot.data();
+
+        // Check if the current user is the sender of the message
+        if (messageData.senderId === currentUser.uid) {
+          console.log("Cannot remove reaction from your own message.");
+          return; // Exit early if user is the sender
+        }
+
+        // Fetch the existing reactions
         const currentReactions = messageData.reactions || {};
 
-        // Remove the reaction for the specified user
-        delete currentReactions[currentUser.uid];
+        // Check if the current user has reacted to the message
+        if (currentReactions.hasOwnProperty(currentUser.uid)) {
+          // Remove the reaction for the current user
+          delete currentReactions[currentUser.uid];
 
-        // Update the document with the modified reactions
-        await updateDoc(messageRef, {
-          reactions: currentReactions,
-        });
+          // Update the message document with the modified reactions
+          await updateDoc(messageRef, {
+            reactions: currentReactions,
+          });
+
+          // // Notify the chat about the updated reactions
+          const chatRef = doc(db, "chats", activeChatId);
+          await updateDoc(chatRef, {
+            messageReaction: false,
+            reactions: currentReactions,
+          });
+        } else {
+          console.log("User hasn't reacted to this message.");
+          // Handle case where user tries to remove a reaction they haven't added
+        }
+      } else {
+        console.log("Message not found.");
+        // Handle case where the message document doesn't exist
       }
     } catch (error) {
-      console.error(error);
+      console.error("Error removing reaction:", error);
+      // Handle errors appropriately
     }
   };
 
@@ -423,31 +467,12 @@ export const ChatProvider = ({ children }) => {
         remainingMessages.push({ id: doc.id, ...doc.data() });
       });
 
-      // Find the new last message
-      let newLastMessage = {};
-      if (remainingMessages.length > 0) {
-        const sortedMessages = remainingMessages.sort(
-          (a, b) => b.timeStamp - a.timeStamp
-        );
-        newLastMessage = {
-          message: sortedMessages[0].message,
-          fileURLs: sortedMessages[0].fileURLs || [],
-          senderId: sortedMessages[0].senderId,
-          receiverId: sortedMessages[0].receiverId,
-          timeStamp: sortedMessages[0].timeStamp,
-        };
-      }
-
       // Update the chat with the last message and timestamp
       const chatRef = doc(db, "chats", activeChatId);
       await updateDoc(chatRef, {
-        // "lastMessage.message": newLastMessage.message || "",
-        // "lastMessage.fileURLs": newLastMessage.fileURLs || [],
-        // "lastMessage.senderId": newLastMessage.senderId || "",
-        // "lastMessage.receiverId": newLastMessage.receiverId || "",
-        // lastUpdated: newLastMessage.timeStamp,
         lastUpdated: serverTimestamp(),
         lastMessageDeleted: true,
+        messageReaction: false,
       });
     } catch (error) {
       console.error(error);
@@ -475,7 +500,7 @@ export const ChatProvider = ({ children }) => {
         error,
         loadingMessages,
         addReaction,
-        removeReaction
+        removeReaction,
       }}
     >
       {children}
