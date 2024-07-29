@@ -35,6 +35,7 @@ import { format } from "date-fns";
 import { FaDeleteLeft } from "react-icons/fa6";
 import { FiDelete, FiTrash } from "react-icons/fi";
 import { CgSpinner } from "react-icons/cg";
+import toast from "react-hot-toast";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -89,8 +90,14 @@ const Chat = () => {
   };
 
   const handleClickOutside = (event) => {
-    const modal = document.getElementById("modal-image");
-    if (modal && !modal.contains(event.target)) {
+    const modal = document.getElementById("modal-background");
+    const modalImage = document.getElementById("modal-image");
+    const download = document.getElementById("modal-background");
+    if (
+      modalImage &&
+      !modalImage.contains(event.target) &&
+      event.target === download
+    ) {
       handleCloseModal();
     }
   };
@@ -101,17 +108,13 @@ const Chat = () => {
     }
   };
 
-  const handleImageClick = (url) => {
-    setSelectedImage(url);
-  };
-
   const handleCloseModal = () => {
     setSelectedImage(null);
   };
 
   const handleDownload = async (event) => {
-    event.preventDefault();
-
+    console.log("clicked");
+    event.stopPropagation();
     try {
       if (!selectedImage) {
         throw new Error("Selected image URL is not valid.");
@@ -122,6 +125,7 @@ const Chat = () => {
       if (!response.ok) {
         throw new Error("Failed to fetch image.");
       }
+      toast.loading("downloading...");
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -131,6 +135,9 @@ const Chat = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
+      handleCloseModal();
+      toast.dismiss();
+      toast.success("Image downloaded");
     } catch (error) {
       console.error("Error downloading the image:", error.message);
       if (error.code === "resource-exhausted") {
@@ -391,8 +398,8 @@ const Chat = () => {
                             <div
                               className={`absolute  z-10 ${
                                 message.fileURLs.length > 0
-                                  ? "-top-1"
-                                  : "-top-0"
+                                  ? "-top-2"
+                                  : "-top-1"
                               } rounded-full ${
                                 currentUser.uid === message.senderId
                                   ? "-left-2"
@@ -402,7 +409,7 @@ const Chat = () => {
                               {Object.entries(message.reactions).map(
                                 ([userId, reaction]) => (
                                   <span
-                                    className="text-sm cursor-pointer"
+                                    className="text-lg cursor-pointer"
                                     onClick={() => {
                                       removeReaction(message.id);
                                       console.log(reaction, message.id);
@@ -452,7 +459,7 @@ const Chat = () => {
                                         src={fileURL}
                                         alt={`file-${index}`}
                                         onClick={() => {
-                                          handleImageClick(fileURL);
+                                          setSelectedImage(fileURL);
                                         }}
                                         className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
                                       />
@@ -580,6 +587,7 @@ const Chat = () => {
                 </div>
 
                 <button
+                  id="download"
                   onClick={handleDownload}
                   className={`absolute bottom-1 right-1 ${
                     theme === "dark" ? "bg-gray-800" : "bg-gray-200"
@@ -616,7 +624,7 @@ const Chat = () => {
         } w-full px-2`}
       >
         <div
-          className={`relative border-2 flex items-center ${
+          className={`relative flex items-center ${
             theme === "dark"
               ? "bg-zinc-900 text-white"
               : "bg-gray-200 text-black"
