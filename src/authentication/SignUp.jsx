@@ -103,6 +103,7 @@ const SignUp = () => {
         following: data.following || [],
         user_name: generateUser_name,
         timeStamp: serverTimestamp(),
+        accountType: "private",
       });
       setData({
         name: "",
