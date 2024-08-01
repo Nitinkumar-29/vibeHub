@@ -80,22 +80,54 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
   // accpet follow reuests
-  const acceptFollowRequest = async (id) => {
+  const acceptFollowRequest = async (userId) => {
     toast.loading("processing....");
     if (!state.currentUser.uid) return "not valid id";
 
     try {
       const userRef = doc(db, "users", state.currentUser.uid);
-      const targetRef = doc(db, "users", id);
+      const targetRef = doc(db, "users", userId);
+
       await Promise.all([
         updateDoc(userRef, {
-          followers: arrayUnion(id),
-          followRequests: arrayRemove(id),
+          followers: arrayUnion(userId),
+          followRequests: arrayRemove(userId),
         }),
         updateDoc(targetRef, {
           following: arrayUnion(state.currentUser.uid),
         }),
       ]);
+      const chatsRef = collection(db, "chats");
+
+      // Query to find chats containing both users
+      const chatQuery = query(
+        chatsRef,
+        where("participants", "array-contains", state.currentUser.uid)
+      );
+
+      // Fetch documents that match the query
+      const chatSnapshot = await getDocs(chatQuery);
+
+      // Filter the results to find the chat that also includes the other user
+      const chatDocs = chatSnapshot.docs.filter((doc) => {
+        const chatData = doc.data();
+        return chatData.participants.includes(userId);
+      });
+
+      if (chatDocs.length > 0) {
+        const chatDoc = chatDocs[0]; // Assuming only one chat exists
+        const chatId = chatDoc.id;
+        const chatRef = doc(db, "chats", chatId); // Reference to the chat document
+
+        // Update the 'messageRequest' field
+        await updateDoc(chatRef, {
+          messageRequest: false,
+        });
+
+        console.log("Chat updated successfully");
+      } else {
+        console.log("No chat found between these users.");
+      }
       // Fetch and update the follow requests after acceptance
       const updatedFollowRequests = await fetchFollowRequests();
       setFollowRequestsData(updatedFollowRequests);
