@@ -60,12 +60,12 @@ const Notifications = () => {
               </div>
               <div className="flex items-center space-x-2">
                 <IoCloseCircleOutline
-                  className="cursor-pointer"
+                  className="cursor-pointer text-red-600"
                   onClick={() => rejectRequest(data.id)}
-                  size={27}
+                  size={28}
                 />
                 <GoIssueClosed
-                  className="cursor-pointer"
+                  className="cursor-pointer text-green-600"
                   size={25}
                   onClick={() => acceptFollowRequest(data.id)}
                 />
