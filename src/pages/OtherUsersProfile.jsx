@@ -152,17 +152,37 @@ const OtherUsersProfile = () => {
           toast.dismiss(toastId);
           toast.success("Unfollowed");
         } else {
-          // Follow the user
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayUnion(currentUser.uid),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayUnion(userId),
-            }),
-          ]);
-          toast.dismiss(toastId);
-          toast.success(`You are now following ${data.name}`);
+          if (targetUserSnapShot?.accountType === "private") {
+            if (!targetUserSnapShot?.followRequests?.includes(currentUser.uid)) {
+              await Promise.all([
+                updateDoc(targetUserRef, {
+                  followRequests: arrayUnion(currentUser.uid),
+                }),
+              ]);
+              toast.dismiss();
+              toast.success("Request Sent!");
+            } else {
+              await Promise.all([
+                updateDoc(targetUserRef, {
+                  followRequests: arrayRemove(currentUser.uid),
+                }),
+              ]);
+              toast.dismiss();
+              toast.success("request cancelled");
+            }
+          } else {
+            // Follow the user
+            await Promise.all([
+              updateDoc(targetUserRef, {
+                followers: arrayUnion(currentUser.uid),
+              }),
+              updateDoc(currentUserRef, {
+                following: arrayUnion(userId),
+              }),
+            ]);
+            toast.dismiss(toastId);
+            toast.success(`You are now following ${data.name}`);
+          }
         }
         // Fetch and update the user data after updating the followers
         handleFetchUserData();
@@ -459,17 +479,34 @@ const OtherUsersProfile = () => {
                 theme === "dark" ? "" : "bg-orange-700 text-white"
               } rounded-md w-full text-center`}
             >
-              {data?.followers?.includes(currentUser.uid) ? (
+              {/* {!data?.followers?.includes(currentUser.uid) ? (
+                <span>Follow</span>
+              ) : (
                 <span
                   className={`${theme === "dark" ? "text-orange-600" : ""}`}
                 >
-                  Following
+                  {data?.followRequests?.includes(currentUser.uid) &&
+                  data?.accountType === "private"
+                    ? "Requested"
+                    : "Following"}
                 </span>
+              )} */}
+
+              {!data?.followers?.includes(currentUser.uid) &&
+              !data?.followRequests?.includes(currentUser.uid) ? (
+                <span>Follow</span>
               ) : (
-                "Follow"
+                <span
+                  className={`${theme === "dark" ? "text-orange-600" : ""}`}
+                >
+                  {data?.followRequests?.includes(currentUser.uid) &&
+                  data?.accountType === "private"
+                    ? "Requested"
+                    : "Following"}
+                </span>
               )}
             </button>
-            {(data.accountType !== "private" ||
+            {(data?.accountType !== "private" ||
               data?.followers?.includes(currentUser.uid)) && (
               <Link
                 to={`/chat/${data?.userId}/messages`}

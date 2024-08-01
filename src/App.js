@@ -26,6 +26,7 @@ import FollowersList from "./components/FollowersList";
 import FollowingList from "./components/FollowingList";
 import Chats from "./pages/Chats";
 import Chat from "./components/Chat";
+import Notifications from "./components/Notifications";
 
 function App() {
   const { currentUser } = useContext(AuthContext);
@@ -76,6 +77,10 @@ function App() {
                   element={<FollowingList />}
                 />
               </Route>
+              <Route
+                path="/user/:userId?/notifications"
+                element={<Notifications />}
+              />
               <Route
                 path="/users/:userId?/profile/"
                 element={<OtherUsersProfile />}

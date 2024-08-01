@@ -14,6 +14,19 @@ import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import {
+  IoNotificationsCircleOutline,
+  IoNotificationsSharp,
+} from "react-icons/io5";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebase";
 
 const Home = () => {
   const {
@@ -83,7 +96,7 @@ const Home = () => {
           <div
             className={`z-20 ${position} top-0 ${
               theme === "dark" ? "bg-black" : "bg-white"
-            }  justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
+            }  flex justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
           >
             <Link className="flex space-x-3 items-center text-2xl" to="/">
               <img
@@ -97,6 +110,9 @@ const Home = () => {
               >
                 Vibehub
               </span>
+            </Link>
+            <Link to={`user/${currentUser.uid}/notifications`}>
+              <IoNotificationsSharp size={25} />
             </Link>
           </div>
           <div className="flex justify-center w-full h-full pb-2 pt-12">
