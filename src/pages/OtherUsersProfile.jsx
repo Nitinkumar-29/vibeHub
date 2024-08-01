@@ -153,7 +153,9 @@ const OtherUsersProfile = () => {
           toast.success("Unfollowed");
         } else {
           if (targetUserSnapShot?.accountType === "private") {
-            if (!targetUserSnapShot?.followRequests?.includes(currentUser.uid)) {
+            if (
+              !targetUserSnapShot?.followRequests?.includes(currentUser.uid)
+            ) {
               await Promise.all([
                 updateDoc(targetUserRef, {
                   followRequests: arrayUnion(currentUser.uid),
@@ -479,19 +481,6 @@ const OtherUsersProfile = () => {
                 theme === "dark" ? "" : "bg-orange-700 text-white"
               } rounded-md w-full text-center`}
             >
-              {/* {!data?.followers?.includes(currentUser.uid) ? (
-                <span>Follow</span>
-              ) : (
-                <span
-                  className={`${theme === "dark" ? "text-orange-600" : ""}`}
-                >
-                  {data?.followRequests?.includes(currentUser.uid) &&
-                  data?.accountType === "private"
-                    ? "Requested"
-                    : "Following"}
-                </span>
-              )} */}
-
               {!data?.followers?.includes(currentUser.uid) &&
               !data?.followRequests?.includes(currentUser.uid) ? (
                 <span>Follow</span>
@@ -506,17 +495,14 @@ const OtherUsersProfile = () => {
                 </span>
               )}
             </button>
-            {(data?.accountType !== "private" ||
-              data?.followers?.includes(currentUser.uid)) && (
-              <Link
-                to={`/chat/${data?.userId}/messages`}
-                className={`px-3 py-1 border-[.5px] ${
-                  theme === "dark" ? "" : "bg-orange-700 text-white"
-                } rounded-md w-full text-center`}
-              >
-                Message
-              </Link>
-            )}
+            <Link
+              to={`/chat/${data?.userId}/messages`}
+              className={`px-3 py-1 border-[.5px] ${
+                theme === "dark" ? "" : "bg-orange-700 text-white"
+              } rounded-md w-full text-center`}
+            >
+              Message
+            </Link>
           </div>
         </div>
         {data?.accountType !== "private" ||
