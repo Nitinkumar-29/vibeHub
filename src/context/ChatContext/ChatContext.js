@@ -36,12 +36,14 @@ export const ChatProvider = ({ children }) => {
   const [particularChatMetaData, setParticularChatMetaData] = useState(null);
   const [error, setError] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [messageRequestChats, setMessageRequestChats] = useState([]);
 
   const handleFetchAllChats = async () => {
     try {
       const chatsRef = query(
         collection(db, "chats/"),
-        where("participants", "array-contains", currentUser.uid)
+        where("participants", "array-contains", currentUser.uid),
+        where("messageRequest", "==", false)
       ); // Reference to the chats collection
       const chatsSnap = await getDocs(chatsRef); // Fetch all documents in the chats collection
       const chats = [];
@@ -64,12 +66,71 @@ export const ChatProvider = ({ children }) => {
         });
       }
       setAllChats(chats);
+      console.log(chats);
     } catch (error) {
       console.error("Error fetching chats:", error);
       if (error.code === "resource-exhausted") {
         console.error("Quota exceeded. Please try again later.");
         setError("Server down, Please try again later");
       }
+    }
+  };
+
+  // fetch message Request Chats
+  const fetchMessageRequestChats = async () => {
+    try {
+      // Reference to the chats collection
+      const chatsRef = collection(db, "chats");
+      const chatQuery = query(
+        chatsRef,
+        where("participants", "array-contains", currentUser.uid),
+        where("messageRequest", "==", true) // Check if messageRequest is true
+      );
+
+      // Fetch all documents in the chats collection
+      const chatsSnap = await getDocs(chatQuery);
+      const chats = [];
+
+      for (const chatDoc of chatsSnap.docs) {
+        const chatData = chatDoc.data();
+        const participantsData = [];
+
+        // Fetch participant data for each chat
+        for (const participantId of chatData.participants) {
+          const userRef = doc(db, "users", participantId);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            participantsData.push({ id: participantId, ...userSnap.data() });
+          }
+        }
+
+        chats.push({
+          id: chatDoc.id,
+          ...chatData,
+          participants: participantsData,
+        });
+      }
+
+      setMessageRequestChats(chats); // Assume setMessageRequestChats is a state setter function to update the UI
+    } catch (error) {
+      console.error("Error fetching message request chats:", error);
+      if (error.code === "resource-exhausted") {
+        console.error("Quota exceeded. Please try again later.");
+        setError("Server down, Please try again later");
+      }
+    }
+  };
+
+  // accept message request
+  const acceptMessageRequest = async (chatId) => {
+    if (!chatId) return "invalid chat id";
+    try {
+      const chatRef = doc(db, "chats", chatId);
+      await updateDoc(chatRef, {
+        messageRequest: false,
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -88,7 +149,14 @@ export const ChatProvider = ({ children }) => {
         chatId = doc.id;
       }
     });
-    handleFetchChatMessages();
+    // target user data
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    const userSnapShot = userSnap.exists() ? userSnap.data() : {};
+    let messageRequest = false;
+    if (!userSnapShot?.followers?.includes(currentUser.uid)) {
+      messageRequest = true;
+    }
     if (!chatId) {
       const newChatRef = await addDoc(chatsRef, {
         participants: [currentUser.uid, userId],
@@ -98,9 +166,11 @@ export const ChatProvider = ({ children }) => {
           receiverId: userId,
         },
         timeStamp: serverTimestamp(),
+        messageRequest: messageRequest,
       });
       chatId = newChatRef.id;
     }
+    handleFetchChatMessages();
     return chatId;
   };
 
@@ -511,6 +581,9 @@ export const ChatProvider = ({ children }) => {
         removeReaction,
         archiveChat,
         handleRemoveArchiveChat,
+        fetchMessageRequestChats,
+        messageRequestChats,
+        acceptMessageRequest
       }}
     >
       {children}
