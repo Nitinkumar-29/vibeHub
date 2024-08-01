@@ -33,8 +33,6 @@ function App() {
     return currentUser ? children : <Navigate to="/login" />;
   };
 
-  console.log("Firebase API Key:", `${process.env.REACT_APP_FIREBASE_KEY}`);
-
   return (
     <>
       <Router>

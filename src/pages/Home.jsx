@@ -2,8 +2,6 @@ import PostContext from "../context/PostContext/PostContext";
 import "../styles/overflow_scroll.css";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { getDocs, collection, where, query } from "firebase/firestore";
-import { db } from "../firebase";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
@@ -11,7 +9,7 @@ import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
-import { BiLoaderCircle, BiPause, BiPlay } from "react-icons/bi";
+import { BiPause, BiPlay } from "react-icons/bi";
 import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";

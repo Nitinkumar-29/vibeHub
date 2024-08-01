@@ -1,5 +1,6 @@
 import {
   addDoc,
+  arrayRemove,
   collection,
   deleteDoc,
   doc,
@@ -11,7 +12,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { db, storage } from "../../firebase";
 import { AuthContext } from "../AuthContext";
 import toast from "react-hot-toast";
@@ -31,7 +32,6 @@ export const ChatProvider = ({ children }) => {
   const { currentUser } = useContext(AuthContext);
   const [messageSent, setMessageSent] = useState(true);
   const [messageText, setMessageText] = useState("");
-  const [messageEmojiValue, setMessaeEmojiValue] = useState("");
   const [files, setFiles] = useState([]);
   const [particularChatMetaData, setParticularChatMetaData] = useState(null);
   const [error, setError] = useState("");
@@ -100,10 +100,6 @@ export const ChatProvider = ({ children }) => {
         timeStamp: serverTimestamp(),
       });
       chatId = newChatRef.id;
-    } else {
-      console.log(
-        `Chat already exists for users ${currentUser.uid} and ${userId}`
-      );
     }
     return chatId;
   };
@@ -306,17 +302,13 @@ export const ChatProvider = ({ children }) => {
         const messageData = messageSnapshot.data();
         const currentReactions = messageData.reactions || {};
 
-        // Check if the message sender is not the current user
         if (messageData.senderId !== currentUser.uid) {
-          // Update reactions with the new reaction
           currentReactions[currentUser.uid] = reaction;
 
-          // Update the document with the new reactions
           await updateDoc(messageRef, {
             reactions: currentReactions,
           });
 
-          // Notify the chat about the reaction
           const chatRef = doc(db, "chats", activeChatId);
           await updateDoc(chatRef, {
             messageReaction: true,
@@ -324,15 +316,12 @@ export const ChatProvider = ({ children }) => {
           });
         } else {
           console.log("Cannot react to your own message.");
-          // Handle case where user tries to react to their own message
         }
       } else {
         console.log("Message not found.");
-        // Handle case where the message document doesn't exist
       }
     } catch (error) {
       console.error("Error adding reaction:", error);
-      // Handle errors appropriately
     }
   };
 
@@ -341,31 +330,24 @@ export const ChatProvider = ({ children }) => {
     const messageRef = doc(db, "chat_messages", messageId);
 
     try {
-      // Fetch the current message data
       const messageSnapshot = await getDoc(messageRef);
       if (messageSnapshot.exists()) {
         const messageData = messageSnapshot.data();
 
-        // Check if the current user is the sender of the message
         if (messageData.senderId === currentUser.uid) {
           console.log("Cannot remove reaction from your own message.");
           return; // Exit early if user is the sender
         }
 
-        // Fetch the existing reactions
         const currentReactions = messageData.reactions || {};
 
-        // Check if the current user has reacted to the message
         if (currentReactions.hasOwnProperty(currentUser.uid)) {
-          // Remove the reaction for the current user
           delete currentReactions[currentUser.uid];
 
-          // Update the message document with the modified reactions
           await updateDoc(messageRef, {
             reactions: currentReactions,
           });
 
-          // // Notify the chat about the updated reactions
           const chatRef = doc(db, "chats", activeChatId);
           await updateDoc(chatRef, {
             messageReaction: false,
@@ -373,15 +355,12 @@ export const ChatProvider = ({ children }) => {
           });
         } else {
           console.log("User hasn't reacted to this message.");
-          // Handle case where user tries to remove a reaction they haven't added
         }
       } else {
         console.log("Message not found.");
-        // Handle case where the message document doesn't exist
       }
     } catch (error) {
       console.error("Error removing reaction:", error);
-      // Handle errors appropriately
     }
   };
 
@@ -390,14 +369,11 @@ export const ChatProvider = ({ children }) => {
     try {
       const chatRef = doc(db, "chats", chatId);
 
-      // Fetch all chat messages for the given chat ID
       const messagesQuery = query(
         collection(db, "chat_messages"),
         where("chatId", "==", chatId)
       );
       const messagesSnapshot = await getDocs(messagesQuery);
-
-      // Collect all file URLs from messages
       const fileUrls = [];
       messagesSnapshot.forEach((doc) => {
         const messageData = doc.data();
@@ -406,24 +382,19 @@ export const ChatProvider = ({ children }) => {
         }
       });
 
-      // Delete each storage media file
       for (const url of fileUrls) {
         const fileRef = ref(storage, url);
         await deleteObject(fileRef);
       }
-
-      // Delete all chat messages
       const deleteMessagesPromises = messagesSnapshot.docs.map((messageDoc) =>
         deleteDoc(messageDoc.ref)
       );
       await Promise.all(deleteMessagesPromises);
 
-      // Delete the chat document
       if (chatRef) {
         await deleteDoc(chatRef);
       }
 
-      // Fetch all chats again (assuming you have a function for this)
       handleFetchAllChats();
     } catch (error) {
       console.error("Error deleting chat:", error);
@@ -431,6 +402,43 @@ export const ChatProvider = ({ children }) => {
         console.error("Quota exceeded. Please try again later.");
         setError("Server down, Please try again later");
       }
+    }
+  };
+
+  // archive a chat
+  const archiveChat = async (chatId) => {
+    if (!chatId) return "no valid chatid";
+
+    try {
+      const chatRef = doc(db, "chats", chatId);
+      const chatSnap = await getDoc(chatRef);
+
+      if (chatSnap.exists()) {
+        const chatData = chatSnap.data();
+        let archiveBy = chatData.archiveBy || [];
+        archiveBy = [currentUser.uid, ...archiveBy];
+
+        await updateDoc(chatRef, {
+          archiveBy,
+        });
+      } else {
+        console.log("Chat does not exist");
+      }
+    } catch (error) {
+      console.error("Error archiving chat:", error);
+    }
+  };
+
+  // remove a chat from archives
+  const handleRemoveArchiveChat = async (chatId) => {
+    if (!chatId) return "no valid chatid";
+    try {
+      const chatRef = doc(db, "chats", chatId);
+      await updateDoc(chatRef, {
+        archiveBy: arrayRemove(currentUser.uid),
+      });
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -501,6 +509,8 @@ export const ChatProvider = ({ children }) => {
         loadingMessages,
         addReaction,
         removeReaction,
+        archiveChat,
+        handleRemoveArchiveChat,
       }}
     >
       {children}

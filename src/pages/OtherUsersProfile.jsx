@@ -127,7 +127,7 @@ const OtherUsersProfile = () => {
   };
 
   // Handle follow/unfollow
-  const handleFollow = async (id) => {
+  const handleFollow = async () => {
     try {
       const toastId = toast.loading("Processing your request");
       const targetUserRef = doc(db, "users", userId);
@@ -139,11 +139,11 @@ const OtherUsersProfile = () => {
         const targetUserSnapShot = targetUserSnap.data();
         const currentUserSnapShot = currentUserSnap.data();
 
-        if (targetUserSnapShot.followers.includes(id)) {
+        if (targetUserSnapShot?.followers?.includes(currentUser.uid)) {
           // Unfollow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayRemove(id),
+              followers: arrayRemove(currentUser.uid),
             }),
             updateDoc(currentUserRef, {
               following: arrayRemove(userId),
@@ -155,7 +155,7 @@ const OtherUsersProfile = () => {
           // Follow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayUnion(id),
+              followers: arrayUnion(currentUser.uid),
             }),
             updateDoc(currentUserRef, {
               following: arrayUnion(userId),
@@ -411,14 +411,6 @@ const OtherUsersProfile = () => {
               )}
             </span>
           </div>
-          <Link
-            to={`/userProfile/settings`}
-            onClick={() => {
-              window.scrollTo(0, 0);
-            }}
-          >
-            <FiSettings size={20} />
-          </Link>
         </div>
         <div className="flex flex-col  jsutify-center items-center space-y-4 h-fit w-full p-4">
           <div className="flex justify-between w-full h-fit">
@@ -808,13 +800,13 @@ const OtherUsersProfile = () => {
                       </div>
 
                       {/*  tagged posts*/}
-                      {data?.followers.includes(currentUser.uid) ? (
+                      {data?.followers?.includes(currentUser.uid) ? (
                         <div
                           className={`w-full flex justify-center pt-2 ${
                             focusedSection === 3 ? "flex" : "hidden"
                           }`}
                         >
-                          {taggedPosts && taggedPosts.length > 0 ? (
+                          {taggedPosts && taggedPosts?.length > 0 ? (
                             <div className="w-full h-full space-y-6">
                               {taggedPosts?.map((taggedPost) => {
                                 return (
