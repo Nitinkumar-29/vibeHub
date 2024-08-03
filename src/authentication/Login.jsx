@@ -12,14 +12,20 @@ import { doc, updateDoc } from "firebase/firestore";
 
 const Login = () => {
   const [error, setError] = useState("");
-  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { dispatch } = useContext(AuthContext);
+  const { dispatch, login, loginCredentials, setLoginCredentials } =
+    useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
   const token = localStorage.getItem("token");
+
+  const handleOnChange = (e) => {
+    setLoginCredentials({
+      ...loginCredentials,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -29,39 +35,15 @@ const Login = () => {
     }
   };
 
-  const updatePasswordStatus = async () => {
-    // To update a doc with uid
-    const user = doc(db, "users", auth.currentUser.uid);
-    token &&
-      (await updateDoc(user, {
-        password: password,
-      }));
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        setIsLoading(true);
-        navigate("/");
-        dispatch({ type: "LOGIN", payload: user });
-        updatePasswordStatus();
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-        setIsLoading(false);
-        setLoading(false);
-        setError("Invalid credentials");
-      });
+    login(auth);
   };
 
   // reset user password
   const handleResetPassword = async () => {
-    await sendPasswordResetEmail(auth, email)
+    await sendPasswordResetEmail(auth, loginCredentials.email)
       .then(() => {
         console.log("Please check email");
       })
@@ -85,7 +67,8 @@ const Login = () => {
           <input
             className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
             name="email"
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleOnChange}
+            value={loginCredentials.email}
             type="email"
             placeholder="Email"
           />
@@ -93,8 +76,9 @@ const Login = () => {
             <input
               className="rounded-md w-72 p-2 bg-inherit focus:outline-none"
               name="password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleOnChange}
               type={passwordType}
+              value={loginCredentials.password}
               placeholder="Password"
             />
             <span
@@ -102,7 +86,7 @@ const Login = () => {
               onClick={handleTogglePasswordType}
             >
               {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
-            </span>{" "}
+            </span>
           </div>
           <span
             onClick={handleResetPassword}

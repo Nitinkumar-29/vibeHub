@@ -27,7 +27,6 @@ const Post = () => {
     handleLikeComment,
     handleLikePost,
     handlePostComment,
-    currentUser,
     fetchPostById,
     fetchPostComments,
     handleSavePost,
@@ -36,6 +35,7 @@ const Post = () => {
   const { id } = useParams();
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const currentUser = localStorage.getItem("currentUser");
 
   const handlePlayPause = () => {
     videoRef.current.click();
@@ -90,7 +90,7 @@ const Post = () => {
                       window.scrollTo(0, 0);
                     }}
                     to={
-                      currentUser?.uid === postData?.userId
+                      currentUser && currentUser === postData?.userId
                         ? `/userProfile/yourPosts`
                         : `/users/${postData?.userId}/profile`
                     }
@@ -127,7 +127,7 @@ const Post = () => {
                       console.log(user?.userId, user?.username);
                     }}
                     to={
-                      currentUser.uid === user?.userId
+                      currentUser && currentUser === user?.userId
                         ? `/userProfile/yourPosts`
                         : `/users/${user?.userId}/profile`
                     }
@@ -192,7 +192,7 @@ const Post = () => {
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-1">
                     <span onClick={() => handleLikePost(id)}>
-                      {postData?.likes?.includes(currentUser.uid) ? (
+                      {postData?.likes?.includes(currentUser) ? (
                         <BsHeartFill
                           size={20}
                           className="text-red-600 cursor-pointer"
@@ -216,7 +216,7 @@ const Post = () => {
                     handleSavePost(id);
                   }}
                 >
-                  {postData?.saves?.includes(currentUser.uid) ? (
+                  {postData?.saves?.includes(currentUser) ? (
                     <RxBookmarkFilled
                       className="text-pink-600 cursor-pointer"
                       size={28}
@@ -308,7 +308,8 @@ const Post = () => {
                                       window.scrollTo(0, 0);
                                     }}
                                     to={
-                                      currentUser.uid === comment.userId
+                                      currentUser &&
+                                      currentUser === comment.userId
                                         ? `/userProfile/yourPosts`
                                         : `/users/${comment?.userId}/profile`
                                     }
@@ -330,7 +331,8 @@ const Post = () => {
                                       window.scrollTo(0, 0);
                                     }}
                                     to={
-                                      currentUser.uid === comment.userId
+                                      currentUser &&
+                                      currentUser === comment.userId
                                         ? `/userProfile/yourPosts`
                                         : `/users/${comment?.userId}/profile`
                                     }
@@ -346,8 +348,9 @@ const Post = () => {
                               </div>
                             </div>
                           }
-                          {(currentUser.uid === postData.userId ||
-                            currentUser.uid === comment?.userId) && (
+                          {((currentUser && currentUser === postData.userId) ||
+                            (currentUser &&
+                              currentUser === comment?.userId)) && (
                             <FiTrash2
                               className="cursor-pointer"
                               onClick={() =>
@@ -365,7 +368,7 @@ const Post = () => {
                               className="flex space-x-1 items-center"
                               onClick={() => handleLikeComment(comment.id, id)}
                             >
-                              {comment?.likes?.includes?.(currentUser.uid) ? (
+                              {comment?.likes?.includes?.(currentUser) ? (
                                 <BsHeartFill
                                   className="text-red-600 cursor-pointer"
                                   size={18}

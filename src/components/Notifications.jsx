@@ -1,20 +1,25 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { FaRightFromBracket } from "react-icons/fa6";
-import { TiTick } from "react-icons/ti";
-import { BiCloset } from "react-icons/bi";
-import { CgClose, CgCloseR } from "react-icons/cg";
-import { TfiClose } from "react-icons/tfi";
 import { GoIssueClosed } from "react-icons/go";
-import { IoCloseCircleOutline } from "react-icons/io5";
+import {
+  IoArrowBack,
+  IoCloseCircleOutline,
+  IoInformation,
+  IoInformationCircleOutline,
+} from "react-icons/io5";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import toast from "react-hot-toast";
+import { MdArrowBackIos, MdOutlineInfo } from "react-icons/md";
+import ThemeContext from "../context/Theme/ThemeContext";
+import { Link } from "react-router-dom";
 
 const Notifications = () => {
-  const { currentUser, fetchFollowRequests, acceptFollowRequest } =
+  const { setFollowRequestsData, followRequestsData, acceptFollowRequest } =
     useContext(AuthContext);
-  const [requestsData, setRequestsData] = useState([]);
+  const currentUser = localStorage.getItem("currentUser");
+  const [infoToggle, setInfoToggle] = useState(false);
+  const { theme } = useContext(ThemeContext);
 
   // reject follow request
   const rejectRequest = async (id) => {
@@ -22,12 +27,12 @@ const Notifications = () => {
     if (!id) return "not valid id";
     try {
       let updatedRequests = [];
-      const docRef = doc(db, "users", currentUser.uid);
+      const docRef = doc(db, "users", currentUser);
       await updateDoc(docRef, {
         followRequests: arrayRemove(id),
       });
-      updatedRequests = requestsData.filter((request) => request === id);
-      setRequestsData(updatedRequests);
+      updatedRequests = followRequestsData.filter((request) => request === id);
+      setFollowRequestsData(updatedRequests);
       toast.dismiss();
       toast.success("request rejected!");
     } catch (error) {
@@ -35,19 +40,47 @@ const Notifications = () => {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      const data = await fetchFollowRequests(currentUser);
-      setRequestsData(data);
-    })();
-    // eslint-disable-next-line
-  }, []);
   return (
     <>
-      <div className="flex flex-col items-center w-full p-4">
-        <div className="text-lg font-semibold">Notifications</div>
+      <div className="flex flex-col items-center w-full p-2">
+        <div
+          className={`relative flex w-full items-center justify-between p-2 ${
+            theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
+          } rounded-md`}
+        >
+          <div className="flex space-x-4 items-center w-full">
+            <MdArrowBackIos size={20} />
+            <div className="text-lg font-semibold">Notifications</div>
+          </div>
+          <MdOutlineInfo
+            onClick={() => {
+              setInfoToggle(!infoToggle);
+            }}
+            className="cursor-pointer"
+            size={25}
+          />{" "}
+          <div
+            className={`${
+              infoToggle ? "hidden" : "flex"
+            } text-sm text-zinc-600 ${
+              theme === "dark" ? "bg-zinc-900" : "bg-gray-200"
+            } flex flex-wrap absolute top-12 max-w-[100%] border-[1px]  rounded-md w-fit right-0 mx-auto min-h-20 p-2`}
+          >
+            <p>
+              {" "}
+              To keep UI clean, we will remove notifications once you have had a
+              look. Let us know your opinion.
+            </p>
+            <div className="flex items-center space-x-2">
+              <span>Email at:</span>
+              <span className="cursor-pointer text-blue-500 hover:underline">
+                vibeHub05@gmail.com
+              </span>
+            </div>
+          </div>
+        </div>
 
-        {requestsData.map((data) => {
+        {followRequestsData.map((data) => {
           return (
             <div
               key={data.id}

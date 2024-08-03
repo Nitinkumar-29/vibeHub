@@ -13,9 +13,9 @@ import PostContext from "../context/PostContext/PostContext";
 import { CgSpinner } from "react-icons/cg";
 
 const FollowingList = () => {
-  const { currentUser } = useContext(PostContext);
   const [followingList, setFollowingList] = useState([]);
   const { userId } = useParams();
+  const currentUser = localStorage.getItem("currentUser")
 
   const handleFetchFollowingList = async () => {
     const docRef = doc(db, "users", userId);
@@ -45,7 +45,7 @@ const FollowingList = () => {
     try {
       const toastId = toast.loading("Processing your request");
       const targetUserRef = doc(db, "users", id);
-      const currentUserRef = doc(db, "users", currentUser.uid);
+      const currentUserRef = doc(db, "users", currentUser);
       const targetUserSnap = await getDoc(targetUserRef);
       const currentUserSnap = await getDoc(currentUserRef);
 
@@ -53,14 +53,14 @@ const FollowingList = () => {
         const targetUserSnapShot = targetUserSnap.data();
         const currentUserSnapShot = currentUserSnap.data();
         let updatedList;
-        if (targetUserSnapShot.followers.includes(currentUser.uid)) {
+        if (targetUserSnapShot.followers.includes(currentUser)) {
           // Unfollow the user
           //   updatedList = followingList.map((user)=>{
 
           //   })
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser.uid),
+              followers: arrayRemove(currentUser),
             }),
             updateDoc(currentUserRef, {
               following: arrayRemove(id),
@@ -73,7 +73,7 @@ const FollowingList = () => {
           // Follow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayUnion(currentUser.uid),
+              followers: arrayUnion(currentUser),
             }),
             updateDoc(currentUserRef, {
               following: arrayUnion(id),
@@ -110,9 +110,9 @@ const FollowingList = () => {
         <div className="h-full w-full flex flex-col space-y-4 items-center px-4 mt-4">
           {followingList
             .sort((a, b) => {
-              if (a.id === currentUser.uid) {
+              if (a.id === currentUser) {
                 return -1;
-              } else if (b.id === currentUser.uid) {
+              } else if (b.id === currentUser) {
                 return 1;
               }
               return a.user_name;
@@ -132,7 +132,7 @@ const FollowingList = () => {
                   </div>
                   <Link
                     to={
-                      following.id === currentUser.uid
+                      following.id === currentUser
                         ? `/userProfile/yourPosts`
                         : `/users/${following.id}/profile`
                     }
@@ -144,7 +144,7 @@ const FollowingList = () => {
                     </span>
                   </Link>
                   <div>
-                    {following?.data?.followers?.includes(currentUser.uid) ? (
+                    {following?.data?.followers?.includes(currentUser) ? (
                       <button
                         // eslint-disable-next-line no-undef
                         onClick={() => handleManageFollow(following.id)}
@@ -154,7 +154,7 @@ const FollowingList = () => {
                       </button>
                     ) : (
                       <div className="flex items-center">
-                        {following.id === currentUser.uid ? (
+                        {following.id === currentUser ? (
                           <button
                             // eslint-disable-next-line no-undef
                             className="cursor-auto px-8  py-2"

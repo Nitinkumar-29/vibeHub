@@ -1,33 +1,20 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { auth, db, storage } from "../firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
-import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-import { AuthContext } from "../context/AuthContext";
-
 import { TfiLayoutListPost } from "react-icons/tfi";
-import { BiArrowBack } from "react-icons/bi";
 import PostContext from "../context/PostContext/PostContext";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSaveSharp } from "react-icons/io5";
 import { BsHeartFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
+import { MdArrowBackIos } from "react-icons/md";
+import { AuthContext } from "../context/AuthContext";
 
 const UserProfile = () => {
-  const imageRef = useRef();
-  const [file, setFile] = useState("");
-  const [bgImgPreview, setBgImgPreview] = useState("");
-  const { currentUser } = useContext(AuthContext);
-  const [fetchedUserData, setFetchedUserData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const currentUser = localStorage.getItem("currentUser");
+  const { currentUserData } = useContext(AuthContext);
+
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
   const {
     handleFetchUserPosts,
     handleFetchLikedPosts,
@@ -36,56 +23,13 @@ const UserProfile = () => {
   } = useContext(PostContext);
   const location = useLocation();
   const { theme } = useContext(ThemeContext);
-
-  const updateUserData = async (updatedData) => {
-    try {
-      const userRef = doc(db, "users", currentUser.uid);
-      await updateDoc(userRef, updatedData);
-      setFetchedUserData((prevData) => ({ ...prevData, ...updatedData }));
-    } catch (error) {
-      console.error("Error updating user data:", error);
-      setError("Failed to update user data. Please try again.");
-    }
-  };
-
-  const handleFetchUserData = async () => {
-    if (currentUser && currentUser.email) {
-      try {
-        const q = query(
-          collection(db, "users"),
-          where("email", "==", currentUser.email)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-          setFetchedUserData(userData, currentUser.uid);
-          localStorage.setItem(
-            "loggedInUserData",
-            JSON.stringify(userData, currentUser.uid)
-          );
-        });
-      } catch (error) {
-        if (error.code === "resource-exhausted") {
-          console.error("Quota exceeded. Please try again later.");
-        }
-        setError("Server down, Please try again later");
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      handleFetchUserData();
-    }
-    // eslint-disable-next-line
-  }, [currentUser]);
-
+  
   useEffect(() => {
     handleFetchUserPosts();
     handleFetchLikedPosts();
     handleFetchSavedPosts();
     // eslint-disable-next-line
-  }, [currentUser.uid]);
+  }, [currentUser]);
 
   return (
     <div
@@ -97,17 +41,23 @@ const UserProfile = () => {
         }`}
       >
         <div className="flex space-x-2 items-center">
-          <BiArrowBack size={20} className="cursor-pointer" />
+          <MdArrowBackIos
+            onClick={() => {
+              navigate(-1);
+            }}
+            size={20}
+            className="cursor-pointer"
+          />
           <span className={` `}>
-            {fetchedUserData?.user_name && (
+            {currentUserData?.user_name && (
               <span className={`text-xl font-semibold`}>
-                {fetchedUserData?.user_name}
+                {currentUserData?.user_name}
               </span>
             )}
           </span>
         </div>
         <Link
-          to={`/userProfile/settings`}
+          to={`/userProfile/settings/edit`}
           onClick={() => {
             window.scrollTo(0, 0);
           }}
@@ -115,16 +65,16 @@ const UserProfile = () => {
           <FiSettings size={20} />
         </Link>
       </div>
-      {fetchedUserData && (
+      {currentUserData && (
         <div className="relative flex flex-col items-center justify-center h-fit space-y-3 px-4 w-full">
           <div className="flex items-start justify-between px-4 w-full">
             <div className="flex flex-col items-center space-y-1">
               <img
-                src={fetchedUserData?.img}
+                src={currentUserData?.img}
                 className="h-16 w-16 object-cover rounded-full duration-300"
                 alt=""
               />
-              <span>{fetchedUserData.name}</span>
+              <span>{currentUserData.name}</span>
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
@@ -138,10 +88,11 @@ const UserProfile = () => {
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-3xl">
-                  {fetchedUserData?.followers?.length || 0}
+                  {currentUserData?.followers?.length || 0}
                 </span>
                 <Link
-                  to={`/userProfile/${currentUser.uid}/followers`}
+                onClick={()=>{console.log(currentUser)}}
+                  to={`/userProfile/${currentUser}/followers`}
                   className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Followers
@@ -149,10 +100,10 @@ const UserProfile = () => {
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-3xl">
-                  {fetchedUserData?.following?.length || 0}
+                  {currentUserData?.following?.length || 0}
                 </span>
                 <Link
-                  to={`/userProfile/${currentUser.uid}/following`}
+                  to={`/userProfile/${currentUser}/following`}
                   className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Following
@@ -208,10 +159,10 @@ const UserProfile = () => {
           <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">
             <span className="w-full flex justify-center">
               <Link
-                to={`/userProfile/${currentUser.uid}/followers`}
+                to={`/userProfile/${currentUser}/followers`}
                 className={`${
                   location.pathname ===
-                  `/userProfile/${currentUser.uid}/followers`
+                  `/userProfile/${currentUser}/followers`
                     ? `${theme === "dark" ? "text-white" : "text-black"}`
                     : "text-gray-400"
                 } p-2  text-center`}
@@ -222,10 +173,10 @@ const UserProfile = () => {
             </span>
             <span className="w-full flex justify-center">
               <Link
-                to={`/userProfile/${currentUser.uid}/following`}
+                to={`/userProfile/${currentUser}/following`}
                 className={`${
                   location.pathname ===
-                  `/userProfile/${currentUser.uid}/following`
+                  `/userProfile/${currentUser}/following`
                     ? `${theme === "dark" ? "text-white" : "text-black"}`
                     : "text-gray-400"
                 } p-2  text-center`}

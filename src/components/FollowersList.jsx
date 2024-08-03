@@ -7,22 +7,21 @@ import {
 } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from "react";
 import { db } from "../firebase";
-import PostContext from "../context/PostContext/PostContext";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { CgSpinner } from "react-icons/cg";
 
 const FollwersList = () => {
-  const { currentUser } = useContext(PostContext);
   const [followersList, setFollowersList] = useState([]);
   const { userId } = useParams();
-  let isOwner = userId === currentUser.uid;
+  const currentUser = localStorage.getItem("currentUser")
+  let isOwner = userId === currentUser;
   // Handle follow/unfollow
   const handleManageFollow = async (id) => {
     try {
       toast.loading("Processing your request");
       const targetUserRef = doc(db, "users", id);
-      const currentUserRef = doc(db, "users", currentUser.uid);
+      const currentUserRef = doc(db, "users", currentUser);
       const targetUserSnap = await getDoc(targetUserRef);
       const currentUserSnap = await getDoc(currentUserRef);
 
@@ -34,11 +33,11 @@ const FollwersList = () => {
         const targetUserFollowers = targetUserSnapShot.followers || [];
         const currentUserFollowing = currentUserSnapShot.following || [];
         let updatedList;
-        if (targetUserFollowers.includes(currentUser.uid)) {
+        if (targetUserFollowers.includes(currentUser)) {
           // Unfollow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser.uid),
+              followers: arrayRemove(currentUser),
             }),
             updateDoc(currentUserRef, {
               following: arrayRemove(id),
@@ -51,7 +50,7 @@ const FollwersList = () => {
           // Follow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayUnion(currentUser.uid),
+              followers: arrayUnion(currentUser),
             }),
             updateDoc(currentUserRef, {
               following: arrayUnion(id),
@@ -101,14 +100,11 @@ const FollwersList = () => {
   const handleRemoveFollower = async (id) => {
     try {
       toast.loading("Removing....");
-      const docRef = doc(db, "users", currentUser.uid);
+      const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const targetRef = doc(db, "users", id);
-      const targetSnap = await getDoc(targetRef);
       const docSnapShot = docSnap.exists ? docSnap.data() : [];
-      const targetSnapShot = targetSnap.exists ? targetSnap.data : [];
       const currentUserFollowersList = docSnapShot.followers;
-      const targetUserFollowingList = targetSnapShot.following;
 
       let updatedList;
 
@@ -117,7 +113,7 @@ const FollwersList = () => {
         await Promise.all([
           updateDoc(docRef, { followers: arrayRemove(id) }),
           updateDoc(targetRef, {
-            following: arrayRemove(currentUser.uid),
+            following: arrayRemove(currentUser),
           }),
         ]);
         updatedList = followersList.filter((follower) => follower.id !== id);
@@ -141,9 +137,9 @@ const FollwersList = () => {
         <div className="h-full w-full flex flex-col items-center space-y-4 px-4 mt-4">
           {followersList
             ?.sort((a, b) => {
-              if (a.id === currentUser.uid) {
+              if (a.id === currentUser) {
                 return -1;
-              } else if (b.id === currentUser.uid) {
+              } else if (b.id === currentUser) {
                 return 1;
               }
               return a.user_name;
@@ -160,7 +156,7 @@ const FollwersList = () => {
                   </div>
                   <Link
                     to={
-                      follower.id === currentUser.uid
+                      follower.id === currentUser
                         ? `/userProfile/yourPosts`
                         : `/users/${follower.id}/profile`
                     }
@@ -174,7 +170,7 @@ const FollwersList = () => {
 
                   {!isOwner && (
                     <div>
-                      {follower?.data?.followers?.includes(currentUser.uid) ? (
+                      {follower?.data?.followers?.includes(currentUser) ? (
                         <button
                           // eslint-disable-next-line no-undef
                           onClick={() => handleManageFollow(follower.id)}
@@ -184,7 +180,7 @@ const FollwersList = () => {
                         </button>
                       ) : (
                         <div className="flex items-center">
-                          {follower.id === currentUser.uid ? (
+                          {follower.id === currentUser? (
                             <button className="cursor-auto px-8 py-2 ">
                               You
                             </button>
@@ -206,7 +202,7 @@ const FollwersList = () => {
                       <button
                         onClick={() => {
                           handleRemoveFollower(follower.id);
-                          console.log(follower.id, userId, currentUser.uid);
+                          console.log(follower.id, userId, currentUser);
                         }}
                         className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
                       >

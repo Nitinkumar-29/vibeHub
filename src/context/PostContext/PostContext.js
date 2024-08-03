@@ -16,8 +16,7 @@ import {
   where,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
-import { db, storage } from "../../firebase";
-import { AuthContext } from "../AuthContext";
+import { auth, db, storage } from "../../firebase";
 import toast from "react-hot-toast";
 import { deleteObject, listAll, ref } from "firebase/storage";
 
@@ -29,8 +28,6 @@ export const PostProvider = ({ children }) => {
   const [postComment, setPostComment] = useState({ commentText: "" });
   const [postComments, setPostComments] = useState([]);
   const [isPublished, setIsPublished] = useState(true);
-  const userData = JSON.parse(localStorage.getItem("loggedInUserData"));
-  const { currentUser } = useContext(AuthContext);
   const [postsLoading, setPostsLoading] = useState(false);
   const [userDataWithPostId, setUserDataWithPostId] = useState();
   const [userPosts, setUserPosts] = useState(null);
@@ -40,6 +37,7 @@ export const PostProvider = ({ children }) => {
   const [explorePosts, setExplorePosts] = useState([]);
   const [otherPublicPostsHomePage, setOtherPublicPostsHomePage] = useState([]);
   const [error, setError] = useState("");
+  const currentUser = localStorage.getItem("currentUser");
 
   const fetchPostById = async (id) => {
     const postRef = doc(db, "posts", id);
@@ -120,7 +118,7 @@ export const PostProvider = ({ children }) => {
     toast.loading("Processing...");
 
     const { commentText } = postComment;
-    const docRef = doc(db, "users", currentUser.uid);
+    const docRef = doc(db, "users", currentUser);
     const docSnap = await getDoc(docRef);
     const docUserData = [];
     if (docSnap.exists()) {
@@ -129,7 +127,7 @@ export const PostProvider = ({ children }) => {
     try {
       await addDoc(collection(db, "postComments"), {
         comment: commentText,
-        userId: currentUser.uid,
+        userId: currentUser,
         postId: id,
         timeStamp: serverTimestamp(),
       });
@@ -180,7 +178,7 @@ export const PostProvider = ({ children }) => {
       const queryPosts = [];
       const q = query(
         collection(db, "posts"),
-        where("userId", "==", currentUser.uid)
+        where("userId", "==", currentUser)
       );
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
@@ -209,9 +207,9 @@ export const PostProvider = ({ children }) => {
       // Fetch saved posts
       const q = query(
         collection(db, "posts"),
-        where("saves", "array-contains", currentUser.uid)
+        where("saves", "array-contains", currentUser)
       );
-      const docRef = doc(db, "users", currentUser.uid);
+      const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const followingList = docSnap.exists()
         ? docSnap.data().following || []
@@ -241,7 +239,7 @@ export const PostProvider = ({ children }) => {
       const publicUsersSavedPosts = [];
 
       postsWithUserData.forEach((post) => {
-        const currentUserPost = post.userId === currentUser.uid;
+        const currentUserPost = post.userId === currentUser;
         const followingUserSavedPost = followingList.includes(post.userId);
         const publicUserSavedPost = post.user.accountType !== "private";
 
@@ -282,9 +280,9 @@ export const PostProvider = ({ children }) => {
       // Fetch saved posts
       const q = query(
         collection(db, "posts"),
-        where("likes", "array-contains", currentUser.uid)
+        where("likes", "array-contains", currentUser)
       );
-      const docRef = doc(db, "users", currentUser.uid);
+      const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const followingList = docSnap.exists()
         ? docSnap.data().following || []
@@ -312,7 +310,7 @@ export const PostProvider = ({ children }) => {
       const publicUsersLikedPosts = [];
 
       postsWithUserData.forEach((post) => {
-        const currentUserPost = post.userId === currentUser.uid;
+        const currentUserPost = post.userId === currentUser;
         const followingUserLikedPost = followingList.includes(post.userId);
         const publicUserLikedPost = post.user.accountType !== "private";
 
@@ -356,13 +354,15 @@ export const PostProvider = ({ children }) => {
         const likes = postData.likes || [];
         let updatedPosts;
 
-        if (likes.includes(currentUser.uid)) {
+        if (likes.includes(currentUser)) {
           // Optimistically update UI
           updatedPosts = homePagePosts.map((post) =>
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                  likes: post.likes.filter(
+                    (uid) => uid !== currentUser
+                  ),
                 }
               : post
           );
@@ -372,7 +372,9 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                    likes: post.likes.filter(
+                      (uid) => uid !== currentUser
+                    ),
                   }
                 : post
             )
@@ -380,7 +382,7 @@ export const PostProvider = ({ children }) => {
           toast.loading("Removing like...");
           // Update database
           await updateDoc(postRef, {
-            likes: arrayRemove(currentUser.uid),
+            likes: arrayRemove(currentUser),
           });
           toast.dismiss();
           toast.success("Like removed");
@@ -393,7 +395,7 @@ export const PostProvider = ({ children }) => {
             post.id === id
               ? {
                   ...post,
-                  likes: [...post?.likes, currentUser?.uid],
+                  likes: [...post?.likes, currentUser],
                 }
               : post
           );
@@ -403,7 +405,7 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    likes: [...post?.likes, currentUser?.uid],
+                    likes: [...post?.likes, currentUser],
                   }
                 : post
             )
@@ -411,7 +413,7 @@ export const PostProvider = ({ children }) => {
           toast.loading("Adding like...");
           // Update database
           await updateDoc(postRef, {
-            likes: arrayUnion(currentUser.uid),
+            likes: arrayUnion(currentUser),
           });
           toast.dismiss();
           toast.success("Liked");
@@ -442,10 +444,10 @@ export const PostProvider = ({ children }) => {
         const commentData = commentSnap.data();
         const commentLikes = commentData.likes || []; // Ensure likes array exists
 
-        if (commentLikes.includes(currentUser.uid)) {
+        if (commentLikes.includes(currentUser)) {
           toast.loading("Removing like...");
           await updateDoc(commentRef, {
-            likes: arrayRemove(currentUser.uid),
+            likes: arrayRemove(currentUser),
             likesCount: increment(-1),
           });
           await fetchPostComments(postId); // Update comments list
@@ -454,7 +456,7 @@ export const PostProvider = ({ children }) => {
         } else {
           toast.loading("Adding like...");
           await updateDoc(commentRef, {
-            likes: arrayUnion(currentUser.uid),
+            likes: arrayUnion(currentUser),
             likesCount: increment(1),
           });
           await fetchPostComments(postId); // Update comments list
@@ -475,7 +477,9 @@ export const PostProvider = ({ children }) => {
       }
 
       // Fetch the current user's following list
-      const currentUserDoc = await getDoc(doc(db, "users", currentUser.uid));
+      const currentUserDoc = await getDoc(
+        doc(db, "users", currentUser)
+      );
       const currentUserData = currentUserDoc.exists()
         ? currentUserDoc.data()
         : {};
@@ -511,7 +515,7 @@ export const PostProvider = ({ children }) => {
       const otherUsersPosts = [];
 
       postsWithUserData.forEach((post) => {
-        const isCurrentUser = post.userId === currentUser.uid;
+        const isCurrentUser = post.userId === currentUser;
         const isFollowing = followingList.includes(post.userId);
         const isPrivate = post.userData.accountType === "private";
 
@@ -601,11 +605,11 @@ export const PostProvider = ({ children }) => {
         const postData = postSnap?.data(); // This is the fetched data
         const saves = postData?.saves || []; // Initialize saves array from fetched data
 
-        if (saves.includes(currentUser?.uid)) {
+        if (saves.includes(currentUser)) {
           toast.loading("Removing...");
 
           await updateDoc(postRef, {
-            saves: arrayRemove(currentUser?.uid),
+            saves: arrayRemove(currentUser),
           });
 
           setHomePagePosts((prevPosts) =>
@@ -614,7 +618,7 @@ export const PostProvider = ({ children }) => {
                 ? {
                     ...post,
                     saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser?.uid
+                      (uid) => uid !== currentUser
                     ),
                   }
                 : post
@@ -626,7 +630,7 @@ export const PostProvider = ({ children }) => {
                 ? {
                     ...post,
                     saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser?.uid
+                      (uid) => uid !== currentUser
                     ),
                   }
                 : post
@@ -641,14 +645,14 @@ export const PostProvider = ({ children }) => {
           toast.loading("saving...");
 
           await updateDoc(postRef, {
-            saves: arrayUnion(currentUser?.uid),
+            saves: arrayUnion(currentUser),
           });
           setHomePagePosts((prevPosts) =>
             prevPosts?.map((post) =>
               post?.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser?.uid],
+                    saves: [...post?.saves, currentUser],
                   }
                 : post
             )
@@ -658,7 +662,7 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser?.uid],
+                    saves: [...post?.saves, currentUser],
                   }
                 : post
             )
@@ -697,12 +701,6 @@ export const PostProvider = ({ children }) => {
     handleFetchUserPosts();
     fetchHomePagePosts();
   };
-
-  useEffect(() => {
-    fetchHomePagePosts();
-    // eslint-disable-next-line
-  }, []);
-
   return (
     <PostContext.Provider
       value={{
@@ -713,7 +711,6 @@ export const PostProvider = ({ children }) => {
         setPostComment,
         postComments,
         isPublished,
-        userData,
         formatDate,
         fetchPostById,
         fetchPostComments,
@@ -721,7 +718,6 @@ export const PostProvider = ({ children }) => {
         handleLikeComment,
         handleLikePost,
         handlePostComment,
-        currentUser,
         fetchHomePagePosts,
         homePagePosts,
         fetchExploreAllPosts,

@@ -14,19 +14,8 @@ import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
-import {
-  IoNotificationsCircleOutline,
-  IoNotificationsSharp,
-} from "react-icons/io5";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { db } from "../firebase";
+import { IoNotificationsSharp } from "react-icons/io5";
+import { auth } from "../firebase";
 
 const Home = () => {
   const {
@@ -78,7 +67,7 @@ const Home = () => {
   useEffect(() => {
     fetchHomePagePosts();
     // eslint-disable-next-line
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
     window.addEventListener("scroll", handlePosition);
@@ -111,7 +100,7 @@ const Home = () => {
                 Vibehub
               </span>
             </Link>
-            <Link to={`user/${currentUser.uid}/notifications`}>
+            <Link to={`user/${auth?.currentUser?.uid}/notifications`}>
               <IoNotificationsSharp size={25} />
             </Link>
           </div>
@@ -138,7 +127,7 @@ const Home = () => {
                               window.scrollTo(0, 0);
                             }}
                             to={
-                              currentUser?.uid === post?.userId
+                              auth.currentUser?.uid === post?.userId
                                 ? `/userProfile/yourPosts`
                                 : `/users/${post?.userId}/profile`
                             }
@@ -182,7 +171,7 @@ const Home = () => {
                                   window.scrollTo(0, 0);
                                 }}
                                 to={
-                                  currentUser.uid === user?.userId
+                                  auth.currentUser.uid === user?.userId
                                     ? `/userProfile/yourPosts`
                                     : `/users/${user?.userId}/profile`
                                 }
@@ -259,10 +248,10 @@ const Home = () => {
                             <div
                               className="flex items-center cursor-pointer"
                               onClick={() =>
-                                handleLikePost(post?.id, currentUser?.uid)
+                                handleLikePost(post?.id, auth.currentUser?.uid)
                               }
                             >
-                              {post?.likes?.includes(currentUser?.uid) ? (
+                              {post?.likes?.includes(auth.currentUser?.uid) ? (
                                 <BsHeartFill
                                   size={20}
                                   className="text-red-600 cursor-pointer"
@@ -286,10 +275,10 @@ const Home = () => {
                           <div
                             className=""
                             onClick={() =>
-                              handleSavePost(post?.id, currentUser?.uid)
+                              handleSavePost(post?.id, auth.currentUser?.uid)
                             }
                           >
-                            {post?.saves?.includes(currentUser?.uid) ? (
+                            {post?.saves?.includes(auth.currentUser?.uid) ? (
                               <RxBookmarkFilled
                                 className="text-pink-600 cursor-pointer"
                                 size={28}
@@ -370,7 +359,7 @@ const Home = () => {
                                 window.scrollTo(0, 0);
                               }}
                               to={
-                                currentUser?.uid === post?.userId
+                                auth.currentUser?.uid === post?.userId
                                   ? `/userProfile/yourPosts`
                                   : `/users/${post?.userId}/profile`
                               }
@@ -470,10 +459,15 @@ const Home = () => {
                               <div
                                 className="flex items-center cursor-pointer"
                                 onClick={() =>
-                                  handleLikePost(post?.id, currentUser?.uid)
+                                  handleLikePost(
+                                    post?.id,
+                                    auth.currentUser?.uid
+                                  )
                                 }
                               >
-                                {post?.likes?.includes(currentUser?.uid) ? (
+                                {post?.likes?.includes(
+                                  auth.currentUser?.uid
+                                ) ? (
                                   <BsHeartFill
                                     size={20}
                                     className="text-red-600 cursor-pointer"
@@ -497,10 +491,10 @@ const Home = () => {
                             <div
                               className=""
                               onClick={() =>
-                                handleSavePost(post?.id, currentUser?.uid)
+                                handleSavePost(post?.id, auth.currentUser?.uid)
                               }
                             >
-                              {post?.saves?.includes(currentUser?.uid) ? (
+                              {post?.saves?.includes(auth.currentUser?.uid) ? (
                                 <RxBookmarkFilled
                                   className="text-pink-600 cursor-pointer"
                                   size={28}

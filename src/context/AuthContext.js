@@ -1,5 +1,4 @@
-import { createContext, useEffect, useReducer, useState } from "react";
-import AuthReducer from "./AuthReducer";
+import { createContext, useEffect, useState } from "react";
 import {
   arrayRemove,
   arrayUnion,
@@ -7,31 +6,91 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import toast from "react-hot-toast";
-
-const INITIAL_STATE = {
-  currentUser: JSON.parse(localStorage.getItem("user")) || null,
-};
-
-export const AuthContext = createContext(INITIAL_STATE);
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContextProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
-  const [followRequestsData, setFollowRequestsData] = useState([]);
+  let [followRequestsData, setFollowRequestsData] = useState([]);
+  const [loginCredentials, setLoginCredentials] = useState({
+    email: "",
+    password: "",
+  });
+  const [currentUserData, setCurrentUserData] = useState({});
+  const currentUser = localStorage.getItem("currentUser");
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const updatePasswordStatus = async () => {
+    // To update a doc with uid
+    const user = doc(db, "users", auth.currentUser.uid);
+    const token = localStorage.getItem("token");
+    token &&
+      (await updateDoc(user, {
+        password: loginCredentials.password,
+      }));
+  };
+
+  // login user
+  const login = async () => {
+    await signInWithEmailAndPassword(
+      auth,
+      loginCredentials.email,
+      loginCredentials.password
+    )
+      .then((userCredential) => {
+        const user = userCredential.user;
+        // setIsLoading(true);
+        console.log(user);
+        // dispatch({ type: "LOGIN", payload: user });
+        updatePasswordStatus();
+        localStorage.setItem("currentUser", auth.currentUser.uid);
+        console.log(localStorage.getItem("currentUser"));
+        navigate("/");
+        setLoginCredentials({ email: "", password: "" });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+        setIsLoading(false);
+        setLoading(false);
+        setError("Invalid credentials");
+      });
+  };
+  // fetch current user data
+  const handleFetchCurrentUserData = async () => {
+    try {
+      const docRef = doc(db, "users", currentUser);
+      const docSnap = await getDoc(docRef);
+      const docSnapShot = docSnap.exists() ? docSnap.data() : {};
+      console.log(docSnapShot);
+      setCurrentUserData(docSnapShot);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    handleFetchCurrentUserData();
+    // eslint-disable-next-line
+  }, [currentUser]);
 
   const fetchFollowRequests = async () => {
-    if (!state.currentUser || !state.currentUser.uid) {
+    if (!currentUser) {
       console.log("Invalid user ID");
       return [];
     }
 
     try {
-      const userRef = doc(db, "users", state.currentUser.uid);
+      const userRef = doc(db, "users", currentUser);
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
@@ -79,13 +138,41 @@ export const AuthContextProvider = ({ children }) => {
       return [];
     }
   };
-  // accpet follow reuests
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const unsubscribe = onSnapshot(
+      doc(db, "users", currentUser),
+      async (docSnap) => {
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          const requests = userData?.followRequests || [];
+
+          if (requests.length === 0) {
+            setFollowRequestsData([]);
+          } else {
+            const updatedFollowRequests = await fetchFollowRequests();
+            setFollowRequestsData(updatedFollowRequests);
+          }
+        }
+      }
+    );
+
+    return () => unsubscribe();
+    // eslint-disable-next-line
+  }, [currentUser]);
+
   const acceptFollowRequest = async (userId) => {
-    toast.loading("processing....");
-    if (!state.currentUser.uid) return "not valid id";
+    toast.loading("Processing...");
+
+    if (!currentUser) {
+      toast.error("Invalid user ID");
+      return;
+    }
 
     try {
-      const userRef = doc(db, "users", state.currentUser.uid);
+      const userRef = doc(db, "users", currentUser);
       const targetRef = doc(db, "users", userId);
 
       await Promise.all([
@@ -94,15 +181,17 @@ export const AuthContextProvider = ({ children }) => {
           followRequests: arrayRemove(userId),
         }),
         updateDoc(targetRef, {
-          following: arrayUnion(state.currentUser.uid),
+          following: arrayUnion(currentUser),
         }),
       ]);
+      toast.dismiss();
+      toast.success("Follow request accepted!");
       const chatsRef = collection(db, "chats");
 
       // Query to find chats containing both users
       const chatQuery = query(
         chatsRef,
-        where("participants", "array-contains", state.currentUser.uid)
+        where("participants", "array-contains", currentUser)
       );
 
       // Fetch documents that match the query
@@ -123,38 +212,33 @@ export const AuthContextProvider = ({ children }) => {
         await updateDoc(chatRef, {
           messageRequest: false,
         });
-
-        console.log("Chat updated successfully");
       } else {
         console.log("No chat found between these users.");
       }
-      // Fetch and update the follow requests after acceptance
-      const updatedFollowRequests = await fetchFollowRequests();
-      setFollowRequestsData(updatedFollowRequests);
-      toast.dismiss();
-      toast.success("accepted!");
     } catch (error) {
       toast.dismiss();
       toast.error("Error accepting follow request");
       console.error(error);
     }
-    fetchFollowRequests();
   };
-
-  useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(state.currentUser));
-  }, [state.currentUser]);
 
   return (
     <AuthContext.Provider
       value={{
-        currentUser: state.currentUser,
-        dispatch,
+        followRequestsData,
+        setFollowRequestsData,
         fetchFollowRequests,
         acceptFollowRequest,
+        currentUserData,
+        handleFetchCurrentUserData,
+        login,
+        loginCredentials,
+        setLoginCredentials,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
+
+export const AuthContext = createContext();

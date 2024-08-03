@@ -22,18 +22,16 @@ import { HighLightLinks } from "../utils/HighlightLinks";
 const UserPosts = () => {
   const audioControl = useRef();
   const menuRefs = useRef({});
-
+  const currentUser = localStorage.getItem("currentUser");
   const { userPosts, handleDeletePost } = useContext(PostContext);
-  const { currentUser, handleLikePost, handleSavePost } =
-    useContext(PostContext);
+  const { handleLikePost, handleSavePost } = useContext(PostContext);
   // const [isPlaying, setIsPlaying] = useState(true);
-  const [currentUserData, setCurrentUserData] = useState(null);
+  const currentUserData = JSON.parse(localStorage.getItem("loggedInUserData"));
   const [toggleMenu, setToggleMenu] = useState({});
   const { theme } = useContext(ThemeContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
   const [error, setError] = useState("");
-
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
     if (isPlaying === false) {
@@ -102,31 +100,6 @@ const UserPosts = () => {
   const handleEditPost = (postId) => {
     setIsEdit(!isEdit);
   };
-
-  const fetchUserData = async () => {
-    try {
-      const docRef = doc(db, "users", currentUser.uid);
-      const userDataDoc = await getDoc(docRef);
-      if (userDataDoc.exists()) {
-        const userData = userDataDoc.data();
-        setCurrentUserData(userData);
-      } else {
-        console.log("No such document!");
-      }
-    } catch (error) {
-      if (error.code === "resource-exhausted") {
-        console.error("Quota exceeded. Please try again later.");
-      }
-      setError("Server down, Please try again later");
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser?.uid) {
-      fetchUserData();
-    }
-    // eslint-disable-next-line
-  }, [currentUser]);
 
   return (
     <>
@@ -227,8 +200,7 @@ const UserPosts = () => {
                               onClick={() => {}}
                               to={`/users/${user?.userId || user}/profile`}
                             >
-                              {currentUser.uid === user?.userId &&
-                              post.userId ? (
+                              {currentUser === user?.userId && post.userId ? (
                                 <div className="flex items-center">
                                   @{user?.username}
                                   <span className="text-sm">
@@ -295,11 +267,9 @@ const UserPosts = () => {
                       <div className="flex items-center space-x-6">
                         <div
                           className="flex space-x-1 items-center cursor-pointer"
-                          onClick={() =>
-                            handleLikePost(post?.id, currentUser?.uid)
-                          }
+                          onClick={() => handleLikePost(post?.id, currentUser)}
                         >
-                          {post?.likes?.includes(currentUser?.uid) ? (
+                          {post?.likes?.includes(currentUser) ? (
                             <BsHeartFill
                               size={20}
                               className="text-red-600 cursor-pointer"
@@ -317,11 +287,9 @@ const UserPosts = () => {
                       </div>
                       <div
                         className=""
-                        onClick={() =>
-                          handleSavePost(post?.id, currentUser?.uid)
-                        }
+                        onClick={() => handleSavePost(post?.id, currentUser)}
                       >
-                        {post?.saves?.includes(currentUser?.uid) ? (
+                        {post?.saves?.includes(currentUser) ? (
                           <RxBookmarkFilled
                             className="text-pink-600 cursor-pointer"
                             size={28}
@@ -368,7 +336,7 @@ const UserPosts = () => {
           )}
         </div>
       ) : (
-        <span>{error}</span>
+        <div>{!currentUser && <span>{error}</span>}</div>
       )}
     </>
   );

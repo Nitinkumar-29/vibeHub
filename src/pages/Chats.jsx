@@ -4,7 +4,7 @@ import PostContext from "../context/PostContext/PostContext";
 import { formatTime } from "../utils/FormatTime";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import {
@@ -33,7 +33,6 @@ const Chats = () => {
     fetchMessageRequestChats,
     acceptMessageRequest,
   } = useContext(ChatContext);
-  const { currentUser } = useContext(PostContext);
   const [currentUserData, setCurrentUserData] = useState();
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
@@ -43,6 +42,7 @@ const Chats = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [isSearchUsers, setIsSearchUsers] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const currentUser = localStorage.getItem("currentUser");
 
   const [chatMenu, setChatMenu] = useState(false);
   const [chatMenuId, setChatMenuId] = useState(null);
@@ -84,7 +84,7 @@ const Chats = () => {
 
   const handleFetchUserData = async () => {
     try {
-      const docRef = doc(db, "users", currentUser.uid);
+      const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const docSnapShot = docSnap.exists ? docSnap.data() : {};
       console.log(docSnapShot);
@@ -122,10 +122,10 @@ const Chats = () => {
   // active tab
   useEffect(() => {
     const chats = allChats.filter(
-      (chat) => !chat.archiveBy || !chat.archiveBy.includes(currentUser.uid)
+      (chat) => !chat.archiveBy || !chat.archiveBy.includes(currentUser)
     );
     const archivedChats = allChats.filter(
-      (chat) => chat.archiveBy && chat.archiveBy.includes(currentUser.uid)
+      (chat) => chat.archiveBy && chat.archiveBy.includes(currentUser)
     );
     if (chats.length === 0) {
       setActiveTab("archived");
@@ -135,17 +135,17 @@ const Chats = () => {
       }
     }
     // eslint-disable-next-line
-  }, [currentUser, allChats]);
+  }, [auth.currentUser, allChats]);
 
   useEffect(() => {
-    currentUser.uid && handleFetchUserData();
+    currentUser && handleFetchUserData();
     // eslint-disable-next-line
-  }, [currentUser.uid]);
+  }, [auth.currentUser]);
 
   useEffect(() => {
     handleFetchAllChats();
     // eslint-disable-next-line
-  }, [currentUser.uid]);
+  }, [auth.currentUser]);
 
   useEffect(() => {
     handleFetchUsersData();
@@ -184,7 +184,7 @@ const Chats = () => {
   useEffect(() => {
     fetchMessageRequestChats();
     // eslint-disable-next-line
-  }, [currentUser]);
+  }, [auth.currentUser]);
   return (
     <>
       {!error ? (
@@ -248,23 +248,34 @@ const Chats = () => {
                     theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
                   }`}
                 />
-                {allUsers?.filter(
+                {new Set(
+                  allChats.flatMap((chat) =>
+                    chat.participants.filter(
+                      (participantId) =>
+                        participantId ===
+                        `${allUsers.filter((user) => {
+                          return user.id;
+                        })}`
+                    )
+                  )
+                ) &&
+                allUsers?.filter(
                   (user) =>
-                    user.id !== currentUser.uid && // Exclude current user
+                    user.id !== currentUser && // Exclude current user
                     (user?.accountType !== "private" || // Include public accounts
                       (user?.accountType === "private" &&
-                        user.followers?.includes(currentUser.uid))) && // Include private accounts only if the current user is a follower
+                        user.followers?.includes(currentUser))) && // Include private accounts only if the current user is a follower
                     user.name
                       .toLowerCase()
-                      .includes(userQuery.trim().toLowerCase()) // Filter by user query
+                      .includes(userQuery.trim().toLowerCase())
                 ).length > 0 ? (
                   <div className="flex flex-col my-4 space-y-3">
                     <span>Users</span>
                     {allUsers
                       ?.filter(
                         (user) =>
-                          user?.id !== currentUser.uid &&
-                          (user?.followers?.includes(currentUser.uid) ||
+                          user?.id !== currentUser &&
+                          (user?.followers?.includes(currentUser) ||
                             user?.accountType !== "private") &&
                           user?.name
                             .toLowerCase()
@@ -314,37 +325,39 @@ const Chats = () => {
             )}
           </div>
           <div className="flex flex-col items-center space-y-4 w-full">
-            <div
-              // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
-              className={`relative flex items-center mt-4 w-[95%] px-2 rounded-md ${
-                theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
-              }`}
-            >
-              <input
-                type="text"
-                placeholder="Search"
-                value={query}
-                ref={searchInputRef}
-                onChange={(e) => {
-                  setQuery(e.target.value);
-                }}
-                className={`p-2 bg-transparent  w-full focus:outline-none focus:placeholder:text-gray-300`}
-              />
-
-              {query.length > 0 && (
-                <CgClose
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setQuery("");
+            {!isSearchUsers && (
+              <div
+                // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
+                className={`relative flex items-center mt-4 w-[95%] px-2 rounded-md ${
+                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                }`}
+              >
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={query}
+                  ref={searchInputRef}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
                   }}
+                  className={`p-2 bg-transparent  w-full focus:outline-none focus:placeholder:text-gray-300`}
                 />
-              )}
-            </div>
+
+                {query.length > 0 && (
+                  <CgClose
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setQuery("");
+                    }}
+                  />
+                )}
+              </div>
+            )}
             {allChats.length > 0 && (
               <div className="flex space-x-2 items-center w-[95%]">
                 {allChats?.filter(
                   (chat) =>
-                    !chat?.archiveBy?.includes(currentUser.uid) &&
+                    !chat?.archiveBy?.includes(currentUser) &&
                     chat.messageRequest === false
                 ).length > 0 && (
                   <button
@@ -365,14 +378,14 @@ const Chats = () => {
                     <span>
                       {
                         allChats.filter(
-                          (chat) => !chat?.archiveBy?.includes(currentUser.uid)
+                          (chat) => !chat?.archiveBy?.includes(currentUser)
                         )?.length
                       }
                     </span>
                   </button>
                 )}
                 {allChats?.filter((chat) =>
-                  chat?.archiveBy?.includes(currentUser.uid)
+                  chat?.archiveBy?.includes(currentUser)
                 ).length !== 0 && (
                   <button
                     onClick={() => {
@@ -392,7 +405,7 @@ const Chats = () => {
                     <span>
                       {
                         allChats.filter((chat) =>
-                          chat?.archiveBy?.includes(currentUser.uid)
+                          chat?.archiveBy?.includes(currentUser)
                         )?.length
                       }
                     </span>
@@ -430,12 +443,12 @@ const Chats = () => {
                       ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
                       ?.map((chat) => {
                         let otherParticipant = chat.participants.find(
-                          (participant) => participant.id !== currentUser.uid
+                          (participant) => participant.id !== currentUser
                         );
                         return (
                           <div
                             key={chat.id}
-                            className={`relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
+                            className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
                               theme === "dark"
                                 ? "hover:bg-zinc-900"
                                 : "hover:bg-zinc-100"
@@ -463,7 +476,7 @@ const Chats = () => {
                                           } text-sm mt-1`}
                                         >
                                           <span>
-                                            {currentUser.uid ===
+                                            {currentUser ===
                                             chat.lastMessage.senderId
                                               ? "sent"
                                               : "received"}
@@ -530,8 +543,7 @@ const Chats = () => {
                                   size={25}
                                 />
                               }
-                              {chat.lastMessage.receiverId ===
-                                currentUser.uid && (
+                              {chat.lastMessage.receiverId === currentUser && (
                                 <GoIssueClosed
                                   size={23}
                                   color="green"
@@ -557,7 +569,7 @@ const Chats = () => {
                         (chat) =>
                           (chat?.participants.some(
                             (participant) =>
-                              participant.id !== currentUser.uid &&
+                              participant.id !== currentUser &&
                               participant?.name
                                 ?.toLowerCase()
                                 .includes(query.trim().toLowerCase())
@@ -566,19 +578,19 @@ const Chats = () => {
                               .toLowerCase()
                               .includes(query.trim().toLowerCase())) &&
                           (activeTab === "all"
-                            ? !chat.archiveBy?.includes(currentUser.uid)
-                            : chat.archiveBy?.includes(currentUser.uid)) &&
+                            ? !chat.archiveBy?.includes(currentUser)
+                            : chat.archiveBy?.includes(currentUser)) &&
                           !chat.messageRequest === true
                       )
                       ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
                       ?.map((chat) => {
                         let otherParticipant = chat.participants.find(
-                          (participant) => participant.id !== currentUser.uid
+                          (participant) => participant.id !== currentUser
                         );
                         return (
                           <div
                             key={chat.id}
-                            className={`relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
+                            className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
                               theme === "dark"
                                 ? "hover:bg-zinc-900"
                                 : "hover:bg-zinc-100"
@@ -609,7 +621,7 @@ const Chats = () => {
                                           } text-sm mt-1`}
                                         >
                                           <span>
-                                            {currentUser.uid ===
+                                            {currentUser ===
                                             chat.lastMessage.senderId
                                               ? "sent"
                                               : "received"}
@@ -695,7 +707,7 @@ const Chats = () => {
                                 ref={chatMenuRef}
                                 className="z-20 flex flex-col items-start space-y-1 bg-opacity-40 backdrop-blur-3xl bg-zinc-800 rounded-md p-4 absolute top-16 right-0"
                               >
-                                {chat?.archiveBy?.includes(currentUser.uid) ? (
+                                {chat?.archiveBy?.includes(currentUser) ? (
                                   <button
                                     onClick={async () => {
                                       await handleRemoveArchiveChat(chat.id);

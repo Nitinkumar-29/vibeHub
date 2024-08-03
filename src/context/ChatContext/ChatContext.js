@@ -29,7 +29,6 @@ export const ChatProvider = ({ children }) => {
   const [allChats, setAllChats] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [messages, setMessages] = useState([]);
-  const { currentUser } = useContext(AuthContext);
   const [messageSent, setMessageSent] = useState(true);
   const [messageText, setMessageText] = useState("");
   const [files, setFiles] = useState([]);
@@ -37,12 +36,13 @@ export const ChatProvider = ({ children }) => {
   const [error, setError] = useState("");
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [messageRequestChats, setMessageRequestChats] = useState([]);
+  const currentUser = localStorage.getItem("currentUser");
 
   const handleFetchAllChats = async () => {
     try {
       const chatsRef = query(
         collection(db, "chats/"),
-        where("participants", "array-contains", currentUser.uid),
+        where("participants", "array-contains", currentUser),
         where("messageRequest", "==", false)
       ); // Reference to the chats collection
       const chatsSnap = await getDocs(chatsRef); // Fetch all documents in the chats collection
@@ -83,7 +83,7 @@ export const ChatProvider = ({ children }) => {
       const chatsRef = collection(db, "chats");
       const chatQuery = query(
         chatsRef,
-        where("participants", "array-contains", currentUser.uid),
+        where("participants", "array-contains", currentUser),
         where("messageRequest", "==", true) // Check if messageRequest is true
       );
 
@@ -138,7 +138,7 @@ export const ChatProvider = ({ children }) => {
     const chatsRef = collection(db, "chats");
     const chatQuery = query(
       chatsRef,
-      where("participants", "array-contains", currentUser.uid)
+      where("participants", "array-contains", currentUser)
     );
     const chatSnapShot = await getDocs(chatQuery);
 
@@ -154,15 +154,15 @@ export const ChatProvider = ({ children }) => {
     const userSnap = await getDoc(userRef);
     const userSnapShot = userSnap.exists() ? userSnap.data() : {};
     let messageRequest = false;
-    if (!userSnapShot?.followers?.includes(currentUser.uid)) {
+    if (!userSnapShot?.followers?.includes(currentUser)) {
       messageRequest = true;
     }
     if (!chatId) {
       const newChatRef = await addDoc(chatsRef, {
-        participants: [currentUser.uid, userId],
+        participants: [currentUser, userId],
         lastMessage: {
           message: "",
-          senderId: currentUser.uid,
+          senderId: currentUser,
           receiverId: userId,
         },
         timeStamp: serverTimestamp(),
@@ -179,7 +179,7 @@ export const ChatProvider = ({ children }) => {
       const chatsRef = collection(db, "chats");
       const chatQuery = query(
         chatsRef,
-        where("participants", "array-contains", currentUser.uid)
+        where("participants", "array-contains", currentUser)
       );
       const chatSnapShot = await getDocs(chatQuery);
 
@@ -247,7 +247,7 @@ export const ChatProvider = ({ children }) => {
     if (currentUser) {
       const chatsRef = query(
         collection(db, "chats"),
-        where("participants", "array-contains", currentUser.uid)
+        where("participants", "array-contains", currentUser)
       );
 
       const unsubscribeChats = onSnapshot(chatsRef, async (querySnapshot) => {
@@ -322,7 +322,7 @@ export const ChatProvider = ({ children }) => {
     try {
       const fileURLs = files && (await handleUploadFiles());
       let messageData = {
-        senderId: currentUser.uid,
+        senderId: currentUser,
         fileURLs: fileURLs,
         message: messageText,
         receiverId: userId,
@@ -338,7 +338,7 @@ export const ChatProvider = ({ children }) => {
       await updateDoc(chatRef, {
         "lastMessage.message": messageText, // Update only the text field of lastMessage
         "lastMessage.fileURLs": fileURLs, // Update fileURLs
-        "lastMessage.senderId": currentUser.uid, // Update senderId
+        "lastMessage.senderId": currentUser, // Update senderId
         "lastMessage.receiverId": userId, // Update receiverId
         lastMessageDeleted: false,
         messageReaction: false,
@@ -372,8 +372,8 @@ export const ChatProvider = ({ children }) => {
         const messageData = messageSnapshot.data();
         const currentReactions = messageData.reactions || {};
 
-        if (messageData.senderId !== currentUser.uid) {
-          currentReactions[currentUser.uid] = reaction;
+        if (messageData.senderId !== currentUser) {
+          currentReactions[currentUser] = reaction;
 
           await updateDoc(messageRef, {
             reactions: currentReactions,
@@ -404,15 +404,15 @@ export const ChatProvider = ({ children }) => {
       if (messageSnapshot.exists()) {
         const messageData = messageSnapshot.data();
 
-        if (messageData.senderId === currentUser.uid) {
+        if (messageData.senderId === currentUser) {
           console.log("Cannot remove reaction from your own message.");
           return; // Exit early if user is the sender
         }
 
         const currentReactions = messageData.reactions || {};
 
-        if (currentReactions.hasOwnProperty(currentUser.uid)) {
-          delete currentReactions[currentUser.uid];
+        if (currentReactions.hasOwnProperty(currentUser)) {
+          delete currentReactions[currentUser];
 
           await updateDoc(messageRef, {
             reactions: currentReactions,
@@ -486,7 +486,7 @@ export const ChatProvider = ({ children }) => {
       if (chatSnap.exists()) {
         const chatData = chatSnap.data();
         let archiveBy = chatData.archiveBy || [];
-        archiveBy = [currentUser.uid, ...archiveBy];
+        archiveBy = [currentUser, ...archiveBy];
 
         await updateDoc(chatRef, {
           archiveBy,
@@ -505,7 +505,7 @@ export const ChatProvider = ({ children }) => {
     try {
       const chatRef = doc(db, "chats", chatId);
       await updateDoc(chatRef, {
-        archiveBy: arrayRemove(currentUser.uid),
+        archiveBy: arrayRemove(currentUser),
       });
     } catch (error) {
       console.error(error);
@@ -583,7 +583,7 @@ export const ChatProvider = ({ children }) => {
         handleRemoveArchiveChat,
         fetchMessageRequestChats,
         messageRequestChats,
-        acceptMessageRequest
+        acceptMessageRequest,
       }}
     >
       {children}

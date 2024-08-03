@@ -15,12 +15,12 @@ const UserLikedPosts = () => {
   const {
     handleFetchLikedPosts,
     likedPosts,
-    currentUser,
     handleLikePost,
     handleSavePost,
   } = useContext(PostContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const currentUser = localStorage.getItem("currentUser")
 
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
@@ -40,11 +40,11 @@ const UserLikedPosts = () => {
   };
 
   useEffect(() => {
-    if (currentUser?.uid) {
+    if (currentUser) {
       handleFetchLikedPosts();
     }
     // eslint-disable-next-line
-  }, [currentUser?.uid]);
+  }, [currentUser]);
 
   return (
     <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-14">
@@ -83,7 +83,7 @@ const UserLikedPosts = () => {
                         window.scrollTo(0, 0);
                       }}
                       to={
-                        currentUser.uid === likedPost.userId
+                        currentUser === likedPost.userId
                           ? `/userProfile/yourPosts`
                           : `/users/${likedPost?.userId}/profile`
                       }
@@ -111,7 +111,7 @@ const UserLikedPosts = () => {
                         window.scrollTo(0, 0);
                       }}
                       to={
-                        currentUser.uid === user?.userId
+                        currentUser === user?.userId
                           ? `/userProfile/yourPosts`
                           : `/users/${user?.userId}/profile`
                       }
@@ -176,7 +176,7 @@ const UserLikedPosts = () => {
                   <div className="flex items-center space-x-6">
                     <div className="flex items-center space-x-1">
                       <span onClick={() => handleLikePost(likedPost.id)}>
-                        {likedPost?.likes?.includes(currentUser.uid) ? (
+                        {likedPost?.likes?.includes(currentUser) ? (
                           <BsHeartFill
                             size={20}
                             className="text-red-600 cursor-pointer"
@@ -202,7 +202,7 @@ const UserLikedPosts = () => {
                       handleSavePost(likedPost.id);
                     }}
                   >
-                    {likedPost?.saves?.includes(currentUser.uid) ? (
+                    {likedPost?.saves?.includes(currentUser) ? (
                       <RxBookmarkFilled
                         className="text-pink-600 cursor-pointer"
                         size={28}

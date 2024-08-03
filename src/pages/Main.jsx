@@ -7,8 +7,15 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebase";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+import { auth, db } from "../firebase";
 import PostContext from "../context/PostContext/PostContext";
 import { MdDarkMode, MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
@@ -16,26 +23,24 @@ import "../styles/overflow_scroll.css";
 
 import { AiFillMessage } from "react-icons/ai";
 
-const Home = () => {
-  const { currentUser, postLoading } = useContext(PostContext);
+const Main = () => {
+  const { postLoading } = useContext(PostContext);
   const location = useLocation();
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [loggedInUserData, setLoggedInUserData] = useState({});
   const navigate = useNavigate();
   const { userId } = useParams();
-
+  const currentUser = localStorage.getItem("currentUser");
   const handleFetchUserData = async () => {
-    if (currentUser && currentUser.email) {
+    if (currentUser) {
       try {
-        const q = query(
-          collection(db, "users"),
-          where("email", "==", currentUser.email)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-          setLoggedInUserData(userData, currentUser.uid);
-        });
+        const docRef = doc(db, "users", currentUser);
+        const docSnap = await getDoc(docRef);
+        const docSnapShot = docSnap.exists ? docSnap.data() : {};
+        setLoggedInUserData(docSnapShot);
+        console.log(docSnapShot);
+        
+        console.log(loggedInUserData);
       } catch (error) {
         console.error(error);
         if (error.code === "resource-exhausted") {
@@ -45,9 +50,9 @@ const Home = () => {
     }
   };
   useEffect(() => {
-    currentUser.uid && handleFetchUserData();
+    currentUser && handleFetchUserData();
     // eslint-disable-next-line
-  }, [currentUser.uid]);
+  }, [currentUser]);
 
   useEffect(() => {
     if (
@@ -88,7 +93,14 @@ const Home = () => {
           } bg-opacity-80 backdrop-blur-3xl border-gray-900 border-t-[.5px]`}
         >
           <Link className="flex flex-col items-center" to="/">
-            <FaHome size={25} />
+            <FaHome
+              onClick={() => {
+                if (location.pathname === "/") {
+                  window.scrollTo(0, 0);
+                }
+              }}
+              size={25}
+            />
           </Link>
           <Link
             to="/explore"
@@ -107,7 +119,7 @@ const Home = () => {
             <FaPlusCircle size={25} />
           </Link>
           <Link
-            to={`/user/${currentUser.uid}/chats`}
+            to={`/user/${currentUser}/chats`}
             onClick={() => {
               window.scrollTo(0, 0);
             }}
@@ -136,4 +148,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Main;

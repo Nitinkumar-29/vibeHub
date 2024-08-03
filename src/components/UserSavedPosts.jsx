@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import PostContext from "../context/PostContext/PostContext";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
@@ -12,15 +11,11 @@ import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 
 const UserSavedPosts = () => {
-  const {
-    handleFetchSavedPosts,
-    savedPosts,
-    currentUser,
-    handleLikePost,
-    handleSavePost,
-  } = useContext(PostContext);
+  const { handleFetchSavedPosts, savedPosts, handleLikePost, handleSavePost } =
+    useContext(PostContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const currentUser = localStorage.getItem("currentUser");
 
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
@@ -40,11 +35,11 @@ const UserSavedPosts = () => {
   };
 
   useEffect(() => {
-    if (currentUser?.uid) {
+    if (currentUser) {
       handleFetchSavedPosts();
     }
     // eslint-disable-next-line
-  }, [currentUser?.uid]);
+  }, [currentUser]);
 
   return (
     <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-1">
@@ -75,7 +70,7 @@ const UserSavedPosts = () => {
                       window.scrollTo(0, 0);
                     }}
                     to={
-                      currentUser.uid === savedPost.userId
+                      currentUser === savedPost.userId
                         ? `/userProfile/yourPosts`
                         : `/users/${savedPost?.userId}/profile`
                     }
@@ -98,7 +93,7 @@ const UserSavedPosts = () => {
                       window.scrollTo(0, 0);
                     }}
                     to={
-                      currentUser.uid === user?.userId
+                      currentUser === user?.userId
                         ? `/userProfile/yourPosts`
                         : `/users/${user?.userId}/profile`
                     }
@@ -163,7 +158,7 @@ const UserSavedPosts = () => {
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-1">
                     <span onClick={() => handleLikePost(savedPost.id)}>
-                      {savedPost?.likes?.includes(currentUser.uid) ? (
+                      {savedPost?.likes?.includes(currentUser) ? (
                         <BsHeartFill
                           size={20}
                           className="text-red-600 cursor-pointer"
@@ -190,7 +185,7 @@ const UserSavedPosts = () => {
                     handleSavePost(savedPost.id);
                   }}
                 >
-                  {savedPost?.saves?.includes(currentUser.uid) ? (
+                  {savedPost?.saves?.includes(currentUser) ? (
                     <RxBookmarkFilled
                       className="text-pink-600 cursor-pointer"
                       size={28}

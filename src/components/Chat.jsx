@@ -49,6 +49,8 @@ const Chat = () => {
   const fileRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const currentUser = localStorage.getItem("currentUser");
+
   const [messageEmojiPicker, setMessageEmojiPicker] = useState(false);
   const {
     sendMessage,
@@ -65,7 +67,6 @@ const Chat = () => {
     addReaction,
     removeReaction,
   } = useContext(ChatContext);
-  const { currentUser } = useContext(AuthContext);
   const messageInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [showReactionMenu, setShowReactionMenu] = useState(false);
@@ -276,9 +277,9 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    currentUser.uid && handleFetchUserData();
+    currentUser && handleFetchUserData();
     // eslint-disable-next-line
-  }, [currentUser.uid]);
+  }, [currentUser]);
 
   useEffect(() => {
     if (messageContainerRef.current) {
@@ -358,7 +359,7 @@ const Chat = () => {
               return (
                 <div
                   className={`group flex items-center space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
-                    message.senderId === currentUser.uid
+                    message.senderId === currentUser
                       ? "self-end"
                       : "self-start"
                   }`}
@@ -366,14 +367,14 @@ const Chat = () => {
                 >
                   <div
                     className={`flex flex-col space-y-1 justify-center ${
-                      currentUser.uid === message.senderId
+                      currentUser === message.senderId
                         ? "items-end"
                         : "items-start"
                     }`}
                   >
                     <div className="group flex items-center relative space-y-1">
                       <div className="">
-                        {currentUser.uid === message.senderId && (
+                        {currentUser === message.senderId && (
                           <button
                             onClick={() => {
                               deleteMessage(message.id);
@@ -388,7 +389,7 @@ const Chat = () => {
                       <div className="relative flex items-center space-x-1">
                         <div
                           className={`flex flex-col space-y-1 ${
-                            message.senderId === currentUser.uid
+                            message.senderId === currentUser
                               ? "items-end"
                               : "items-start"
                           }`}
@@ -401,7 +402,7 @@ const Chat = () => {
                                   ? "-top-2"
                                   : "-top-1"
                               } rounded-full ${
-                                currentUser.uid === message.senderId
+                                currentUser === message.senderId
                                   ? "-left-2"
                                   : "-right-2"
                               }  `}
@@ -425,7 +426,7 @@ const Chat = () => {
                           {message.fileURLs && (
                             <div
                               className={`flex flex-wrap w-fit ${
-                                message.senderId === currentUser.uid
+                                message.senderId === currentUser
                                   ? "justify-end"
                                   : "justify-start"
                               }`}
@@ -474,15 +475,15 @@ const Chat = () => {
                             {message.message && (
                               <span
                                 className={`${
-                                  currentUser.uid === message.senderId
+                                  currentUser === message.senderId
                                     ? "self-end"
                                     : "self-start"
                                 } break-words whitespace-pre-wrap text-sm ${
                                   theme === "dark"
-                                    ? message.senderId === currentUser.uid
+                                    ? message.senderId === currentUser
                                       ? "bg-gradient-to-tr from-violet-800 via-blue-800 to-indigo-800"
                                       : "bg-gray-800"
-                                    : message.senderId === currentUser.uid
+                                    : message.senderId === currentUser
                                     ? "bg-gradient-to-tr from-violet-200 via-blue-200 to-indigo-200"
                                     : "bg-gray-200"
                                 } rounded-md px-3 py-2`}
@@ -497,18 +498,18 @@ const Chat = () => {
                             )}
                           </div>
                         </div>
-                        {currentUser.uid === message.receiverId && (
+                        {currentUser === message.receiverId && (
                           <span
                             onClick={() => {
                               handleReaction(message.id);
                               console.log(
                                 message.id,
-                                currentUser.uid,
+                                currentUser,
                                 message.receiverId
                               );
                             }}
                             className={`absolute -right-6 mt-2 cursor-pointer px-1 ${
-                              currentUser.uid === message.receiverId && "m-auto"
+                              currentUser === message.receiverId && "m-auto"
                             } hidden group-hover:inline-flex`}
                           >
                             <MdOutlineAddReaction />
@@ -517,7 +518,7 @@ const Chat = () => {
                       </div>
 
                       {showReactionMenu === true &&
-                        currentUser.uid === message.receiverId &&
+                        currentUser === message.receiverId &&
                         selectedMessageId === message.id && (
                           <div
                             onClick={handleCloseReactionPicker}
@@ -527,7 +528,7 @@ const Chat = () => {
                                 ? "flex"
                                 : "hidden"
                             } z-10 absolute ${
-                              message.senderId === currentUser.uid
+                              message.senderId === currentUser
                                 ? "top-1 right-0"
                                 : "-top-[53px] left-0"
                             }`}
@@ -547,14 +548,14 @@ const Chat = () => {
 
                     <div
                       className={`flex flex-col space-y-1 ${
-                        currentUser.uid === message.senderId
+                        currentUser === message.senderId
                           ? "self-end"
                           : "self-start"
                       }`}
                     >
                       <span
                         className={` ${
-                          currentUser.uid === message.senderId
+                          currentUser === message.senderId
                             ? "self-end"
                             : "self-start"
                         } text-xs ${

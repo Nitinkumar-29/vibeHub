@@ -10,18 +10,17 @@ import {
   where,
 } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link, Outlet, useLocation, useParams } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { BsGrid3X3, BsHeartFill } from "react-icons/bs";
-import {
-  BiArrowBack,
-  BiCopy,
-  BiLockAlt,
-  BiPause,
-  BiPlay,
-  BiUserPin,
-} from "react-icons/bi";
+import { BiPause, BiPlay, BiUserPin } from "react-icons/bi";
 import PostContext from "../context/PostContext/PostContext";
 import toast from "react-hot-toast";
 import { TfiLayoutListPost } from "react-icons/tfi";
@@ -34,9 +33,10 @@ import { Carousel } from "react-responsive-carousel";
 import FollowingList from "../components/FollowingList";
 import { FiSettings } from "react-icons/fi";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { MdArrowBackIos } from "react-icons/md";
 
 const OtherUsersProfile = () => {
-  const { userId, username } = useParams();
+  const { userId } = useParams();
   const location = useLocation();
   const otherUserId = userId;
   const [focusedSection, setFocusedSection] = useState(() => {
@@ -47,10 +47,12 @@ const OtherUsersProfile = () => {
   });
   const [data, setData] = useState({});
   const { theme } = useContext(ThemeContext);
-  const { currentUser, fetchHomePagePosts } = useContext(PostContext);
+  const { fetchHomePagePosts } = useContext(PostContext);
+  const currentUser = localStorage.getItem("currentUser");
   const [taggedPosts, setTaggedPosts] = useState([]);
   const [otherUserImagePosts, setOtherUserImagePosts] = useState([]);
   const [otherUserPosts, setOtherUserPosts] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch user data
   const handleFetchUserData = async () => {
@@ -131,7 +133,7 @@ const OtherUsersProfile = () => {
     try {
       const toastId = toast.loading("Processing your request");
       const targetUserRef = doc(db, "users", userId);
-      const currentUserRef = doc(db, "users", currentUser.uid);
+      const currentUserRef = doc(db, "users", currentUser);
       const targetUserSnap = await getDoc(targetUserRef);
       const currentUserSnap = await getDoc(currentUserRef);
 
@@ -139,11 +141,11 @@ const OtherUsersProfile = () => {
         const targetUserSnapShot = targetUserSnap.data();
         const currentUserSnapShot = currentUserSnap.data();
 
-        if (targetUserSnapShot?.followers?.includes(currentUser.uid)) {
+        if (targetUserSnapShot?.followers?.includes(currentUser)) {
           // Unfollow the user
           await Promise.all([
             updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser.uid),
+              followers: arrayRemove(currentUser),
             }),
             updateDoc(currentUserRef, {
               following: arrayRemove(userId),
@@ -153,12 +155,10 @@ const OtherUsersProfile = () => {
           toast.success("Unfollowed");
         } else {
           if (targetUserSnapShot?.accountType === "private") {
-            if (
-              !targetUserSnapShot?.followRequests?.includes(currentUser.uid)
-            ) {
+            if (!targetUserSnapShot?.followRequests?.includes(currentUser)) {
               await Promise.all([
                 updateDoc(targetUserRef, {
-                  followRequests: arrayUnion(currentUser.uid),
+                  followRequests: arrayUnion(currentUser),
                 }),
               ]);
               toast.dismiss();
@@ -166,7 +166,7 @@ const OtherUsersProfile = () => {
             } else {
               await Promise.all([
                 updateDoc(targetUserRef, {
-                  followRequests: arrayRemove(currentUser.uid),
+                  followRequests: arrayRemove(currentUser),
                 }),
               ]);
               toast.dismiss();
@@ -176,7 +176,7 @@ const OtherUsersProfile = () => {
             // Follow the user
             await Promise.all([
               updateDoc(targetUserRef, {
-                followers: arrayUnion(currentUser.uid),
+                followers: arrayUnion(currentUser),
               }),
               updateDoc(currentUserRef, {
                 following: arrayUnion(userId),
@@ -243,10 +243,10 @@ const OtherUsersProfile = () => {
         const likes = postData.likes || [];
         let updatedPosts;
         let updatedTaggedPosts;
-        if (likes.includes(currentUser.uid)) {
+        if (likes.includes(currentUser)) {
           // Update database
           await updateDoc(postRef, {
-            likes: arrayRemove(currentUser.uid),
+            likes: arrayRemove(currentUser),
           });
           toast.dismiss();
           // Optimistically update UI
@@ -254,7 +254,7 @@ const OtherUsersProfile = () => {
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                  likes: post.likes.filter((uid) => uid !== currentUser),
                 }
               : post
           );
@@ -262,7 +262,7 @@ const OtherUsersProfile = () => {
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter((uid) => uid !== currentUser.uid),
+                  likes: post.likes.filter((uid) => uid !== currentUser),
                 }
               : post
           );
@@ -272,7 +272,7 @@ const OtherUsersProfile = () => {
         } else {
           // Update database
           await updateDoc(postRef, {
-            likes: arrayUnion(currentUser.uid),
+            likes: arrayUnion(currentUser),
           });
           toast.dismiss();
           // Optimistically update UI
@@ -280,7 +280,7 @@ const OtherUsersProfile = () => {
             post.id === id
               ? {
                   ...post,
-                  likes: [...post.likes, currentUser.uid],
+                  likes: [...post.likes, currentUser],
                 }
               : post
           );
@@ -288,7 +288,7 @@ const OtherUsersProfile = () => {
             post.id === id
               ? {
                   ...post,
-                  likes: [...post.likes, currentUser.uid],
+                  likes: [...post.likes, currentUser],
                 }
               : post
           );
@@ -315,9 +315,9 @@ const OtherUsersProfile = () => {
         const postData = postSnap?.data(); // This is the fetched data
         const saves = postData?.saves || []; // Initialize saves array from fetched data
 
-        if (saves.includes(currentUser?.uid)) {
+        if (saves.includes(currentUser)) {
           await updateDoc(postRef, {
-            saves: arrayRemove(currentUser?.uid),
+            saves: arrayRemove(currentUser),
           });
 
           toast.dismiss();
@@ -326,9 +326,7 @@ const OtherUsersProfile = () => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser?.uid
-                    ),
+                    saves: post?.saves?.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
@@ -338,9 +336,7 @@ const OtherUsersProfile = () => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser?.uid
-                    ),
+                    saves: post?.saves?.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
@@ -349,7 +345,7 @@ const OtherUsersProfile = () => {
           handleOtherUserPostsData(otherUserId);
         } else {
           await updateDoc(postRef, {
-            saves: arrayUnion(currentUser?.uid),
+            saves: arrayUnion(currentUser),
           });
           toast.dismiss();
           setOtherUserPosts((prevPosts) =>
@@ -357,7 +353,7 @@ const OtherUsersProfile = () => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser?.uid],
+                    saves: [...post?.saves, currentUser],
                   }
                 : post
             )
@@ -367,7 +363,7 @@ const OtherUsersProfile = () => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser?.uid],
+                    saves: [...post?.saves, currentUser],
                   }
                 : post
             )
@@ -424,7 +420,13 @@ const OtherUsersProfile = () => {
           }`}
         >
           <div className="flex space-x-2 items-center">
-            <BiArrowBack size={20} className="cursor-pointer" />
+            <MdArrowBackIos
+              onClick={() => {
+                navigate(-1);
+              }}
+              size={20}
+              className="cursor-pointer"
+            />
             <span className={` `}>
               {data?.user_name && (
                 <span className={`text-xl font-semibold`}>
@@ -476,19 +478,19 @@ const OtherUsersProfile = () => {
           </div>
           <div className="flex justify-between space-x-6 w-full">
             <button
-              onClick={() => handleFollow(currentUser?.uid)}
+              onClick={() => handleFollow(currentUser)}
               className={` px-3 py-1 border-[.5px] ${
                 theme === "dark" ? "" : "bg-orange-700 text-white"
               } rounded-md w-full text-center`}
             >
-              {!data?.followers?.includes(currentUser.uid) &&
-              !data?.followRequests?.includes(currentUser.uid) ? (
+              {!data?.followers?.includes(currentUser) &&
+              !data?.followRequests?.includes(currentUser) ? (
                 <span>Follow</span>
               ) : (
                 <span
                   className={`${theme === "dark" ? "text-orange-600" : ""}`}
                 >
-                  {data?.followRequests?.includes(currentUser.uid) &&
+                  {data?.followRequests?.includes(currentUser) &&
                   data?.accountType === "private"
                     ? "Requested"
                     : "Following"}
@@ -506,7 +508,7 @@ const OtherUsersProfile = () => {
           </div>
         </div>
         {data?.accountType !== "private" ||
-        data?.followers?.includes(currentUser.uid) ? (
+        data?.followers?.includes(currentUser) ? (
           <div className="w-full">
             <div className="w-full">
               {(location.pathname === `/users/${userId}/profile/followers` ||
@@ -552,7 +554,7 @@ const OtherUsersProfile = () => {
                 {location.pathname === `/users/${userId}/profile` && (
                   <div className="flex flex-col items-center w-full">
                     {(data?.accountType !== "private" ||
-                      data?.followers?.includes(currentUser.uid)) && (
+                      data?.followers?.includes(currentUser)) && (
                       <div className="flex w-full justify-around my-2">
                         <button
                           onClick={() => handleFocus(1)}
@@ -683,7 +685,7 @@ const OtherUsersProfile = () => {
                                           window.scrollTo(0, 0);
                                         }}
                                         to={
-                                          currentUser?.uid === post?.userId
+                                          currentUser === post?.userId
                                             ? `/userProfile/yourPosts`
                                             : `/users/${post?.userId}/profile`
                                         }
@@ -714,7 +716,7 @@ const OtherUsersProfile = () => {
                                               window.scrollTo(0, 0);
                                             }}
                                             to={
-                                              currentUser.uid === user?.userId
+                                              currentUser === user?.userId
                                                 ? `/userProfile/yourPosts`
                                                 : `/users/${user?.userId}/profile`
                                             }
@@ -743,15 +745,10 @@ const OtherUsersProfile = () => {
                                       <button
                                         className="flex items-center cursor-pointer"
                                         onClick={() =>
-                                          handleLikePost(
-                                            post?.id,
-                                            currentUser?.uid
-                                          )
+                                          handleLikePost(post?.id, currentUser)
                                         }
                                       >
-                                        {post?.likes?.includes(
-                                          currentUser?.uid
-                                        ) ? (
+                                        {post?.likes?.includes(currentUser) ? (
                                           <BsHeartFill
                                             size={20}
                                             className="text-red-600"
@@ -775,15 +772,10 @@ const OtherUsersProfile = () => {
                                     <button
                                       className=""
                                       onClick={() =>
-                                        handleSavePost(
-                                          post?.id,
-                                          currentUser?.uid
-                                        )
+                                        handleSavePost(post?.id, currentUser)
                                       }
                                     >
-                                      {post?.saves?.includes(
-                                        currentUser?.uid
-                                      ) ? (
+                                      {post?.saves?.includes(currentUser) ? (
                                         <RxBookmarkFilled
                                           className="text-pink-600"
                                           size={28}
@@ -823,7 +815,7 @@ const OtherUsersProfile = () => {
                       </div>
 
                       {/*  tagged posts*/}
-                      {data?.followers?.includes(currentUser.uid) ? (
+                      {data?.followers?.includes(currentUser) ? (
                         <div
                           className={`w-full flex justify-center pt-2 ${
                             focusedSection === 3 ? "flex" : "hidden"
@@ -850,8 +842,7 @@ const OtherUsersProfile = () => {
                                             window.scrollTo(0, 0);
                                           }}
                                           to={
-                                            currentUser?.uid ===
-                                            taggedPost?.userId
+                                            currentUser === taggedPost?.userId
                                               ? `/userProfile/yourPosts`
                                               : `/users/${taggedPost?.userId}/profile`
                                           }
@@ -884,7 +875,7 @@ const OtherUsersProfile = () => {
                                                 window.scrollTo(0, 0);
                                               }}
                                               to={
-                                                currentUser.uid === user?.userId
+                                                currentUser === user?.userId
                                                   ? `/userProfile/yourPosts`
                                                   : `/users/${user?.userId}/profile`
                                               }
@@ -988,12 +979,12 @@ const OtherUsersProfile = () => {
                                           onClick={() =>
                                             handleLikePost(
                                               taggedPost?.id,
-                                              currentUser?.uid
+                                              currentUser
                                             )
                                           }
                                         >
                                           {taggedPost?.likes?.includes(
-                                            currentUser?.uid
+                                            currentUser
                                           ) ? (
                                             <BsHeartFill
                                               size={20}
@@ -1020,12 +1011,12 @@ const OtherUsersProfile = () => {
                                         onClick={() =>
                                           handleSavePost(
                                             taggedPost?.id,
-                                            currentUser?.uid
+                                            currentUser
                                           )
                                         }
                                       >
                                         {taggedPost?.saves?.includes(
-                                          currentUser?.uid
+                                          currentUser
                                         ) ? (
                                           <RxBookmarkFilled
                                             className="text-pink-600"

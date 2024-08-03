@@ -38,10 +38,9 @@ const CreatePost = () => {
   const audioControl = useRef();
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
-  const { currentUser } = useContext(AuthContext);
   const [files, setFiles] = useState([]);
   const [audioFile, setAudioFile] = useState(null);
-  const [currentUserData, setCurrentUserData] = useState(null);
+  const [currentUserData, setCurrentUserData] = useState({});
   const [isPlaying, setIsPlaying] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [newPostData, setNewPostData] = useState({
@@ -49,6 +48,7 @@ const CreatePost = () => {
   });
   const [mentionedUsers, setMentionedUsers] = useState([]);
   const { theme } = useContext(ThemeContext);
+  const currentUser = localStorage.getItem("currentUser");
 
   const [displayUsersdata, setDisplayUsersData] = useState("hidden");
 
@@ -137,16 +137,12 @@ const CreatePost = () => {
   };
 
   const handleFetchUserData = async () => {
-    if (currentUser && currentUser.email) {
-      const q = query(
-        collection(db, "users"),
-        where("email", "==", currentUser.email)
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        setCurrentUserData(userData);
-      });
+    if (currentUser) {
+      const docRef = doc(db, "users", currentUser);
+      const docSnap = await getDoc(docRef);
+      const userData = docSnap.exists() ? docSnap.data() : {};
+      setCurrentUserData(userData);
+      console.log(currentUserData);
     }
   };
 
@@ -187,7 +183,7 @@ const CreatePost = () => {
   };
 
   const handlehashtag = async () => {
-    const docRef = doc(db, "users", currentUser.uid);
+    const docRef = doc(db, "users", currentUser);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       console.log("Document data:", docSnap.data());
@@ -217,7 +213,7 @@ const CreatePost = () => {
       const postPublished = await addDoc(collection(db, "posts"), {
         postCaption: postCaption,
         fileURLs: fileURLs,
-        userId: currentUser.uid,
+        userId: currentUser,
         audio: audioURL,
         audioName: name,
         timeStamp: serverTimestamp(),
@@ -325,19 +321,22 @@ const CreatePost = () => {
               </div>
             </div>
             <div className="flex flex-col items-center w-full h-fit p-2">
-              <textarea
-                type="textarea"
-                className={`w-full focus:outline-none resize-none overflow-y-auto hideScrollbar p-2 my-1 ${
+              <div
+                className={`p-2 my-1 ${
                   theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
-                } rounded-md placeholder:text-zinc-600 overflow-y-auto`}
-                placeholder={`What's on your mind, ${currentUserData?.name} ?`}
-                rows={6}
-                name="postCaption"
-                onChange={onChange}
-                required
-                value={newPostData.postCaption || ""}
-              
-              />
+                } rounded-md w-full`}
+              >
+                <textarea
+                  type="textarea"
+                  className={` focus:outline-none resize-none overflow-y-auto hideScrollbar  placeholder:text-zinc-600 bg-inherit w-full`}
+                  placeholder={`What's on your mind, ${currentUserData?.name} ?`}
+                  rows={6}
+                  name="postCaption"
+                  onChange={onChange}
+                  required
+                  value={newPostData.postCaption || ""}
+                />
+              </div>
               {mentionedUsers.length > 0 ? (
                 <div
                   className={`flex flex-wrap space-x-1 h-32 duration-150 p-2 ${
@@ -445,7 +444,7 @@ const CreatePost = () => {
                   ></CgClose>
                   {allUsers.filter(
                     (user) =>
-                      user.id !== currentUser.uid &&
+                      user.id !== currentUser &&
                       !mentionedUsers.some(
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
@@ -473,7 +472,7 @@ const CreatePost = () => {
                   )}
                   {allUsers.filter(
                     (user) =>
-                      user.id !== currentUser.uid &&
+                      user.id !== currentUser &&
                       !mentionedUsers.some(
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
@@ -482,7 +481,7 @@ const CreatePost = () => {
                     {allUsers
                       .filter(
                         (user) =>
-                          user.id !== currentUser.uid &&
+                          user.id !== currentUser &&
                           !mentionedUsers.some(
                             (mentionedUser) => mentionedUser.userId === user.id
                           )
@@ -518,7 +517,7 @@ const CreatePost = () => {
                     {/* Conditional message when no users are left */}
                     {allUsers.length > 0 &&
                       mentionedUsers.length ===
-                        allUsers.filter((user) => user.id !== currentUser.uid)
+                        allUsers.filter((user) => user.id !== currentUser)
                           .length && (
                         <p className="mt-2 text-zinc-600 w-full text-start">
                           Note:{" "}

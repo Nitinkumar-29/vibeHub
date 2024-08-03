@@ -7,11 +7,12 @@ import PostContext from "../context/PostContext/PostContext";
 import { GiSpinningSword } from "react-icons/gi";
 import ThemeContext from "../context/Theme/ThemeContext";
 import "../styles/overflow_scroll.css";
+import { CgClose } from "react-icons/cg";
 
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
-  const { explorePosts, fetchExploreAllPosts, currentUser } =
-    useContext(PostContext);
+  const { explorePosts, fetchExploreAllPosts } = useContext(PostContext);
+  const currentUser = localStorage.getItem("currentUser");
   const { theme } = useContext(ThemeContext);
   const [query, setQuery] = useState(" ");
   const searchInputRef = useRef(null);
@@ -80,23 +81,6 @@ const Explore = () => {
     };
   }, []);
 
-  // const highlightText = (text, highlight) => {
-  //   if (!highlight) return text;
-  //   const parts = text.split(new RegExp(`(${highlight})`, "gi"));
-  //   return (
-  //     <span>
-  //       {parts.map((part, index) =>
-  //         part.toLowerCase() === highlight.toLowerCase() ? (
-  //           <span key={index} className="bg-gray-600 ">
-  //             {part}
-  //           </span>
-  //         ) : (
-  //           part
-  //         )
-  //       )}
-  //     </span>
-  //   );
-  // };
   useEffect(() => {
     handleFetchUsersData();
   }, []);
@@ -114,20 +98,28 @@ const Explore = () => {
         >
           <div
             ref={componentRef}
-            className={`flex justify-between items-center w-full max-w-[430px] py-4 px-2`}
+            className={`${
+              theme === "dark" ? "bg-zinc-900" : "bg-zinc-100"
+            } flex justify-between items-center w-[95%] rounded-md max-w-[430px] my-4 p-2 mx-2`}
           >
             <input
               onClickCapture={() => {}}
               type="text"
               ref={searchInputRef}
-              className={`${
-                theme === "dark" ? "bg-zinc-900" : "bg-zinc-100"
-              } w-full p-3 outline-none rounded-md`}
+              className={`bg-inherit w-[95%] p-1 outline-none rounded-md`}
               placeholder="Search @username, name.... with '/ '"
               onChange={(e) => {
                 setQuery(e.target.value);
               }}
             />
+            {query.trim(" ").length > 0 && (
+              <CgClose
+                className="cursor-pointer"
+                onClick={() => {
+                  setQuery("");
+                }}
+              />
+            )}
           </div>
           {query.trim(" ").length > 0 && (
             <div className="flex flex-col px-4 space-y-3">
@@ -150,7 +142,7 @@ const Explore = () => {
                           window.scrollTo(0, 0);
                         }}
                         to={
-                          currentUser?.uid !== user?.id
+                          currentUser && currentUser !== user?.id
                             ? `/users/${user?.id}/profile`
                             : `/userProfile/yourPosts`
                         }
