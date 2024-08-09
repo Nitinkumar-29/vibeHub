@@ -132,7 +132,7 @@ const Main = () => {
               window.scrollTo(0, 0);
             }}
           >
-            {loggedInUserData.img ? (
+            {loggedInUserData?.img ? (
               <img
                 src={loggedInUserData?.img}
                 className="h-7 w-7 rounded-full object-cover"

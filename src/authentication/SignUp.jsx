@@ -112,24 +112,7 @@ const SignUp = () => {
       });
       setFile("");
       setLoading(true);
-      dispatch({ type: "SIGNUP", payload: response.user });
-      if (currentUser && currentUser.email) {
-        const q = query(
-          collection(db, "users"),
-          where("email", "==", currentUser.email)
-        );
-        const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          console.log({ data, uid: currentUser.uid });
-          setUserData(data, currentUser.uid);
-          localStorage.setItem(
-            "loggedInUserData",
-            JSON.stringify(userData, currentUser.uid)
-          );
-        });
-      }
+      localStorage.setItem("currentUser", response.user.uid);
       navigate("/userProfile");
       console.log(response.user, data);
       await sendEmailVerification(response.user);

@@ -18,6 +18,7 @@ import { FaCircleLeft, FaCircleRight } from "react-icons/fa6";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { BiPause, BiPlay } from "react-icons/bi";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { AuthContext } from "../context/AuthContext";
 
 const UserPosts = () => {
   const audioControl = useRef();
@@ -26,7 +27,7 @@ const UserPosts = () => {
   const { userPosts, handleDeletePost } = useContext(PostContext);
   const { handleLikePost, handleSavePost } = useContext(PostContext);
   // const [isPlaying, setIsPlaying] = useState(true);
-  const currentUserData = JSON.parse(localStorage.getItem("loggedInUserData"));
+  const { currentUserData } = useContext(AuthContext);
   const [toggleMenu, setToggleMenu] = useState({});
   const { theme } = useContext(ThemeContext);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -108,7 +109,10 @@ const UserPosts = () => {
           {userPosts?.length > 0 ? (
             userPosts?.map((post) => {
               return (
-                <div key={post?.id} className="w-full rounded-md">
+                <div
+                  key={post?.id}
+                  className={`w-full border-b-[1px] last:border-b-0 border-zinc-700 pb-3`}
+                >
                   <div className="h-16 flex items-center rounded-sm space-x-2 w-full justify-start px-3">
                     {currentUserData?.img ? (
                       <img
@@ -216,7 +220,7 @@ const UserPosts = () => {
                       </div>
                     )}
                     <Carousel
-                      className="carousel"
+                      className="carousel px-4"
                       showThumbs={false}
                       autoPlay={false}
                       infiniteLoop={true}
@@ -237,7 +241,7 @@ const UserPosts = () => {
                               onEnded={handleEnded}
                               ref={videoRef}
                               autoFocus={true}
-                              className="h-full w-full object-contain rounded-sm "
+                              className="h-full w-full object-contain rounded-md"
                             >
                               <source src={fileURL} type="video/mp4" />
                             </video>
@@ -245,7 +249,7 @@ const UserPosts = () => {
                             <img
                               src={fileURL}
                               alt="post media"
-                              className="h-full w-full object-contain rounded-sm "
+                              className="h-full w-full object-contain rounded-md"
                             />
                           )}
                           {fileURL?.includes(".mp4") && (

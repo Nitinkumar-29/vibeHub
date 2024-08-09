@@ -1,17 +1,23 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 import ThemeContext from "../context/Theme/ThemeContext";
 import { MdArrowBackIos } from "react-icons/md";
 
 const Settings = () => {
   const { toggleTheme, theme } = useContext(ThemeContext);
+  const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(() => {
     const savedTab = localStorage.getItem("activeTab");
-    return savedTab || "edit profile";
+    return savedTab || "edit";
   });
 
+  useEffect(() => {
+    if (location.pathname === "/userProfile/settings/edit") {
+      setActiveTab("edit");
+    }
+  });
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);
@@ -30,17 +36,17 @@ const Settings = () => {
           />
           <span>Settings</span>
         </div>
-        <div className={`flex flex-col space-y-2 w-full p-2 rounded-md `}>
+        <div className={`flex flex-col space-y-2 w-full rounded-md `}>
           <div className="flex w-full items-center justify-between space-x-2">
             <Link
               to="/userProfile/settings/edit"
               onClick={() => {
-                setActiveTab("edit profile");
+                setActiveTab("edit");
               }}
               className={`${
                 theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
               } rounded-md px-4 py-1 space-x-2 w-full ${
-                activeTab === "edit profile"
+                activeTab === "edit"
                   ? "text-red-600"
                   : `${theme === "dark" ? "text-zinc-400" : "text-zinc-900"}`
               }`}
@@ -62,7 +68,8 @@ const Settings = () => {
             >
               Account
             </Link>
-            <button
+            <Link
+              to="/userProfile/settings/accessibility"
               onClick={() => {
                 setActiveTab("more");
               }}
@@ -74,8 +81,8 @@ const Settings = () => {
                   : `${theme === "dark" ? "text-zinc-400" : "text-zinc-900"}`
               }`}
             >
-              More
-            </button>
+              Accessibility
+            </Link>
           </div>
         </div>
         <Outlet />

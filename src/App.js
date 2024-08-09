@@ -27,13 +27,14 @@ import FollowingList from "./components/FollowingList";
 import Chats from "./pages/Chats";
 import Chat from "./components/Chat";
 import Notifications from "./components/Notifications";
-import EditUserInfo from "./components/EditUserInfo";
+import EditUserProfile from "./components/EditUserProfile";
 import AccountSettings from "./components/AccountSettings";
 import { ThemeProvider } from "./context/Theme/ThemeContext";
 import { ChatProvider } from "./context/ChatContext/ChatContext";
+import Accessibility from "./components/Accessibility";
 
 function App() {
-  const currentUser = localStorage.getItem("currentUser")
+  const currentUser = localStorage.getItem("currentUser");
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
@@ -103,8 +104,9 @@ function App() {
                     <Route path="/explore" element={<Explore />} />
                     <Route path="/posts/:id" element={<Post />} />
                     <Route path="/userProfile/settings/" element={<Settings />}>
-                      <Route path="edit" element={<EditUserInfo />} />
+                      <Route path="edit" element={<EditUserProfile />} />
                       <Route path="account" element={<AccountSettings />} />
+                      <Route path="accessibility" element={<Accessibility />} />
                     </Route>
                   </Route>
                   <Route path="/login" element={<Login />} />

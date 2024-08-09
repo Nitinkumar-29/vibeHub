@@ -138,7 +138,7 @@ const Post = () => {
                 ))}
               </div>
               <Carousel
-                className="carousel"
+                className="carousel px-4"
                 showThumbs={false}
                 autoPlay={false}
                 infiniteLoop={true}
@@ -161,7 +161,7 @@ const Post = () => {
                             onEnded={handleEnded}
                             ref={videoRef}
                             autoFocus={true}
-                            className="h-[80%] w-full object-contain rounded-sm "
+                            className="h-[80%] w-full object-contain rounded-md "
                           >
                             <source src={fileURL} type="video/mp4" />
                           </video>
@@ -169,7 +169,7 @@ const Post = () => {
                           <img
                             src={fileURL}
                             alt="post media"
-                            className="h-fit w-fit object-contain rounded-sm"
+                            className="h-fit w-fit object-contain rounded-md"
                           />
                         )}
                         {fileURL.includes(".mp4") && (

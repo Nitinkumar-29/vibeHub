@@ -1,12 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { GoIssueClosed } from "react-icons/go";
-import {
-  IoArrowBack,
-  IoCloseCircleOutline,
-  IoInformation,
-  IoInformationCircleOutline,
-} from "react-icons/io5";
+import { IoCloseCircleOutline } from "react-icons/io5";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import toast from "react-hot-toast";

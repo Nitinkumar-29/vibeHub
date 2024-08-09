@@ -436,7 +436,7 @@ const OtherUsersProfile = () => {
             </span>
           </div>
         </div>
-        <div className="flex flex-col  jsutify-center items-center space-y-4 h-fit w-full p-4">
+        <div className="flex flex-col  jsutify-center items-center space-y-3 h-fit w-full p-4">
           <div className="flex justify-between w-full h-fit">
             <div className="flex flex-col items-center space-y-1">
               <img
@@ -476,6 +476,14 @@ const OtherUsersProfile = () => {
               </div>
             </div>
           </div>
+          <div
+            className={`flex justify-start w-full ${
+              theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+            }`}
+            dangerouslySetInnerHTML={{
+              __html: HighLightLinks(data?.bio || ""),
+            }}
+          ></div>
           <div className="flex justify-between space-x-6 w-full">
             <button
               onClick={() => handleFollow(currentUser)}
