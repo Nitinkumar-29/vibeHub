@@ -52,7 +52,7 @@ const UserSavedPosts = () => {
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
-              className="flex flex-col -space-y-1 w-full h-fit"
+              className="flex flex-col -space-y-1 w-full h-fit border-b-[1px] border-zinc-700 last:border-b-0"
             >
               <div className="h-16 flex items-center space-x-4 w-full justify-start px-3">
                 {savedPost.user?.img ? (
@@ -104,7 +104,7 @@ const UserSavedPosts = () => {
                 ))}
               </div>
               <Carousel
-                className="carousel"
+                className="carousel px-4"
                 showThumbs={false}
                 autoPlay={false}
                 infiniteLoop={true}
@@ -128,7 +128,7 @@ const UserSavedPosts = () => {
                           onEnded={handleEnded}
                           ref={videoRef}
                           autoFocus={true}
-                          className="h-full w-full object-contain rounded-sm "
+                          className="h-full w-full object-contain rounded-md"
                         >
                           <source src={fileURL} type="video/mp4" />
                         </video>
@@ -136,7 +136,7 @@ const UserSavedPosts = () => {
                         <img
                           src={fileURL}
                           alt="post media"
-                          className="h-full w-full object-contain rounded-sm "
+                          className="h-full w-full object-contain rounded-md"
                         />
                       )}
                       {fileURL.includes(".mp4") && (

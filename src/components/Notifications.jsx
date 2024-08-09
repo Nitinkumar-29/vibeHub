@@ -1,12 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { GoIssueClosed } from "react-icons/go";
-import {
-  IoArrowBack,
-  IoCloseCircleOutline,
-  IoInformation,
-  IoInformationCircleOutline,
-} from "react-icons/io5";
+import { IoCloseCircleOutline } from "react-icons/io5";
 import { arrayRemove, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import toast from "react-hot-toast";
@@ -18,7 +13,7 @@ const Notifications = () => {
   const { setFollowRequestsData, followRequestsData, acceptFollowRequest } =
     useContext(AuthContext);
   const currentUser = localStorage.getItem("currentUser");
-  const [infoToggle, setInfoToggle] = useState(false);
+  const [infoToggle, setInfoToggle] = useState(true);
   const { theme } = useContext(ThemeContext);
 
   // reject follow request
@@ -58,7 +53,7 @@ const Notifications = () => {
             }}
             className="cursor-pointer"
             size={25}
-          />{" "}
+          />
           <div
             className={`${
               infoToggle ? "hidden" : "flex"
@@ -67,7 +62,6 @@ const Notifications = () => {
             } flex flex-wrap absolute top-12 max-w-[100%] border-[1px]  rounded-md w-fit right-0 mx-auto min-h-20 p-2`}
           >
             <p>
-              {" "}
               To keep UI clean, we will remove notifications once you have had a
               look. Let us know your opinion.
             </p>

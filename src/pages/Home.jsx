@@ -16,6 +16,7 @@ import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { auth } from "../firebase";
+import { AuthContext } from "../context/AuthContext";
 
 const Home = () => {
   const {
@@ -28,6 +29,7 @@ const Home = () => {
     otherPublicPostsHomePage,
   } = useContext(PostContext);
   const { theme } = useContext(ThemeContext);
+  const { allUsers } = useContext(AuthContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
   const [position, setPosition] = useState("fixed");
@@ -110,7 +112,10 @@ const Home = () => {
                 homePagePosts
                   ?.sort((a, b) => b.timeStamp - a.timeStamp)
                   .map((post, index) => (
-                    <div key={index} className="w-full rounded-md">
+                    <div
+                      key={index}
+                      className="w-full pb-3 border-b-[1px] border-zinc-700 last:border-b-0"
+                    >
                       <div className="h-fit flex items-center rounded-sm space-x-4 w-full justify-start px-4 py-1">
                         {post?.userData?.img ? (
                           <img
@@ -190,7 +195,7 @@ const Home = () => {
                             );
                           })}
                         </div>
-                        <div className="flex w-full my-1">
+                        <div className="flex w-full my-1 px-4">
                           <Carousel
                             className="carousel"
                             showThumbs={false}
@@ -215,7 +220,7 @@ const Home = () => {
                                     onEnded={handleEnded}
                                     ref={videoRef}
                                     autoFocus={true}
-                                    className="h-[80%] w-full object-contain rounded-sm "
+                                    className="h-[80%] w-full object-contain rounded-md"
                                   >
                                     <source src={fileURL} type="video/mp4" />
                                   </video>
@@ -223,7 +228,7 @@ const Home = () => {
                                   <img
                                     src={fileURL}
                                     alt="post media error"
-                                    className="h-fit w-fit object-contain rounded-sm"
+                                    className="h-fit w-fit object-contain rounded-md"
                                   />
                                 )}
 
@@ -329,7 +334,7 @@ const Home = () => {
             </div>
           </div>
           {homePagePosts.length > 0 && (
-            <div className="flex flex-col items-center w-full h-fit pb-2">
+            <div className="flex flex-col items-center w-full h-fit">
               {otherPublicPostsHomePage.length > 0 && (
                 <div
                   className={`my-6 underline underline-offset-4 decoration-gray-700 text-2xl border-b-[1px] `}
@@ -342,7 +347,10 @@ const Home = () => {
                   otherPublicPostsHomePage
                     ?.sort((a, b) => b.timeStamp - a.timeStamp)
                     .map((post, index) => (
-                      <div key={index} className="w-full rounded-md">
+                      <div
+                        key={index}
+                        className="w-full border-b-[1px] pb-3 border-zinc-700 last:border-0"
+                      >
                         <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-3">
                           {post?.userData?.img ? (
                             <img
@@ -415,7 +423,7 @@ const Home = () => {
                               );
                             })}
                           </div>
-                          <div className="flex w-full">
+                          <div className="flex w-full px-4">
                             <Carousel
                               className="carousel"
                               showThumbs={false}
@@ -439,7 +447,7 @@ const Home = () => {
                                     <video
                                       controls
                                       autoFocus={true}
-                                      className="h-[80%] w-full object-contain rounded-sm "
+                                      className="h-[80%] w-full object-contain rounded-md"
                                     >
                                       <source src={fileURL} type="video/mp4" />
                                     </video>
@@ -447,7 +455,7 @@ const Home = () => {
                                     <img
                                       src={fileURL}
                                       alt="post media"
-                                      className="h-fit w-fit object-contain rounded-sm"
+                                      className="h-fit w-fit object-contain rounded-md"
                                     />
                                   )}
                                 </div>

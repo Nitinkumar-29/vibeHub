@@ -13,11 +13,17 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import toast from "react-hot-toast";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
 export const AuthContextProvider = ({ children }) => {
   let [followRequestsData, setFollowRequestsData] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [loginCredentials, setLoginCredentials] = useState({
     email: "",
     password: "",
@@ -48,12 +54,11 @@ export const AuthContextProvider = ({ children }) => {
     )
       .then((userCredential) => {
         const user = userCredential.user;
-        // setIsLoading(true);
         console.log(user);
-        // dispatch({ type: "LOGIN", payload: user });
         updatePasswordStatus();
-        localStorage.setItem("currentUser", auth.currentUser.uid);
+        localStorage.setItem("currentUser", user.uid);
         console.log(localStorage.getItem("currentUser"));
+        setIsLoading(true);
         navigate("/");
         setLoginCredentials({ email: "", password: "" });
       })
@@ -66,8 +71,51 @@ export const AuthContextProvider = ({ children }) => {
         setError("Invalid credentials");
       });
   };
+
+  // sign in with google
+  const handleSignInWithGoogle = async () => {
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        // This gives you a Google Access Token. You can use it to access the Google API.
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const token = credential.accessToken;
+        console.log(token);
+
+        // The signed-in user info.
+        const user = result?.user;
+        console.log(user);
+        localStorage.setItem("currentUser",user.uid)
+        setCurrentUserData(user)
+        navigate("/")
+
+        // IdP data available using getAdditionalUserInfo(result)
+        // ...
+      })
+      .catch((error) => {
+        // Handle Errors here.
+        const errorCode = error?.code;
+        console.error(errorCode);
+
+        const errorMessage = error?.message;
+        console.error(errorMessage);
+
+        // The email of the user's account used.
+        const email = error?.customData.email;
+        console.error(email);
+
+        // The AuthCredential type that was used.
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        console.error(credential);
+
+        // ...
+      });
+  };
+
   // fetch current user data
   const handleFetchCurrentUserData = async () => {
+    if (!currentUser) return;
     try {
       const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
@@ -78,10 +126,32 @@ export const AuthContextProvider = ({ children }) => {
       console.error(error);
     }
   };
+
   useEffect(() => {
     handleFetchCurrentUserData();
     // eslint-disable-next-line
   }, [currentUser]);
+
+  // fetching all users data
+  const handleFetchUsersData = async () => {
+    try {
+      const queryUsersData = await getDocs(collection(db, "users"));
+      const allUsersData = [];
+
+      queryUsersData.forEach((dataDoc) => {
+        const userData = dataDoc.data();
+        const userId = dataDoc.id;
+        allUsersData.push({ id: userId, ...userData });
+      });
+      console.log(allUsersData);
+
+      setAllUsers(allUsersData);
+      return allUsersData;
+    } catch (error) {
+      console.error("Error fetching users data: ", error);
+      return [];
+    }
+  };
 
   const fetchFollowRequests = async () => {
     if (!currentUser) {
@@ -234,6 +304,10 @@ export const AuthContextProvider = ({ children }) => {
         login,
         loginCredentials,
         setLoginCredentials,
+        allUsers,
+        handleFetchUsersData,
+        updatePasswordStatus,
+        handleSignInWithGoogle,
       }}
     >
       {children}

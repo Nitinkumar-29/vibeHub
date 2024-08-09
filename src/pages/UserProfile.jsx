@@ -4,10 +4,11 @@ import { TfiLayoutListPost } from "react-icons/tfi";
 import PostContext from "../context/PostContext/PostContext";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { IoSaveSharp } from "react-icons/io5";
-import { BsHeartFill } from "react-icons/bs";
+import { BsHeartFill, BsPencilFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
 import { MdArrowBackIos } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
+import { HighLightLinks } from "../utils/HighlightLinks";
 
 const UserProfile = () => {
   const currentUser = localStorage.getItem("currentUser");
@@ -23,7 +24,7 @@ const UserProfile = () => {
   } = useContext(PostContext);
   const location = useLocation();
   const { theme } = useContext(ThemeContext);
-  
+
   useEffect(() => {
     handleFetchUserPosts();
     handleFetchLikedPosts();
@@ -66,15 +67,15 @@ const UserProfile = () => {
         </Link>
       </div>
       {currentUserData && (
-        <div className="relative flex flex-col items-center justify-center h-fit space-y-3 px-4 w-full">
+        <div className="relative flex flex-col items-center justify-center h-fit space-y-1 w-full">
           <div className="flex items-start justify-between px-4 w-full">
-            <div className="flex flex-col items-center space-y-1">
+            <div className="flex flex-col items-start space-y-1">
               <img
                 src={currentUserData?.img}
                 className="h-16 w-16 object-cover rounded-full duration-300"
                 alt=""
               />
-              <span>{currentUserData.name}</span>
+              <span>{currentUserData?.name}</span>
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
@@ -91,7 +92,9 @@ const UserProfile = () => {
                   {currentUserData?.followers?.length || 0}
                 </span>
                 <Link
-                onClick={()=>{console.log(currentUser)}}
+                  onClick={() => {
+                    console.log(currentUser);
+                  }}
                   to={`/userProfile/${currentUser}/followers`}
                   className={`text-sm font-semibold px-3 py-1 `}
                 >
@@ -110,6 +113,24 @@ const UserProfile = () => {
                 </Link>
               </div>
             </div>
+          </div>
+          <div className="flex flex-col items-start w-full space-y-2 px-4">
+            <div
+              className={`${
+                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: HighLightLinks(currentUserData?.bio || ""),
+              }}
+            ></div>
+            <button
+              className={`flex text-sm items-center space-x-2 border-[1px] w-fit px-3 py-2 rounded-md ${
+                theme === "dark" ? "border-zinc-700" : "border-zinc-700"
+              }`}
+            >
+              <BsPencilFill />
+              <Link to="/userProfile/settings/edit">Edit Profile</Link>
+            </button>
           </div>
         </div>
       )}
@@ -161,8 +182,7 @@ const UserProfile = () => {
               <Link
                 to={`/userProfile/${currentUser}/followers`}
                 className={`${
-                  location.pathname ===
-                  `/userProfile/${currentUser}/followers`
+                  location.pathname === `/userProfile/${currentUser}/followers`
                     ? `${theme === "dark" ? "text-white" : "text-black"}`
                     : "text-gray-400"
                 } p-2  text-center`}
@@ -175,8 +195,7 @@ const UserProfile = () => {
               <Link
                 to={`/userProfile/${currentUser}/following`}
                 className={`${
-                  location.pathname ===
-                  `/userProfile/${currentUser}/following`
+                  location.pathname === `/userProfile/${currentUser}/following`
                     ? `${theme === "dark" ? "text-white" : "text-black"}`
                     : "text-gray-400"
                 } p-2  text-center`}
