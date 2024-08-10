@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ChatContext from "../context/ChatContext/ChatContext";
-import PostContext from "../context/PostContext/PostContext";
 import { formatTime } from "../utils/FormatTime";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
@@ -16,9 +15,8 @@ import {
 import { BiBlock, BiEdit, BiTrashAlt } from "react-icons/bi";
 import { MdArchive, MdArrowBackIos, MdUnarchive } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import { TiTickOutline } from "react-icons/ti";
 import { GoIssueClosed } from "react-icons/go";
-import { CgClose, CgCloseR } from "react-icons/cg";
+import { CgClose } from "react-icons/cg";
 import { AuthContext } from "../context/AuthContext";
 
 const Chats = () => {
@@ -356,7 +354,7 @@ const Chats = () => {
               </div>
             )}
             {allChats.length > 0 && (
-              <div className="flex space-x-4 items-center w-[95%] overflow-x-auto hideScrollbar">
+              <div className="relative flex space-x-4 items-center w-[95%] overflow-x-auto scrollbarH pb-2">
                 {allChats?.filter(
                   (chat) =>
                     !chat?.archiveBy?.includes(currentUser) &&
@@ -416,29 +414,31 @@ const Chats = () => {
                   </button>
                 )}
 
-                <button
-                  onClick={() => {
-                    setActiveTab("blocked");
-                  }}
-                  className={`${
-                    theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
-                  } rounded-full px-4 py-1 space-x-2 ${
-                    activeTab === "blocked"
-                      ? "text-red-600"
-                      : `${
-                          theme === "dark" ? "text-zinc-400" : "text-zinc-900"
-                        }`
-                  }`}
-                >
-                  <span className="">Blocked</span>
-                  <span>
-                    {
-                      allChats?.filter((chat) =>
-                        currentUserData?.blockedChats?.includes(chat?.id)
-                      )?.length
-                    }
-                  </span>
-                </button>
+                {currentUserData?.blockedChats?.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setActiveTab("blocked");
+                    }}
+                    className={`${
+                      theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
+                    } rounded-full px-4 py-1 space-x-2 ${
+                      activeTab === "blocked"
+                        ? "text-red-600"
+                        : `${
+                            theme === "dark" ? "text-zinc-400" : "text-zinc-900"
+                          }`
+                    }`}
+                  >
+                    <span className="">Blocked</span>
+                    <span>
+                      {
+                        allChats?.filter((chat) =>
+                          currentUserData?.blockedChats?.includes(chat?.id)
+                        )?.length
+                      }
+                    </span>
+                  </button>
+                )}
 
                 {messageRequestChats.length > 0 && (
                   <button
