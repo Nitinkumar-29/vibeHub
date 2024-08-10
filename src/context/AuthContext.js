@@ -1,5 +1,6 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 import {
+  addDoc,
   arrayRemove,
   arrayUnion,
   collection,
@@ -8,6 +9,7 @@ import {
   getDocs,
   onSnapshot,
   query,
+  serverTimestamp,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -55,10 +57,8 @@ export const AuthContextProvider = ({ children }) => {
     )
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
         updatePasswordStatus();
         localStorage.setItem("currentUser", user.uid);
-        console.log(localStorage.getItem("currentUser"));
         setIsLoading(true);
         navigate("/");
         setLoginCredentials({ email: "", password: "" });
@@ -73,33 +73,36 @@ export const AuthContextProvider = ({ children }) => {
         setLoginCredentials({ email: "", password: "" });
       });
   };
-
+  const generateUsername = (name) => {
+    const randomDigits = Math.floor(1000 + Math.random() * 9000); // Generates a random number between 1000 and 9999
+    return `${name}${randomDigits}`;
+  };
   // sign in with google
   const handleSignInWithGoogle = async () => {
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result?.user;
-        localStorage.setItem("currentUser", user.uid);
-        setCurrentUserData(user);
-        navigate("/");
-      })
-      .catch((error) => {
-        const errorCode = error?.code;
-        console.error(errorCode);
-        const errorMessage = error?.message;
-        console.error(errorMessage);
-        // The email of the user's account used.
-        const email = error?.customData.email;
-        console.error(email);
-
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        console.error(credential);
-
-        // ...
+    try {
+      const result = signInWithPopup(auth, provider);
+      const user = result?.user;
+      localStorage.setItem(user?.uid);
+      console.log(user);
+      const username = user?.displayName.split(" ");
+      const updatedName = username[0];
+      const generateUser_name = generateUsername(updatedName);
+      const userRef = await addDoc(collection(db, "users"), {
+        uid: user?.uid,
+        name: user?.displayName,
+        email: user?.email,
+        img: user?.photoUrl,
+        timeStamp: serverTimestamp(),
+        accountType: "private",
+        user_name: generateUser_name,
       });
+      console.log(userRef?.uid);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // fetch current user data
@@ -109,7 +112,6 @@ export const AuthContextProvider = ({ children }) => {
       const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const docSnapShot = docSnap.exists() ? docSnap.data() : {};
-      console.log(docSnapShot);
       setCurrentUserData(docSnapShot);
     } catch (error) {
       console.error(error);
@@ -121,7 +123,6 @@ export const AuthContextProvider = ({ children }) => {
     const docRef = doc(db, "users", currentUser);
     const unsubscribe = onSnapshot(docRef, (querySnapShot) => {
       const newData = querySnapShot.data();
-      console.log(newData);
       setCurrentUserData(newData);
     });
     return () => unsubscribe();
@@ -143,7 +144,6 @@ export const AuthContextProvider = ({ children }) => {
         const userId = dataDoc.id;
         allUsersData.push({ id: userId, ...userData });
       });
-      console.log(allUsersData);
 
       setAllUsers(allUsersData);
       return allUsersData;
@@ -171,8 +171,6 @@ export const AuthContextProvider = ({ children }) => {
       const userData = userSnap.data();
       const requests = userData?.followRequests || [];
 
-      console.log("Follow Requests:", requests);
-
       if (requests.length === 0) {
         console.log("No follow requests to fetch.");
         return [];
@@ -199,8 +197,6 @@ export const AuthContextProvider = ({ children }) => {
           id: doc.id,
         }))
       );
-
-      console.log("Users Data:", usersData);
 
       return usersData;
     } catch (error) {
