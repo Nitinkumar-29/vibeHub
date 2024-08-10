@@ -86,9 +86,9 @@ export const AuthContextProvider = ({ children }) => {
         // The signed-in user info.
         const user = result?.user;
         console.log(user);
-        localStorage.setItem("currentUser",user.uid)
-        setCurrentUserData(user)
-        navigate("/")
+        localStorage.setItem("currentUser", user.uid);
+        setCurrentUserData(user);
+        navigate("/");
 
         // IdP data available using getAdditionalUserInfo(result)
         // ...
@@ -126,6 +126,17 @@ export const AuthContextProvider = ({ children }) => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const docRef = doc(db, "users", currentUser);
+    const unsubscribe = onSnapshot(docRef, (querySnapShot) => {
+      const newData = querySnapShot.data();
+      console.log(newData);
+      setCurrentUserData(newData);
+    });
+    return () => unsubscribe();
+  }, [currentUser]);
 
   useEffect(() => {
     handleFetchCurrentUserData();
@@ -292,6 +303,36 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  // block a user
+  const handleBlock = async (userId, chatId) => {
+    if (!currentUser) return;
+    try {
+      toast.loading("processing...");
+      const currentUserRef = doc(db, "users", currentUser);
+      if (currentUserData.blockedUsers.includes(userId)) {
+        await Promise.all([
+          updateDoc(currentUserRef, {
+            blockedUsers: arrayRemove(userId),
+            blockedChats: arrayRemove(chatId),
+          }),
+        ]);
+        toast.dismiss();
+        toast.success("Unblocked");
+      } else {
+        await Promise.all([
+          updateDoc(currentUserRef, {
+            blockedUsers: arrayUnion(userId),
+            blockedChats: arrayUnion(chatId),
+          }),
+        ]);
+        toast.dismiss();
+        toast.success("Blocked");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -308,6 +349,7 @@ export const AuthContextProvider = ({ children }) => {
         handleFetchUsersData,
         updatePasswordStatus,
         handleSignInWithGoogle,
+        handleBlock,
       }}
     >
       {children}

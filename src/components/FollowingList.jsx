@@ -15,7 +15,7 @@ import { CgSpinner } from "react-icons/cg";
 const FollowingList = () => {
   const [followingList, setFollowingList] = useState([]);
   const { userId } = useParams();
-  const currentUser = localStorage.getItem("currentUser")
+  const currentUser = localStorage.getItem("currentUser");
 
   const handleFetchFollowingList = async () => {
     const docRef = doc(db, "users", userId);
@@ -104,85 +104,92 @@ const FollowingList = () => {
     // eslint-disable-next-line
   }, []);
   return (
-    <div>
-      {" "}
-      {followingList?.length > 0 ? (
-        <div className="h-full w-full flex flex-col space-y-4 items-center px-4 mt-4">
-          {followingList
-            .sort((a, b) => {
-              if (a.id === currentUser) {
-                return -1;
-              } else if (b.id === currentUser) {
-                return 1;
-              }
-              return a.user_name;
-            })
-            .map((following, index) => {
-              return (
-                <div
-                  className="flex justify-between min-w-[90%]"
-                  key={index}
-                >
-                  <div>
-                    <img
-                      src={following?.data?.img}
-                      className="h-10 w-10 object-cover rounded-full"
-                      alt=""
-                    />
-                  </div>
-                  <Link
-                    to={
-                      following.id === currentUser
-                        ? `/userProfile/yourPosts`
-                        : `/users/${following.id}/profile`
-                    }
-                    className="flex flex-col"
-                  >
-                    <span>{following?.data?.name}</span>
-                    <span className="text-sm text-gray-400">
-                      {following?.data?.user_name}
-                    </span>
-                  </Link>
-                  <div>
-                    {following?.data?.followers?.includes(currentUser) ? (
-                      <button
-                        // eslint-disable-next-line no-undef
-                        onClick={() => handleManageFollow(following.id)}
-                        className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+    <>
+      {followingList && followingList ? (
+        <div>
+          {followingList?.length > 0 ? (
+            <div className="h-full w-full flex flex-col space-y-4 items-center px-4 mt-4">
+              {followingList
+                .sort((a, b) => {
+                  if (a.id === currentUser) {
+                    return -1;
+                  } else if (b.id === currentUser) {
+                    return 1;
+                  }
+                  return a.user_name;
+                })
+                .map((following, index) => {
+                  return (
+                    <div
+                      className="flex justify-between min-w-[90%]"
+                      key={index}
+                    >
+                      <div>
+                        <img
+                          src={following?.data?.img}
+                          className="h-10 w-10 object-cover rounded-full"
+                          alt=""
+                        />
+                      </div>
+                      <Link
+                        to={
+                          following.id === currentUser
+                            ? `/userProfile/yourPosts`
+                            : `/users/${following.id}/profile`
+                        }
+                        className="flex flex-col"
                       >
-                        Unfollow
-                      </button>
-                    ) : (
-                      <div className="flex items-center">
-                        {following.id === currentUser ? (
-                          <button
-                            // eslint-disable-next-line no-undef
-                            className="cursor-auto px-8  py-2"
-                          >
-                            You
-                          </button>
-                        ) : (
+                        <span>{following?.data?.name}</span>
+                        <span className="text-sm text-gray-400">
+                          {following?.data?.user_name}
+                        </span>
+                      </Link>
+                      <div>
+                        {following?.data?.followers?.includes(currentUser) ? (
                           <button
                             // eslint-disable-next-line no-undef
                             onClick={() => handleManageFollow(following.id)}
                             className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
                           >
-                            Follow
+                            Unfollow
                           </button>
+                        ) : (
+                          <div className="flex items-center">
+                            {following.id === currentUser ? (
+                              <button
+                                // eslint-disable-next-line no-undef
+                                className="cursor-auto px-8  py-2"
+                              >
+                                You
+                              </button>
+                            ) : (
+                              <button
+                                // eslint-disable-next-line no-undef
+                                onClick={() => handleManageFollow(following.id)}
+                                className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                              >
+                                Follow
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                    </div>
+                  );
+                })}
+            </div>
+          ) : (
+            <div className="h-20 w-full flex items-center justify-center">
+              <span className="text-zinc-400">0 following</span>
+            </div>
+          )}
         </div>
       ) : (
         <div className="h-20 w-full flex items-center justify-center">
           <CgSpinner className="animate-spin" size={40} />
         </div>
       )}
-    </div>
+    </>
   );
 };
 
