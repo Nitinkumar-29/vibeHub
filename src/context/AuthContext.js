@@ -59,7 +59,7 @@ export const AuthContextProvider = ({ children }) => {
         const user = userCredential.user;
         updatePasswordStatus();
         localStorage.setItem("currentUser", user.uid);
-        setIsLoading(true);
+        setIsLoading(false);
         navigate("/");
         setLoginCredentials({ email: "", password: "" });
       })
