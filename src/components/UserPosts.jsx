@@ -248,7 +248,7 @@ const UserPosts = () => {
                           ) : (
                             <img
                               src={fileURL}
-                              alt="post media"
+                              alt=""
                               className="h-full w-full object-contain rounded-md"
                             />
                           )}

@@ -13,12 +13,13 @@ import {
   IoCloseCircleOutline,
   IoEllipsisVerticalSharp,
 } from "react-icons/io5";
-import { BiEdit, BiTrashAlt } from "react-icons/bi";
+import { BiBlock, BiEdit, BiTrashAlt } from "react-icons/bi";
 import { MdArchive, MdArrowBackIos, MdUnarchive } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { TiTickOutline } from "react-icons/ti";
 import { GoIssueClosed } from "react-icons/go";
 import { CgClose, CgCloseR } from "react-icons/cg";
+import { AuthContext } from "../context/AuthContext";
 
 const Chats = () => {
   const {
@@ -43,6 +44,7 @@ const Chats = () => {
   const [isSearchUsers, setIsSearchUsers] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const currentUser = localStorage.getItem("currentUser");
+  const { handleBlock } = useContext(AuthContext);
 
   const [chatMenu, setChatMenu] = useState(false);
   const [chatMenuId, setChatMenuId] = useState(null);
@@ -354,7 +356,7 @@ const Chats = () => {
               </div>
             )}
             {allChats.length > 0 && (
-              <div className="flex space-x-2 items-center w-[95%]">
+              <div className="flex space-x-4 items-center w-[95%] overflow-x-auto hideScrollbar">
                 {allChats?.filter(
                   (chat) =>
                     !chat?.archiveBy?.includes(currentUser) &&
@@ -378,7 +380,9 @@ const Chats = () => {
                     <span>
                       {
                         allChats.filter(
-                          (chat) => !chat?.archiveBy?.includes(currentUser)
+                          (chat) =>
+                            !chat?.archiveBy?.includes(currentUser) &&
+                            !currentUserData?.blockedChats?.includes(chat.id)
                         )?.length
                       }
                     </span>
@@ -411,6 +415,31 @@ const Chats = () => {
                     </span>
                   </button>
                 )}
+
+                <button
+                  onClick={() => {
+                    setActiveTab("blocked");
+                  }}
+                  className={`${
+                    theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
+                  } rounded-full px-4 py-1 space-x-2 ${
+                    activeTab === "blocked"
+                      ? "text-red-600"
+                      : `${
+                          theme === "dark" ? "text-zinc-400" : "text-zinc-900"
+                        }`
+                  }`}
+                >
+                  <span className="">Blocked</span>
+                  <span>
+                    {
+                      allChats?.filter((chat) =>
+                        currentUserData?.blockedChats?.includes(chat?.id)
+                      )?.length
+                    }
+                  </span>
+                </button>
+
                 {messageRequestChats.length > 0 && (
                   <button
                     onClick={() => {
@@ -580,7 +609,8 @@ const Chats = () => {
                           (activeTab === "all"
                             ? !chat.archiveBy?.includes(currentUser)
                             : chat.archiveBy?.includes(currentUser)) &&
-                          !chat.messageRequest === true
+                          !chat.messageRequest === true &&
+                          !currentUserData?.blockedChats?.includes(chat.id)
                       )
                       ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
                       ?.map((chat) => {
@@ -732,11 +762,30 @@ const Chats = () => {
                                 )}
 
                                 <button
-                                  onClick={() => deleteChat(chat.id)}
+                                  onClick={() => {
+                                    deleteChat(chat.id);
+                                    setChatMenu(false);
+                                  }}
                                   className="flex space-x-1 items-center p-2"
                                 >
                                   <BiTrashAlt />
                                   <span>Delete</span>
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleBlock(otherParticipant.id, chat.id);
+                                    setChatMenu(false);
+                                  }}
+                                  className="flex space-x-1 items-center p-2 text-red-700"
+                                >
+                                  <BiBlock />
+                                  <span>
+                                    {currentUserData?.blockedUsers?.includes(
+                                      otherParticipant.id
+                                    )
+                                      ? "UnBlock"
+                                      : "Block"}
+                                  </span>
                                 </button>
                               </div>
                             )}

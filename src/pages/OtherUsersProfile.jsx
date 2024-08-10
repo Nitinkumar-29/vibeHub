@@ -34,6 +34,7 @@ import FollowingList from "../components/FollowingList";
 import { FiSettings } from "react-icons/fi";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { MdArrowBackIos } from "react-icons/md";
+import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
 
 const OtherUsersProfile = () => {
   const { userId } = useParams();
@@ -429,9 +430,17 @@ const OtherUsersProfile = () => {
             />
             <span className={` `}>
               {data?.user_name && (
-                <span className={`text-xl font-semibold`}>
-                  {data?.user_name}
-                </span>
+                <div className="flex items-center space-x-1">
+                  <span className={`text-xl font-semibold`}>
+                    {data?.user_name}
+                  </span>
+
+                  {data?.accountType === "private" ? (
+                    <IoLockClosedOutline />
+                  ) : (
+                    <IoLockOpenOutline />
+                  )}
+                </div>
               )}
             </span>
           </div>
@@ -477,7 +486,7 @@ const OtherUsersProfile = () => {
             </div>
           </div>
           <div
-            className={`flex justify-start w-full ${
+            className={`w-full ${
               theme === "dark" ? "text-zinc-400" : "text-zinc-600"
             }`}
             dangerouslySetInnerHTML={{
@@ -648,7 +657,7 @@ const OtherUsersProfile = () => {
                                   ) : (
                                     <img
                                       src={post.fileURLs[0]}
-                                      alt="post media"
+                                      alt=""
                                       className="h-40 w-40 object-cover rounded-sm"
                                     />
                                   )}

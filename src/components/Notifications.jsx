@@ -73,33 +73,49 @@ const Notifications = () => {
             </div>
           </div>
         </div>
-
-        {followRequestsData.map((data) => {
-          return (
-            <div
-              key={data.id}
-              className={`mt-10 flex items-center justify-between w-full `}
-            >
-              <div className="flex space-x-2 items-center">
-                <img src={data?.img} alt="" className="h-8 w-8 rounded-full" />
-                <span> {data?.user_name}</span>
-                <span>requested you to follow</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <IoCloseCircleOutline
-                  className="cursor-pointer text-red-600"
-                  onClick={() => rejectRequest(data.id)}
-                  size={28}
-                />
-                <GoIssueClosed
-                  className="cursor-pointer text-green-600"
-                  size={25}
-                  onClick={() => acceptFollowRequest(data.id)}
-                />
-              </div>
+        <div className="flex flex-col w-full items-start mt-10 px-2">
+          {followRequestsData.length !== 0 && <span className="font-semibold ">Follow Requests</span>}{" "}
+          {followRequestsData.length > 0 ? (
+            followRequestsData.map((data) => {
+              return (
+                <div
+                  key={data.id}
+                  className={`mt-2 flex items-center justify-start space-x-2 w-full `}
+                >
+                  <div className="flex space-x-2 items-center">
+                    <img
+                      src={data?.img}
+                      alt=""
+                      className="h-8 w-8 rounded-full"
+                    />
+                    <div className="flex items-center space-x-1 flex-wrap justify-start">
+                      <span className="font-medium"> {data?.user_name}</span>
+                      <span className="text-zinc-300">
+                        requested to follow you
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <IoCloseCircleOutline
+                      className="cursor-pointer text-red-600"
+                      onClick={() => rejectRequest(data.id)}
+                      size={23}
+                    />
+                    <GoIssueClosed
+                      className="cursor-pointer text-green-600"
+                      size={20}
+                      onClick={() => acceptFollowRequest(data.id)}
+                    />
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="flex h-40 w-full items-center justify-center text-zinc-400 ">
+              <span>No Notification</span>
             </div>
-          );
-        })}
+          )}
+        </div>
       </div>
     </>
   );

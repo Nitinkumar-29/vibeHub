@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import {
   Link,
@@ -7,52 +7,20 @@ import {
   useNavigate,
   useParams,
 } from "react-router-dom";
-import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
-import { auth, db } from "../firebase";
-import PostContext from "../context/PostContext/PostContext";
-import { MdDarkMode, MdOutlineExplore } from "react-icons/md";
+import { MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
 import "../styles/overflow_scroll.css";
 
 import { AiFillMessage } from "react-icons/ai";
+import { AuthContext } from "../context/AuthContext";
 
 const Main = () => {
-  const { postLoading } = useContext(PostContext);
   const location = useLocation();
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const [loggedInUserData, setLoggedInUserData] = useState({});
+  const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const { userId } = useParams();
   const currentUser = localStorage.getItem("currentUser");
-  const handleFetchUserData = async () => {
-    if (currentUser) {
-      try {
-        const docRef = doc(db, "users", currentUser);
-        const docSnap = await getDoc(docRef);
-        const docSnapShot = docSnap.exists ? docSnap.data() : {};
-        setLoggedInUserData(docSnapShot);
-        console.log(docSnapShot);
-        
-        console.log(loggedInUserData);
-      } catch (error) {
-        console.error(error);
-        if (error.code === "resource-exhausted") {
-          console.error("Quota exceeded. Please try again later.");
-        }
-      }
-    }
-  };
-  useEffect(() => {
-    currentUser && handleFetchUserData();
-    // eslint-disable-next-line
-  }, [currentUser]);
+  const { currentUserData } = useContext(AuthContext);
 
   useEffect(() => {
     if (
@@ -132,9 +100,9 @@ const Main = () => {
               window.scrollTo(0, 0);
             }}
           >
-            {loggedInUserData?.img ? (
+            {currentUserData?.img ? (
               <img
-                src={loggedInUserData?.img}
+                src={currentUserData?.img}
                 className="h-7 w-7 rounded-full object-cover"
                 alt=""
               />

@@ -17,7 +17,8 @@ const Settings = () => {
     if (location.pathname === "/userProfile/settings/edit") {
       setActiveTab("edit");
     }
-  });
+  }, [location.pathname]);
+  
   useEffect(() => {
     localStorage.setItem("activeTab", activeTab);
   }, [activeTab]);

@@ -23,16 +23,16 @@ import {
 import toast from "react-hot-toast";
 import { deleteObject, listAll, ref } from "firebase/storage";
 import { CgSpinner } from "react-icons/cg";
+import { BiDownArrow } from "react-icons/bi";
+import { FaChevronDown } from "react-icons/fa";
+import { IoCaretDownOutline, IoCaretUpOutline } from "react-icons/io5";
 
 const AccountSettings = () => {
   const [error, setError] = useState("");
-  const { toggleTheme, theme } = useContext(ThemeContext);
   const currentUser = localStorage.getItem("currentUser");
-
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("edit profile");
   const [currentUserData, setCurrentUserData] = useState([]);
-
+  const [togglePrivacyNote, setTogglePrivacyNote] = useState(false);
   // Fetch current user data
   const fetchCurrentUserData = async () => {
     const docRef = doc(db, "users", currentUser);
@@ -65,20 +65,6 @@ const AccountSettings = () => {
       console.error(error);
     }
   };
-
-//   const handleLogOut = async () => {
-//     await signOut(auth)
-//       .then(() => {
-//         dispatch({ type: "LOGOUT" });
-//         localStorage.removeItem("user");
-//         localStorage.removeItem("loggedInUserData");
-//         navigate("/login");
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//         setError("Logout failed. Please try again.");
-//       });
-//   };
 
   const handleDeleteAccount = async () => {
     try {
@@ -128,7 +114,7 @@ const AccountSettings = () => {
       // Delete user account from Firebase Auth
       await deleteUser(user);
 
-    //   dispatch({ type: "DELETE" });
+      //   dispatch({ type: "DELETE" });
       localStorage.removeItem("user");
       navigate("/login");
     } catch (error) {
@@ -166,7 +152,22 @@ const AccountSettings = () => {
   return (
     <div className="flex flex-col items-center w-full justify-between">
       <div className="flex items-center w-full justify-between p-2">
-        <span>Privacy</span>
+        <div className="flex items-center space-x-1">
+          <span>Privacy</span>
+          {togglePrivacyNote === false ? (
+            <IoCaretDownOutline
+              size={15}
+              className="cursor-pointer mt-1"
+              onClick={() => setTogglePrivacyNote(!togglePrivacyNote)}
+            />
+          ) : (
+            <IoCaretUpOutline
+              className="cursor-pointer mt-1"
+              size={15}
+              onClick={() => setTogglePrivacyNote(!togglePrivacyNote)}
+            />
+          )}
+        </div>
         <div>
           {currentUserData?.accountType && (
             <button
@@ -188,7 +189,11 @@ const AccountSettings = () => {
           )}
         </div>
       </div>
-      <div className="tracking-normal text-sm font-normal text-zinc-600  p-2">
+      <div
+        className={`${
+          togglePrivacyNote === false ? "hidden" : "flex"
+        } tracking-normal text-sm font-normal text-zinc-600  p-2`}
+      >
         {currentUserData?.accountType === "public" ? (
           <div className="flex flex-col space-y-1 whitespace-pre-wrap">
             <p>

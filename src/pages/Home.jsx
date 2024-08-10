@@ -227,7 +227,7 @@ const Home = () => {
                                 ) : (
                                   <img
                                     src={fileURL}
-                                    alt="post media error"
+                                    alt=""
                                     className="h-fit w-fit object-contain rounded-md"
                                   />
                                 )}
@@ -454,7 +454,7 @@ const Home = () => {
                                   ) : (
                                     <img
                                       src={fileURL}
-                                      alt="post media"
+                                      alt=""
                                       className="h-fit w-fit object-contain rounded-md"
                                     />
                                   )}

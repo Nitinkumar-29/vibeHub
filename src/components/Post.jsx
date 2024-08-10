@@ -168,7 +168,7 @@ const Post = () => {
                         ) : (
                           <img
                             src={fileURL}
-                            alt="post media"
+                            alt=""
                             className="h-fit w-fit object-contain rounded-md"
                           />
                         )}

@@ -3,12 +3,17 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { TfiLayoutListPost } from "react-icons/tfi";
 import PostContext from "../context/PostContext/PostContext";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { IoSaveSharp } from "react-icons/io5";
+import {
+  IoLockClosedOutline,
+  IoLockOpenOutline,
+  IoSaveSharp,
+} from "react-icons/io5";
 import { BsHeartFill, BsPencilFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
 import { MdArrowBackIos } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { FaLock, FaUserLock } from "react-icons/fa";
 
 const UserProfile = () => {
   const currentUser = localStorage.getItem("currentUser");
@@ -49,13 +54,20 @@ const UserProfile = () => {
             size={20}
             className="cursor-pointer"
           />
-          <span className={` `}>
+          <div className={` `}>
             {currentUserData?.user_name && (
-              <span className={`text-xl font-semibold`}>
-                {currentUserData?.user_name}
-              </span>
+              <div className="flex items-center space-x-1">
+                <span className={`text-xl font-semibold`}>
+                  {currentUserData?.user_name}
+                </span>
+                {currentUserData?.accountType === "private" ? (
+                  <IoLockClosedOutline />
+                ) : (
+                  <IoLockOpenOutline />
+                )}
+              </div>
             )}
-          </span>
+          </div>
         </div>
         <Link
           to={`/userProfile/settings/edit`}

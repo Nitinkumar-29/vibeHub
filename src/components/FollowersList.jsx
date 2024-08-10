@@ -216,7 +216,7 @@ const FollwersList = () => {
         </div>
       ) : (
         <div className="h-20 w-full flex items-center justify-center">
-          <CgSpinner className="animate-spin" size={40} />
+          <span className="text-zinc-400">0 followers</span>
         </div>
       )}
     </div>
