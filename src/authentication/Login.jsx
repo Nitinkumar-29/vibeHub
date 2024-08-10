@@ -8,18 +8,17 @@ import { BsEye, BsEyeSlash, BsGoogle } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 
 const Login = () => {
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const {
     login,
     loginCredentials,
     setLoginCredentials,
+    loading,
+    isLoading,
     handleSignInWithGoogle,
+    error,
   } = useContext(AuthContext);
-  const [isLoading, setIsLoading] = useState(false);
   const [passwordType, setPasswordType] = useState("password");
-  const token = localStorage.getItem("token");
 
   const handleOnChange = (e) => {
     setLoginCredentials({
@@ -38,7 +37,6 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     login(auth);
     // navigate("/");
   };
@@ -107,7 +105,16 @@ const Login = () => {
             <span className="text-sm w-fit text-red-600">{error}</span>
           )}
           <button
-            className="flex justify-center border-[1px] border-zinc-600 rounded-md w-72 p-2"
+            disabled={
+              loginCredentials.email.length === 0 ||
+              loginCredentials.password.length === 0
+            }
+            className={`flex justify-center border-[1px] border-zinc-600 rounded-md w-72 p-2 ${
+              loginCredentials?.email?.length === 0 ||
+              loginCredentials.password.length === 0
+                ? "cursor-not-allowed text-zinc-400"
+                : "cursor-pointer text-white"
+            }`}
             type="submit"
           >
             {isLoading === false && "Submit"}

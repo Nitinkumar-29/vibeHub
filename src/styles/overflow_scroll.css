@@ -10,26 +10,6 @@
   display: hidden;
   scrollbar-width: 0px;
 }
-/* overflow-y: hidden; */
-
-/* Track */
-/* ::-webkit-scrollbar-track {
-  background: #fbf9f9; 
-} */
-/* Handle */
-/* ::-webkit-scrollbar-thumb {
-  background: rgb(159, 158, 158); 
-  scrollbar-width: 1px;
-  cursor: grabbing;
-} */
-
-/* .scroll-container {
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  scrollbar-width: thin;
-  scrollbar-color: #4a5568 #2d3748;
-} */
 
 .scroll-container::-webkit-scrollbar {
   height: 6px;
@@ -53,6 +33,7 @@
   justify-content: center;
   align-items: center;
 }
+
 .carousel::after {
   content: "";
   position: absolute;
@@ -62,6 +43,7 @@
   opacity: 0.5;
   z-index: 1;
 }
+
 .carousel .carousel .control-dots {
   z-index: 10;
 }
@@ -70,7 +52,34 @@
   scrollbar-width: 0px;
   /* display: none; */
 }
+
 .hideScrollbar::-webkit-scrollbar {
   scrollbar-width: 0px;
   display: none;
+}
+
+
+/* App.css */
+.scrollbarH::-webkit-scrollbar {
+  height: 10px;
+  background: #2d3748; /* Dark background for the scrollbar */
+}
+
+.scrollbarH::-webkit-scrollbar-thumb {
+  height: 10px;
+  background-color: #a0aec0; /* Color of the scrollbar thumb */
+  border-radius: 8px; /* Rounded corners */
+}
+
+.scrollbarH::-webkit-scrollbar-track {
+  height: 10px;
+  background: #d8dade; /* Background color of the scrollbar track */
+}
+
+.scrollbarH {
+  display: flex;
+  appearance: none;
+  border-radius: 8px; /* Rounded corners for the scrollable area */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #a0aec0 #d8dade; /* Thumb and track colors for Firefox */
 }

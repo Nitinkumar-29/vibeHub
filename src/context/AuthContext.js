@@ -47,6 +47,7 @@ export const AuthContextProvider = ({ children }) => {
 
   // login user
   const login = async () => {
+    setIsLoading(true);
     await signInWithEmailAndPassword(
       auth,
       loginCredentials.email,
@@ -69,6 +70,7 @@ export const AuthContextProvider = ({ children }) => {
         setIsLoading(false);
         setLoading(false);
         setError("Invalid credentials");
+        setLoginCredentials({ email: "", password: "" });
       });
   };
 
@@ -78,29 +80,16 @@ export const AuthContextProvider = ({ children }) => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider)
       .then((result) => {
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        console.log(token);
-
-        // The signed-in user info.
         const user = result?.user;
-        console.log(user);
         localStorage.setItem("currentUser", user.uid);
         setCurrentUserData(user);
         navigate("/");
-
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
       })
       .catch((error) => {
-        // Handle Errors here.
         const errorCode = error?.code;
         console.error(errorCode);
-
         const errorMessage = error?.message;
         console.error(errorMessage);
-
         // The email of the user's account used.
         const email = error?.customData.email;
         console.error(email);
@@ -309,7 +298,7 @@ export const AuthContextProvider = ({ children }) => {
     try {
       toast.loading("processing...");
       const currentUserRef = doc(db, "users", currentUser);
-      if (currentUserData.blockedUsers.includes(userId)) {
+      if (currentUserData?.blockedUsers?.includes(userId)) {
         await Promise.all([
           updateDoc(currentUserRef, {
             blockedUsers: arrayRemove(userId),
@@ -350,6 +339,9 @@ export const AuthContextProvider = ({ children }) => {
         updatePasswordStatus,
         handleSignInWithGoogle,
         handleBlock,
+        isLoading,
+        loading,
+        error,
       }}
     >
       {children}
