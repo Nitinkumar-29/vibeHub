@@ -12,9 +12,8 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
 import { db, storage } from "../../firebase";
-import { AuthContext } from "../AuthContext";
 import toast from "react-hot-toast";
 import {
   deleteObject,
@@ -66,7 +65,6 @@ export const ChatProvider = ({ children }) => {
         });
       }
       setAllChats(chats);
-      console.log(chats);
     } catch (error) {
       console.error("Error fetching chats:", error);
       if (error.code === "resource-exhausted") {
@@ -295,12 +293,8 @@ export const ChatProvider = ({ children }) => {
       return new Promise((resolve, reject) => {
         uploadTask.on(
           "state_changed",
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          },
+          (snapshot) => (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
           (error) => {
-            console.log(error);
             reject(error);
           },
           async () => {
@@ -384,11 +378,7 @@ export const ChatProvider = ({ children }) => {
             messageReaction: true,
             reaction: reaction,
           });
-        } else {
-          console.log("Cannot react to your own message.");
         }
-      } else {
-        console.log("Message not found.");
       }
     } catch (error) {
       console.error("Error adding reaction:", error);
@@ -405,7 +395,6 @@ export const ChatProvider = ({ children }) => {
         const messageData = messageSnapshot.data();
 
         if (messageData.senderId === currentUser) {
-          console.log("Cannot remove reaction from your own message.");
           return; // Exit early if user is the sender
         }
 
@@ -423,11 +412,7 @@ export const ChatProvider = ({ children }) => {
             messageReaction: false,
             reactions: currentReactions,
           });
-        } else {
-          console.log("User hasn't reacted to this message.");
         }
-      } else {
-        console.log("Message not found.");
       }
     } catch (error) {
       console.error("Error removing reaction:", error);
@@ -491,8 +476,6 @@ export const ChatProvider = ({ children }) => {
         await updateDoc(chatRef, {
           archiveBy,
         });
-      } else {
-        console.log("Chat does not exist");
       }
     } catch (error) {
       console.error("Error archiving chat:", error);
@@ -518,7 +501,6 @@ export const ChatProvider = ({ children }) => {
       const messageRef = doc(db, "chat_messages", messageId);
       const messageSnap = await getDoc(messageRef);
       const messageData = messageSnap.exists() ? messageSnap.data() : {};
-      console.log(messageData);
 
       let fileUrls = [];
       if (messageData.fileURLs) {

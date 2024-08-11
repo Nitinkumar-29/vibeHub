@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { CgDarkMode, CgLogOut } from "react-icons/cg";
+import { CgLogOut } from "react-icons/cg";
 import { MdDarkMode, MdLightMode } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { useNavigate } from "react-router-dom";

@@ -7,10 +7,9 @@ import {
 import Main from "./pages/Main";
 import Login from "./authentication/Login";
 import SignUp from "./authentication/SignUp";
-import { AuthContext, AuthContextProvider } from "./context/AuthContext";
-import { useContext, useEffect, useState } from "react";
+import { AuthContextProvider } from "./context/AuthContext";
 import UserProfile from "./pages/UserProfile";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
 import CreatePost from "./components/CreatePost";
 import { PostProvider } from "./context/PostContext/PostContext";

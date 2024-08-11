@@ -3,25 +3,18 @@ import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
 } from "firebase/auth";
-import {
-  collection,
-  doc,
-  getDocs,
-  query,
-  serverTimestamp,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { auth, db, storage } from "../firebase";
-import { AuthContext } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const SignUp = () => {
   const imageRef = useRef();
+  const { theme } = useContext(ThemeContext);
 
   const [data, setData] = useState({
     name: "",
@@ -30,11 +23,9 @@ const SignUp = () => {
   });
   const [error, setError] = useState("");
   const [file, setFile] = useState("");
-  const { dispatch, currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState([]);
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -58,10 +49,7 @@ const SignUp = () => {
 
       uploadTask.on(
         "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        },
+        (snapshot) => (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
         (error) => {
           console.log(error);
           // setError(error);
@@ -124,8 +112,12 @@ const SignUp = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] text-white bg-neutral-900 space-y-3">
-        <h1 className="text-2xl font-semibold my-3">Create Account</h1>
+      <div
+        className={`flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${
+          theme === "dark" ? "bg-zinc-950 text-zinc-200" : "bg-white text-black"
+        } bg-inherit space-y-3`}
+      >
+        <h1 className="text-2xl font-medium my-6">Sign Up Now</h1>
         <form
           onSubmit={handleSubmit}
           className="flex flex-col justify-center space-y-4"
@@ -147,7 +139,7 @@ const SignUp = () => {
             )}
           </div>
           <input
-            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
             type="text"
             name="name"
             id="name"
@@ -157,7 +149,7 @@ const SignUp = () => {
             onChange={onChange}
           />
           <input
-            className="border-[1px] rounded-md w-72 p-2 bg-inherit focus:outline-none"
+            className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
             type="email"
             name="email"
             id="email"
@@ -166,7 +158,7 @@ const SignUp = () => {
             value={data.email}
             onChange={onChange}
           />
-          <div className="flex justify-between items-center border-[1px] rounded-md w-72 p-2 bg-inherit">
+          <div className="flex justify-between items-center border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit">
             <input
               className="bg-inherit focus:placeholder:text-gray-300 focus:outline-none"
               type={passwordType}
@@ -185,7 +177,18 @@ const SignUp = () => {
             </span>
           </div>
           <button
-            className="border-[1px] flex justify-center rounded-md w-72 p-2"
+            disabled={
+              data.password.length === 0 ||
+              data.email.length === 0 ||
+              data.name.length === 0
+            }
+            className={` ${
+              data.password.length === 0 ||
+              data.email.length === 0 ||
+              data.name.length === 0
+                ? "cursor-not-allowed text-zinc-400"
+                : "cursor-pointer text-white"
+            } border-[1px] border-zinc-600 flex justify-center rounded-md w-72 p-2`}
             type="submit"
           >
             {loading ? (

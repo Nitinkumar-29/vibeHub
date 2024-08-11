@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
+import { FaDotCircle, FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import {
   Link,
   Outlet,
@@ -10,9 +10,10 @@ import {
 import { MdOutlineExplore } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
 import "../styles/overflow_scroll.css";
-
 import { AiFillMessage } from "react-icons/ai";
 import { AuthContext } from "../context/AuthContext";
+import ChatContext from "../context/ChatContext/ChatContext";
+import { BsDot } from "react-icons/bs";
 
 const Main = () => {
   const location = useLocation();
@@ -21,6 +22,7 @@ const Main = () => {
   const { userId } = useParams();
   const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
+  const { messageRequestChats } = useContext(ChatContext);
 
   useEffect(() => {
     if (
@@ -39,7 +41,7 @@ const Main = () => {
       } backdrop-blur-3xl `}
     >
       <div
-        className={`w-full h-[92vh] overflow-y-auto hideScrollbar
+        className={`w-full h-[100vh] overflow-y-auto hideScrollbar pb-10
         `}
       >
         <Outlet />
@@ -50,7 +52,7 @@ const Main = () => {
         location.pathname === `/chat/${userId}/messages`
       ) && (
         <div
-          className={`flex z-10 fixed bottom-0 ${
+          className={`flex z-10 absolute bottom-0 ${
             location.pathname === "/userChats/" ||
             location.pathname === "/userChats" ||
             location.pathname === `/userChats/${userId}/messages`
@@ -87,12 +89,18 @@ const Main = () => {
             <FaPlusCircle size={25} />
           </Link>
           <Link
+            className="relative"
             to={`/user/${currentUser}/chats`}
             onClick={() => {
               window.scrollTo(0, 0);
             }}
           >
             <AiFillMessage size={25} />
+            {messageRequestChats.length > 0 && (
+              <span className="text-red-600 absolute -top-1 left-4 font-medium">
+                <BsDot size={20} />
+              </span>
+            )}
           </Link>
           <Link
             to="/userProfile/yourPosts"

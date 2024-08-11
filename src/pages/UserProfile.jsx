@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { TfiLayoutListPost } from "react-icons/tfi";
 import PostContext from "../context/PostContext/PostContext";
@@ -13,13 +13,11 @@ import { FiSettings } from "react-icons/fi";
 import { MdArrowBackIos } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { HighLightLinks } from "../utils/HighlightLinks";
-import { FaLock, FaUserLock } from "react-icons/fa";
 
 const UserProfile = () => {
   const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
 
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const {
     handleFetchUserPosts,
@@ -199,7 +197,6 @@ const UserProfile = () => {
                     : "text-gray-400"
                 } p-2  text-center`}
               >
-                {/* <TfiLayoutListPost size={25} /> */}
                 Followers
               </Link>
             </span>
@@ -212,7 +209,6 @@ const UserProfile = () => {
                     : "text-gray-400"
                 } p-2  text-center`}
               >
-                {/* <TfiLayoutListPost size={25} /> */}
                 Following
               </Link>
             </span>
@@ -222,7 +218,6 @@ const UserProfile = () => {
           <Outlet />
         </div>
       </div>
-      {error && <div className="text-red-500">{error}</div>}
     </div>
   );
 };

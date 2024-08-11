@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import {
   arrayRemove,
@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
-import PostContext from "../context/PostContext/PostContext";
 import { CgSpinner } from "react-icons/cg";
 
 const FollowingList = () => {
@@ -47,17 +46,10 @@ const FollowingList = () => {
       const targetUserRef = doc(db, "users", id);
       const currentUserRef = doc(db, "users", currentUser);
       const targetUserSnap = await getDoc(targetUserRef);
-      const currentUserSnap = await getDoc(currentUserRef);
 
       if (targetUserSnap.exists()) {
         const targetUserSnapShot = targetUserSnap.data();
-        const currentUserSnapShot = currentUserSnap.data();
-        let updatedList;
         if (targetUserSnapShot.followers.includes(currentUser)) {
-          // Unfollow the user
-          //   updatedList = followingList.map((user)=>{
-
-          //   })
           await Promise.all([
             updateDoc(targetUserRef, {
               followers: arrayRemove(currentUser),
@@ -84,9 +76,6 @@ const FollowingList = () => {
           toast.success(`You are now following ${docSnapData.name}`);
           handleFetchFollowingList();
         }
-        // Fetch and update the user data after updating the followers
-        // handleFetchUserData();
-        // fetchHomePagePosts();
       } else {
         console.log("User document does not exist");
         toast.dismiss(toastId);

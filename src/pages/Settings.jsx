@@ -5,7 +5,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { MdArrowBackIos } from "react-icons/md";
 
 const Settings = () => {
-  const { toggleTheme, theme } = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(() => {

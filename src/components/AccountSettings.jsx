@@ -1,6 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import ThemeContext from "../context/Theme/ThemeContext";
-import { AuthContext } from "../context/AuthContext";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -18,13 +16,10 @@ import {
   deleteUser,
   EmailAuthProvider,
   reauthenticateWithCredential,
-  signOut,
 } from "firebase/auth";
 import toast from "react-hot-toast";
 import { deleteObject, listAll, ref } from "firebase/storage";
 import { CgSpinner } from "react-icons/cg";
-import { BiDownArrow } from "react-icons/bi";
-import { FaChevronDown } from "react-icons/fa";
 import { IoCaretDownOutline, IoCaretUpOutline } from "react-icons/io5";
 
 const AccountSettings = () => {
@@ -45,7 +40,6 @@ const AccountSettings = () => {
   // Update account type
   const updateAccountType = async () => {
     try {
-      // toast.loading("Processing...");
       const docRef = doc(db, "users", currentUser);
 
       await updateDoc(docRef, {
@@ -53,10 +47,6 @@ const AccountSettings = () => {
           currentUserData.accountType === "public" ? "private" : "public"
         }`,
       });
-
-      // toast.dismiss();
-      // toast.success("Done");
-
       // Fetch the updated data
       fetchCurrentUserData();
     } catch (error) {

@@ -30,8 +30,6 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { Carousel } from "react-responsive-carousel";
-import FollowingList from "../components/FollowingList";
-import { FiSettings } from "react-icons/fi";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { MdArrowBackIos } from "react-icons/md";
 import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
@@ -39,7 +37,6 @@ import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
 const OtherUsersProfile = () => {
   const { userId } = useParams();
   const location = useLocation();
-  const otherUserId = userId;
   const [focusedSection, setFocusedSection] = useState(() => {
     // Check if the value exists in localStorage
     const storedSection = localStorage.getItem("focusedSection");
@@ -71,13 +68,11 @@ const OtherUsersProfile = () => {
       if (!userId) {
         throw new Error("Profile user ID not provided");
       }
-      console.log(userId);
 
       // Fetch all posts and filter them client-side
       const q = query(collection(db, "posts"));
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
-        console.log("No posts found.");
         setTaggedPosts([]);
         return;
       }
@@ -93,7 +88,6 @@ const OtherUsersProfile = () => {
       );
 
       if (filteredPosts.length === 0) {
-        console.log("No posts found where the profile user is mentioned.");
         setTaggedPosts([]);
         return;
       }
@@ -108,8 +102,6 @@ const OtherUsersProfile = () => {
       );
 
       setTaggedPosts(postsWithUserData);
-      console.log("Tagged posts fetched:", postsWithUserData);
-      console.log(taggedPosts);
     } catch (error) {
       console.error("Error fetching tagged posts:", error);
     }
@@ -136,11 +128,9 @@ const OtherUsersProfile = () => {
       const targetUserRef = doc(db, "users", userId);
       const currentUserRef = doc(db, "users", currentUser);
       const targetUserSnap = await getDoc(targetUserRef);
-      const currentUserSnap = await getDoc(currentUserRef);
 
       if (targetUserSnap.exists()) {
         const targetUserSnapShot = targetUserSnap.data();
-        const currentUserSnapShot = currentUserSnap.data();
 
         if (targetUserSnapShot?.followers?.includes(currentUser)) {
           // Unfollow the user
@@ -191,7 +181,6 @@ const OtherUsersProfile = () => {
         handleFetchUserData();
         fetchHomePagePosts();
       } else {
-        console.log("User document does not exist");
         toast.dismiss(toastId);
         toast.error("User not found");
       }
@@ -373,7 +362,6 @@ const OtherUsersProfile = () => {
           handleOtherUserPostsData();
         }
       } else {
-        console.log("No such post document!");
       }
     } catch (error) {
       console.error("Error saving post: ", error);
@@ -387,11 +375,9 @@ const OtherUsersProfile = () => {
     videoRef.current.click(index);
     if (isPlaying === false) {
       videoRef.current.play(index);
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause(index);
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };
