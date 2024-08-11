@@ -1,6 +1,6 @@
 import PostContext from "../context/PostContext/PostContext";
 import "../styles/overflow_scroll.css";
-import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
@@ -16,7 +16,6 @@ import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { auth } from "../firebase";
-import { AuthContext } from "../context/AuthContext";
 
 const Home = () => {
   const {
@@ -29,7 +28,6 @@ const Home = () => {
     otherPublicPostsHomePage,
   } = useContext(PostContext);
   const { theme } = useContext(ThemeContext);
-  const { allUsers } = useContext(AuthContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
   const [position, setPosition] = useState("fixed");
@@ -106,7 +104,7 @@ const Home = () => {
               <IoNotificationsSharp size={25} />
             </Link>
           </div>
-          <div className="flex justify-center w-full h-full pb-2 pt-12">
+          <div className="flex justify-center w-full h-full pt-16">
             <div className="flex flex-col w-full h-fit space-y-4">
               {homePagePosts.length > 0 ? (
                 homePagePosts
@@ -120,7 +118,7 @@ const Home = () => {
                         {post?.userData?.img ? (
                           <img
                             src={post?.userData?.img}
-                            className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
+                            className="h-12 w-12 object-cover duration-200 rounded-full"
                             alt=""
                           />
                         ) : (
@@ -144,29 +142,18 @@ const Home = () => {
                               @{post?.userData?.user_name}
                             </span>
                           </Link>
-                          {/* <div>
-                          <HiDotsVertical
-                            className="cursor-pointer"
-                            size={25}
-                          />
-                          <div className="hidden">
-                            <span>Edit</span>
-                            <span>Delete</span>
-                            <span></span>
-                            </div>
-                            </div> */}
                         </div>
                       </div>
                       <div className="w-full h-full ">
                         {post?.postCaption && (
                           <p
-                            className="whitespace-pre-wrap px-4"
+                            className="whitespace-pre-wrap px-4 pb-2"
                             dangerouslySetInnerHTML={{
                               __html: HighLightLinks(post?.postCaption),
                             }}
                           ></p>
                         )}
-                        <div className="px-2 flex flex-wrap">
+                        <div className="px-2 pb-2 flex flex-wrap">
                           {post?.mentionedUsers?.map((user, index) => {
                             return (
                               <Link
@@ -297,7 +284,6 @@ const Home = () => {
                           </div>
                         </div>
                         <div className="flex flex-col -space-y-1">
-                          {/* {post?.likes?.length !== 0 && ( */}
                           {post?.likes?.length !== 0 && (
                             <span className="w-full px-4">
                               {post?.likes?.length !== 0 && post?.likes?.length}
@@ -379,17 +365,6 @@ const Home = () => {
                                 @{post?.userData?.user_name}
                               </span>
                             </Link>
-                            {/* <div>
-                          <HiDotsVertical
-                            className="cursor-pointer"
-                            size={25}
-                          />
-                          <div className="hidden">
-                            <span>Edit</span>
-                            <span>Delete</span>
-                            <span></span>
-                          </div>
-                          </div> */}
                           </div>
                         </div>
                         <div className="w-full h-full">
@@ -516,7 +491,6 @@ const Home = () => {
                             </div>
                           </div>
                           <div className="flex flex-col">
-                            {/* {post?.likes?.length !== 0 && ( */}
                             {post?.likes?.length !== 0 && (
                               <span className="w-full px-4">
                                 {post?.likes?.length !== 0 &&

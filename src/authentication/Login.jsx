@@ -1,14 +1,15 @@
 import React, { useContext, useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import { BsEye, BsEyeSlash, BsGoogle } from "react-icons/bs";
+import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Login = () => {
-  const navigate = useNavigate();
+  const {theme}=useContext(ThemeContext)
   const {
     login,
     loginCredentials,
@@ -38,7 +39,6 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     login(auth);
-    // navigate("/");
   };
 
   // reset user password
@@ -53,7 +53,7 @@ const Login = () => {
   };
   return (
     <div
-      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] text-white bg-zinc-950 space-y-3`}
+      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${theme==="dark"?"bg-zinc-950 text-white":"bg-white text-black"} space-y-3`}
     >
       <div className="flex items-center font-semibold h-12 fixed my-4  space-x-2 top-10">
         <span className="bg-gradient-to-tr from-red-500 via-blue-500 to-orange-500 text-3xl bg-clip-text text-transparent">
@@ -62,12 +62,12 @@ const Login = () => {
         <img src={`/images/logo.png`} className="h-8 w-8 rounded-md" alt="" />
       </div>
       <button
-        className="flex items-center space-x-2 border-[1px] rounded-md border-zinc-600 px-4 py-2 w-72 justify-center"
+        className="hidden lg:flex items-center space-x-2 border-[1px] rounded-md border-zinc-600 px-4 py-2 w-72 justify-center"
         onClick={() => handleSignInWithGoogle()}
       >
         <FcGoogle /> <span>Sign in with Google</span>
       </button>
-      <span>or</span>
+      <span className="hidden lg:flex">or</span>
       <div className="flex flex-col items-center h-fit">
         <h1 className="mb-3">Sign in with Email</h1>
         <form onSubmit={handleLogin} className="flex flex-col space-y-4">

@@ -5,16 +5,15 @@ import {
   getDoc,
   updateDoc,
 } from "firebase/firestore";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { CgSpinner } from "react-icons/cg";
 
 const FollwersList = () => {
   const [followersList, setFollowersList] = useState([]);
   const { userId } = useParams();
-  const currentUser = localStorage.getItem("currentUser")
+  const currentUser = localStorage.getItem("currentUser");
   let isOwner = userId === currentUser;
   // Handle follow/unfollow
   const handleManageFollow = async (id) => {
@@ -27,12 +26,9 @@ const FollwersList = () => {
 
       if (targetUserSnap.exists() && currentUserSnap.exists()) {
         const targetUserSnapShot = targetUserSnap.data();
-        const currentUserSnapShot = currentUserSnap.data();
 
         // Ensure followers and following fields are arrays
         const targetUserFollowers = targetUserSnapShot.followers || [];
-        const currentUserFollowing = currentUserSnapShot.following || [];
-        let updatedList;
         if (targetUserFollowers.includes(currentUser)) {
           // Unfollow the user
           await Promise.all([
@@ -180,7 +176,7 @@ const FollwersList = () => {
                         </button>
                       ) : (
                         <div className="flex items-center">
-                          {follower.id === currentUser? (
+                          {follower.id === currentUser ? (
                             <button className="cursor-auto px-8 py-2 ">
                               You
                             </button>

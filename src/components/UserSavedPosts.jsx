@@ -6,7 +6,7 @@ import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
 import { Carousel } from "react-responsive-carousel";
-import { BiCopy, BiPause, BiPlay } from "react-icons/bi";
+import { BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 
@@ -85,7 +85,7 @@ const UserSavedPosts = () => {
                 </div>
               </div>
               <div className="flex flex-wrap">
-                <p className="px-4">{savedPost.postCaption}</p>
+                <p className="px-4 pb-2">{savedPost.postCaption}</p>
                 {savedPost?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
@@ -97,7 +97,7 @@ const UserSavedPosts = () => {
                         ? `/userProfile/yourPosts`
                         : `/users/${user?.userId}/profile`
                     }
-                    className="text-zinc-500 px-4"
+                    className="text-zinc-500 px-4 pb-2"
                   >
                     @{user?.username}
                   </Link>

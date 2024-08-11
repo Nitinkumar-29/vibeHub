@@ -8,16 +8,19 @@ import {
   getDocs,
   onSnapshot,
   query,
+  serverTimestamp,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import toast from "react-hot-toast";
 import {
-  getAuth,
+  getRedirectResult,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
 } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -55,11 +58,9 @@ export const AuthContextProvider = ({ children }) => {
     )
       .then((userCredential) => {
         const user = userCredential.user;
-        console.log(user);
         updatePasswordStatus();
         localStorage.setItem("currentUser", user.uid);
-        console.log(localStorage.getItem("currentUser"));
-        setIsLoading(true);
+        setIsLoading(false);
         navigate("/");
         setLoginCredentials({ email: "", password: "" });
       })
@@ -73,33 +74,74 @@ export const AuthContextProvider = ({ children }) => {
         setLoginCredentials({ email: "", password: "" });
       });
   };
+  const generateUsername = (name) => {
+    const randomDigits = Math.floor(1000 + Math.random() * 9000); // Generates a random number between 1000 and 9999
+    return `${name}${randomDigits}`;
+  };
 
-  // sign in with google
+  // Sign in with Google
   const handleSignInWithGoogle = async () => {
-    const auth = getAuth();
     const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result?.user;
-        localStorage.setItem("currentUser", user.uid);
-        setCurrentUserData(user);
-        navigate("/");
-      })
-      .catch((error) => {
-        const errorCode = error?.code;
-        console.error(errorCode);
-        const errorMessage = error?.message;
-        console.error(errorMessage);
-        // The email of the user's account used.
-        const email = error?.customData.email;
-        console.error(email);
+    try {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        await handleRedirectResult();
+      } else {
+        const result = await signInWithPopup(auth, provider);
+        await handleUser(result.user);
+      }
+    } catch (error) {
+      console.error("Error signing in with Google:", error);
+    }
+  };
 
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        console.error(credential);
+  // Handle redirect result for mobile devices
+  const handleRedirectResult = async () => {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result?.user) {
+        console.log("Redirect result user:", result.user);
+        await handleUser(result.user);
+      }
+    } catch (error) {
+      console.error("Error handling redirect result:", error);
+    }
+  };
 
-        // ...
+  // Process user data after sign-in
+  const handleUser = async (user) => {
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Store user UID in local storage
+    localStorage.setItem("currentUser", user.uid);
+
+    // Reference to the user's document in Firestore
+    const userDocRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      // If the user document doesn't exist, create it
+      const username = user.displayName?.split(" ");
+      const updatedName = username ? username[0] : "User";
+      const generateUser_name = generateUsername(updatedName);
+
+      await setDoc(userDocRef, {
+        name: user.displayName,
+        email: user.email,
+        img: user.photoURL, // Correct property for photo URL
+        timeStamp: serverTimestamp(),
+        accountType: "private",
+        user_name: generateUser_name,
       });
+    } else {
+      console.log("User document already exists:", user.uid);
+    }
+
+    // Navigate to home page after successful sign-in
+    navigate("/");
   };
 
   // fetch current user data
@@ -109,7 +151,6 @@ export const AuthContextProvider = ({ children }) => {
       const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const docSnapShot = docSnap.exists() ? docSnap.data() : {};
-      console.log(docSnapShot);
       setCurrentUserData(docSnapShot);
     } catch (error) {
       console.error(error);
@@ -121,7 +162,6 @@ export const AuthContextProvider = ({ children }) => {
     const docRef = doc(db, "users", currentUser);
     const unsubscribe = onSnapshot(docRef, (querySnapShot) => {
       const newData = querySnapShot.data();
-      console.log(newData);
       setCurrentUserData(newData);
     });
     return () => unsubscribe();
@@ -143,7 +183,6 @@ export const AuthContextProvider = ({ children }) => {
         const userId = dataDoc.id;
         allUsersData.push({ id: userId, ...userData });
       });
-      console.log(allUsersData);
 
       setAllUsers(allUsersData);
       return allUsersData;
@@ -171,8 +210,6 @@ export const AuthContextProvider = ({ children }) => {
       const userData = userSnap.data();
       const requests = userData?.followRequests || [];
 
-      console.log("Follow Requests:", requests);
-
       if (requests.length === 0) {
         console.log("No follow requests to fetch.");
         return [];
@@ -199,8 +236,6 @@ export const AuthContextProvider = ({ children }) => {
           id: doc.id,
         }))
       );
-
-      console.log("Users Data:", usersData);
 
       return usersData;
     } catch (error) {

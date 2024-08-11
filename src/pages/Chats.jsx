@@ -87,7 +87,6 @@ const Chats = () => {
       const docRef = doc(db, "users", currentUser);
       const docSnap = await getDoc(docRef);
       const docSnapShot = docSnap.exists ? docSnap.data() : {};
-      console.log(docSnapShot);
       setCurrentUserData(docSnapShot);
     } catch (error) {
       if (error.code === "resource-exhausted") {
@@ -107,7 +106,6 @@ const Chats = () => {
         allUsersData.push({ id: userId, ...userData });
       });
 
-      console.log(allUsersData);
       setAllUsers(allUsersData);
       return allUsersData;
     } catch (error) {
@@ -477,7 +475,11 @@ const Chats = () => {
                         return (
                           <div
                             key={chat.id}
-                            className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
+                            className={` border-b-[1px] ${
+                              theme === "dark"
+                                ? "border-zinc-900"
+                                : "border-zinc-200"
+                            } last:border-none relative group flex w-full items-center justify-between mt-2 p-2 rounded-t-md ${
                               theme === "dark"
                                 ? "hover:bg-zinc-900"
                                 : "hover:bg-zinc-100"
@@ -620,11 +622,15 @@ const Chats = () => {
                         return (
                           <div
                             key={chat.id}
-                            className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
+                            className={` relative group flex w-full items-center justify-between mt-2 p-2 ${
                               theme === "dark"
                                 ? "hover:bg-zinc-900"
                                 : "hover:bg-zinc-100"
-                            } duration-200`}
+                            } border-b-[1px] ${
+                              theme === "dark"
+                                ? "border-zinc-900"
+                                : "border-zinc-200"
+                            } last:border-none rounded-t-md duration-200`}
                           >
                             {otherParticipant?.img && (
                               <Link

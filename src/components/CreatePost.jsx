@@ -1,47 +1,30 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { AiOutlineClose, AiOutlineUsergroupDelete } from "react-icons/ai";
-import { AuthContext } from "../context/AuthContext";
 import {
   addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
-  query,
   serverTimestamp,
-  where,
 } from "firebase/firestore";
 import { db, storage } from "../firebase";
-import { BiCross, BiInfoCircle, BiLoader, BiZoomIn } from "react-icons/bi";
+import { BiLoader, BiZoomIn } from "react-icons/bi";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { TiAttachmentOutline } from "react-icons/ti";
 import { VscMention } from "react-icons/vsc";
-import { PiMusicNotesPlusFill } from "react-icons/pi";
-import { GiMusicalNotes } from "react-icons/gi";
-import { TbMusicOff } from "react-icons/tb";
-import { TbMusicCheck } from "react-icons/tb";
-import { MentionsInput, Mention } from "react-mentions";
-import PostContext from "../context/PostContext/PostContext";
-import { CgClose, CgCloseO, CgCloseR } from "react-icons/cg";
-import { FaUser, FaUserCircle } from "react-icons/fa";
-import { MdClearAll } from "react-icons/md";
-import ScrollContainer from "react-indiana-drag-scroll";
-import { toBeDisabled } from "@testing-library/jest-dom/matchers";
+import { CgClose, CgCloseO } from "react-icons/cg";
+import { FaUserCircle } from "react-icons/fa";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { HighLightLinks } from "../utils/HighlightLinks";
 
 const CreatePost = () => {
   const inputRef = useRef();
-  const audioRef = useRef();
-  const audioControl = useRef();
   const navigate = useNavigate();
   const [isPublished, setIsPublished] = useState(null);
   const [files, setFiles] = useState([]);
-  const [audioFile, setAudioFile] = useState(null);
   const [currentUserData, setCurrentUserData] = useState({});
-  const [isPlaying, setIsPlaying] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [newPostData, setNewPostData] = useState({
     postCaption: "",
@@ -110,30 +93,10 @@ const CreatePost = () => {
     setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
   };
 
-  const handleAudioFileChange = (e) => {
-    setAudioFile(e.target.files[0]);
-  };
-
   const removeFile = (indexToRemove) => {
     setFiles((prevFiles) =>
       prevFiles.filter((_, index) => index !== indexToRemove)
     );
-  };
-  const handlePlay = () => {
-    const audioElement = audioControl.current;
-    if (audioElement) {
-      audioElement.play();
-      audioElement.loop = true;
-      setIsPlaying(true);
-    }
-  };
-
-  const handlePause = () => {
-    const audioElement = audioControl.current;
-    if (audioElement) {
-      audioElement.pause();
-      setIsPlaying(false);
-    }
   };
 
   const handleFetchUserData = async () => {
@@ -142,7 +105,6 @@ const CreatePost = () => {
       const docSnap = await getDoc(docRef);
       const userData = docSnap.exists() ? docSnap.data() : {};
       setCurrentUserData(userData);
-      console.log(currentUserData);
     }
   };
 
@@ -163,10 +125,7 @@ const CreatePost = () => {
       return new Promise((resolve, reject) => {
         uploadTask.on(
           "state_changed",
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          },
+          (snapshot) => (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
           (error) => {
             console.log(error);
             reject(error);
@@ -182,29 +141,11 @@ const CreatePost = () => {
     return Promise.all(uploadPromises);
   };
 
-  const handlehashtag = async () => {
-    const docRef = doc(db, "users", currentUser);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-    } else {
-      // docSnap.data() will be undefined in this case
-      console.log("No such document!");
-    }
-  };
-
   const handlePublishPost = async (e) => {
     e.preventDefault();
     setIsPublished(false);
     let audioURL = "";
-    const name = "audio " + audioFile?.name;
     toast.loading("Publishing your thoughts...");
-
-    if (audioFile) {
-      const audioRef = ref(storage, `audio/${name}`);
-      const uploadTask = await uploadBytesResumable(audioRef, audioFile);
-      audioURL = await getDownloadURL(uploadTask.ref);
-    }
     const fileURLs = await handleUploadFiles();
     const { postCaption } = newPostData;
 
@@ -215,7 +156,6 @@ const CreatePost = () => {
         fileURLs: fileURLs,
         userId: currentUser,
         audio: audioURL,
-        audioName: name,
         timeStamp: serverTimestamp(),
         mentionedUsers: mentionedUsers,
         saves: [],
@@ -259,65 +199,6 @@ const CreatePost = () => {
                     @{currentUserData?.user_name}
                   </span>
                 </div>
-                {/* <div>
-                  <input
-                    type="file"
-                    accept="audio/mp3"
-                    hidden
-                    ref={audioRef}
-                    value={audioFile || ""}
-                    onChange={handleAudioFileChange}
-                  />
-                  {audioFile && (
-                    <audio
-                      className="border-2 bg-inherit"
-                      onPlay={handlePlay}
-                      onPause={handlePause}
-                      ref={audioControl}
-                    >
-                      <source
-                        src={URL.createObjectURL(audioFile)}
-                        type={audioFile.type}
-                      />
-                      Your browser does not support the audio element.
-                    </audio>
-                  )}
-                  {!audioFile ? (
-                    <PiMusicNotesPlusFill
-                      size={15}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        audioRef.current.click();
-                      }}
-                    />
-                  ) : (
-                    <div>
-                      {isPlaying === null ? (
-                        <div className="flex items-center space-x-4">
-                          <TbMusicCheck
-                            className="cursor-pointer"
-                            size={15}
-                            onClick={() => {
-                              handlePlay();
-                            }}
-                          />
-                          <span className="text-sm">Click to play</span>
-                        </div>
-                      ) : (
-                        <div onClick={isPlaying ? handlePause : handlePlay}>
-                          {isPlaying ? (
-                            <GiMusicalNotes
-                              size={15}
-                              className="animate-pulse cursor-pointer"
-                            />
-                          ) : (
-                            <TbMusicOff size={20} className="cursor-pointer" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div> */}
               </div>
             </div>
             <div className="flex flex-col items-center w-full h-fit p-2">

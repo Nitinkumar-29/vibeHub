@@ -1,7 +1,7 @@
 import { collection, getDocs } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
-import { FaUser, FaUserAlt } from "react-icons/fa";
+import { FaUserAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import PostContext from "../context/PostContext/PostContext";
 import { GiSpinningSword } from "react-icons/gi";
@@ -29,7 +29,6 @@ const Explore = () => {
         allUsersData.push({ id: userId, ...userData });
       });
 
-      console.log(allUsersData);
       setAllUsers(allUsersData);
       return allUsersData;
     } catch (error) {
@@ -50,21 +49,7 @@ const Explore = () => {
     }
   };
 
-  const [isSticky, setIsSticky] = useState(false);
   const componentRef = useRef(null);
-
-  const handleScroll = () => {
-    if (componentRef.current) {
-      // Get the position of the component relative to the viewport
-      const rect = componentRef.current.getBoundingClientRect();
-      // Check if the component is at the top of the viewport
-      if (rect.top <= 0) {
-        setIsSticky(true);
-      } else {
-        setIsSticky(false);
-      }
-    }
-  };
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
@@ -72,13 +57,6 @@ const Explore = () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
     // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
   }, []);
 
   useEffect(() => {
@@ -112,10 +90,11 @@ const Explore = () => {
                 setQuery(e.target.value);
               }}
             />
-            {query.trim(" ").length > 0 && (
+            {query.trim().length > 0 && (
               <CgClose
                 className="cursor-pointer"
                 onClick={() => {
+                  searchInputRef.current.value = "";
                   setQuery("");
                 }}
               />
@@ -161,12 +140,8 @@ const Explore = () => {
                             />
                           )}
                           <div className="flex flex-col -space-y-1 h-fit items-start justify-center">
-                            <span className="w-full">
-                              {/* {highlightText(user?.user_name, query)} */}
-                              {user?.user_name}
-                            </span>
+                            <span className="w-full">{user?.user_name}</span>
                             <span className=" text-gray-500 w-full">
-                              {/* {highlightText(user?.name, query)} */}
                               {user?.name}
                             </span>
                           </div>

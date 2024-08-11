@@ -4,7 +4,6 @@ import {
   getDoc,
   getDocs,
   query,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -12,28 +11,20 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { AuthContext } from "../context/AuthContext";
 import { formatTime } from "../utils/FormatTime";
-import { BiLoader, BiPause, BiPlay } from "react-icons/bi";
+import { BiLoader } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
-import {
-  IoArrowBackCircle,
-  IoArrowBackCircleSharp,
-  IoSend,
-} from "react-icons/io5";
-import EmojiPicker, { Emoji, EmojiStyle } from "emoji-picker-react";
-import { TiAttachmentOutline, TiTickOutline } from "react-icons/ti";
+import { IoSend } from "react-icons/io5";
+import EmojiPicker from "emoji-picker-react";
+import { TiAttachmentOutline } from "react-icons/ti";
 import {
   MdArrowBackIos,
   MdEmojiEmotions,
-  MdEmojiFlags,
   MdOutlineAddReaction,
 } from "react-icons/md";
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 import { HighLightLinks } from "../utils/HighlightLinks";
-import { format } from "date-fns";
-import { FaDeleteLeft } from "react-icons/fa6";
-import { FiDelete, FiTrash } from "react-icons/fi";
+import { FiTrash } from "react-icons/fi";
 import { CgSpinner } from "react-icons/cg";
 import toast from "react-hot-toast";
 
@@ -43,8 +34,6 @@ const Chat = () => {
   const { theme } = useContext(ThemeContext);
   const messageContainerRef = useRef(null);
   const navigate = useNavigate();
-  const [showMenu, setShowMenu] = useState(false);
-  const [currentScroll, setCurrentScroll] = useState(0);
   const [scrollInterval, setScrollInterval] = useState(null);
   const fileRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -91,7 +80,6 @@ const Chat = () => {
   };
 
   const handleClickOutside = (event) => {
-    const modal = document.getElementById("modal-background");
     const modalImage = document.getElementById("modal-image");
     const download = document.getElementById("modal-background");
     if (
@@ -181,9 +169,7 @@ const Chat = () => {
           where("email", "==", currentUser.email)
         );
         const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-        });
+        querySnapshot.forEach((doc) => {});
       } catch (error) {
         if (error.code === "resource-exhausted") {
           console.error("Quota exceeded. Please try again later.");
@@ -206,11 +192,11 @@ const Chat = () => {
         if (direction === "down") {
           newScroll = container.scrollTop + scrollStep;
           container.scrollTop = newScroll;
-          setCurrentScroll(newScroll);
+          // setCurrentScroll(newScroll);
         } else if (direction === "up") {
           newScroll = container.scrollTop - scrollStep;
           container.scrollTop = newScroll;
-          setCurrentScroll(newScroll);
+          // setCurrentScroll(newScroll);
         }
       }, intervalTime)
     );
@@ -320,12 +306,13 @@ const Chat = () => {
     // eslint-disable-next-line
   }, [scrollInterval]);
 
-  const convertToMillis = (seconds, nanoseconds) =>
-    seconds * 1000 + nanoseconds / 1000000;
-
   return (
     <div className="h-full w-full flex flex-col">
-      <div className={`flex items-center space-x-2 p-4 `}>
+      <div
+        className={`flex items-center space-x-2 p-4 ${
+          theme === "dark" ? "bg-black" : "bg-zinc-200"
+        } backdrop-blur-3xl bg-opacity-30 `}
+      >
         <MdArrowBackIos
           onClick={() => {
             navigate(-1);
@@ -348,10 +335,7 @@ const Chat = () => {
       {!loadingMessages ? (
         <div
           ref={messageContainerRef}
-          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4 ${
-            showMenu ? "blur-sm" : ""
-          }`}
-          // onClick={handleCloseMenu}
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4`}
         >
           {messages
             ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
@@ -359,9 +343,7 @@ const Chat = () => {
               return (
                 <div
                   className={`group flex items-center space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
-                    message.senderId === currentUser
-                      ? "self-end"
-                      : "self-start"
+                    message.senderId === currentUser ? "self-end" : "self-start"
                   }`}
                   key={message.id}
                 >
@@ -605,20 +587,6 @@ const Chat = () => {
           <CgSpinner className="animate-spin " size={40} />
         </div>
       )}
-      {/* {showMenu && (
-        <div
-          className="absolute p-2 bg-white shadow-lg rounded-lg z-10"
-          style={{ top: menuPosition.top, left: menuPosition.left }}
-        >
-          <ul>
-            <li className="p-2 hover:bg-gray-100">Delete</li>
-            <li className="p-2 hover:bg-gray-100">Copy</li>
-            <li className="p-2 hover:bg-gray-100">Edit</li>
-          </ul>
-        </div>
-      )} */}
-      {/* input */}
-
       <div
         className={`z-20 absolute flex items-center bottom-0 py-3 ${
           theme === "dark" ? "bg-black text-white" : "bg-white text-black"

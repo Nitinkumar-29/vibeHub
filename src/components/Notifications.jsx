@@ -7,7 +7,7 @@ import { db } from "../firebase";
 import toast from "react-hot-toast";
 import { MdArrowBackIos, MdOutlineInfo } from "react-icons/md";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Notifications = () => {
   const { setFollowRequestsData, followRequestsData, acceptFollowRequest } =
@@ -15,7 +15,7 @@ const Notifications = () => {
   const currentUser = localStorage.getItem("currentUser");
   const [infoToggle, setInfoToggle] = useState(true);
   const { theme } = useContext(ThemeContext);
-
+  const navigate = useNavigate();
   // reject follow request
   const rejectRequest = async (id) => {
     toast.loading("processing...");
@@ -44,7 +44,13 @@ const Notifications = () => {
           } rounded-md`}
         >
           <div className="flex space-x-4 items-center w-full">
-            <MdArrowBackIos size={20} />
+            <MdArrowBackIos
+              onClick={() => {
+                navigate(-1);
+              }}
+              className="cursor-pointer"
+              size={20}
+            />
             <div className="text-lg font-semibold">Notifications</div>
           </div>
           <MdOutlineInfo
@@ -59,7 +65,7 @@ const Notifications = () => {
               infoToggle ? "hidden" : "flex"
             } text-sm text-zinc-600 ${
               theme === "dark" ? "bg-zinc-900" : "bg-gray-200"
-            } flex flex-wrap absolute top-12 max-w-[100%] border-[1px]  rounded-md w-fit right-0 mx-auto min-h-20 p-2`}
+            } flex flex-wrap absolute top-12 max-w-[100%] border-[1px] border-zinc-600 rounded-md w-fit right-0 mx-auto min-h-20 p-2`}
           >
             <p>
               To keep UI clean, we will remove notifications once you have had a
@@ -74,7 +80,9 @@ const Notifications = () => {
           </div>
         </div>
         <div className="flex flex-col w-full items-start mt-10 px-2">
-          {followRequestsData.length !== 0 && <span className="font-semibold ">Follow Requests</span>}{" "}
+          {followRequestsData.length !== 0 && (
+            <span className="font-semibold ">Follow Requests</span>
+          )}{" "}
           {followRequestsData.length > 0 ? (
             followRequestsData.map((data) => {
               return (

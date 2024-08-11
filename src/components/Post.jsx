@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { Carousel } from "react-responsive-carousel";
-import { SlBubble, SlHeart, SlPaperPlane, SlPin } from "react-icons/sl";
+import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
-import { RxBookmarkFilled, RxPaperPlane } from "react-icons/rx";
+import { RxBookmarkFilled } from "react-icons/rx";
 import { BiCopy, BiLoader, BiPause, BiPlay } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
 import PostContext from "../context/PostContext/PostContext";
@@ -113,7 +113,7 @@ const Post = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap">
+              <div className="flex flex-wrap py-1">
                 <p
                   className="px-4 whitespace-pre-wrap"
                   dangerouslySetInnerHTML={{

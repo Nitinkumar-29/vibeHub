@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   addDoc,
@@ -16,7 +16,7 @@ import {
   where,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
-import { auth, db, storage } from "../../firebase";
+import { db, storage } from "../../firebase";
 import toast from "react-hot-toast";
 import { deleteObject, listAll, ref } from "firebase/storage";
 
@@ -33,7 +33,6 @@ export const PostProvider = ({ children }) => {
   const [userPosts, setUserPosts] = useState(null);
   const [savedPosts, setSavedPosts] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
-  const [otherUserPosts, setOtherUserPosts] = useState([]);
   const [explorePosts, setExplorePosts] = useState([]);
   const [otherPublicPostsHomePage, setOtherPublicPostsHomePage] = useState([]);
   const [error, setError] = useState("");
@@ -360,9 +359,7 @@ export const PostProvider = ({ children }) => {
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter(
-                    (uid) => uid !== currentUser
-                  ),
+                  likes: post.likes.filter((uid) => uid !== currentUser),
                 }
               : post
           );
@@ -372,9 +369,7 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    likes: post.likes.filter(
-                      (uid) => uid !== currentUser
-                    ),
+                    likes: post.likes.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
@@ -477,9 +472,7 @@ export const PostProvider = ({ children }) => {
       }
 
       // Fetch the current user's following list
-      const currentUserDoc = await getDoc(
-        doc(db, "users", currentUser)
-      );
+      const currentUserDoc = await getDoc(doc(db, "users", currentUser));
       const currentUserData = currentUserDoc.exists()
         ? currentUserDoc.data()
         : {};
@@ -617,9 +610,7 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser
-                    ),
+                    saves: post?.saves?.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
@@ -629,9 +620,7 @@ export const PostProvider = ({ children }) => {
               post?.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter(
-                      (uid) => uid !== currentUser
-                    ),
+                    saves: post?.saves?.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
@@ -732,8 +721,8 @@ export const PostProvider = ({ children }) => {
         handleFetchLikedPosts,
         handleDeletePost,
         likedPosts,
-        otherUserPosts,
         otherPublicPostsHomePage,
+        error,
       }}
     >
       {children}

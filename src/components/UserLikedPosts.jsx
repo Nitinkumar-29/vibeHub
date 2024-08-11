@@ -6,7 +6,7 @@ import { RxBookmarkFilled } from "react-icons/rx";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsHeartFill } from "react-icons/bs";
 import { Carousel } from "react-responsive-carousel";
-import { BiCopy, BiPause, BiPlay } from "react-icons/bi";
+import { BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 import { HighLightLinks } from "../utils/HighlightLinks";
@@ -115,7 +115,7 @@ const UserLikedPosts = () => {
                           ? `/userProfile/yourPosts`
                           : `/users/${user?.userId}/profile`
                       }
-                      className="text-zinc-500 px-4"
+                      className="text-zinc-500 px-4 pb-2"
                     >
                       @{user?.username}
                     </Link>
