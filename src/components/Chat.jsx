@@ -64,7 +64,7 @@ const Chat = () => {
   //  message reaction picker
   const handleReaction = (id) => {
     setSelectedMessageId(id);
-    setShowReactionMenu(true);
+    setShowReactionMenu((prev) => !prev);
   };
 
   const handleCloseReactionPicker = (event) => {
@@ -484,11 +484,6 @@ const Chat = () => {
                           <span
                             onClick={() => {
                               handleReaction(message.id);
-                              console.log(
-                                message.id,
-                                currentUser,
-                                message.receiverId
-                              );
                             }}
                             className={`absolute -right-6 mt-2 cursor-pointer px-1 ${
                               currentUser === message.receiverId && "m-auto"
@@ -517,11 +512,11 @@ const Chat = () => {
                           >
                             <EmojiPicker
                               reactionsDefaultOpen
+                              allowExpandReactions={false}
                               searchDisabled
                               onEmojiClick={(event) => {
                                 setShowReactionMenu(false);
                                 addReaction(message.id, event.emoji);
-                                console.log("reaction: ", event.emoji);
                               }}
                             />
                           </div>
@@ -660,9 +655,7 @@ const Chat = () => {
               emojiStyle="google"
               onEmojiClick={(event) => {
                 setMessageEmojiPicker(false);
-                console.log(event.emoji);
                 setMessageText(messageText + event.emoji);
-                console.log(messageText);
               }}
             />
           </div>

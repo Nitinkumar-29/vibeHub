@@ -41,7 +41,7 @@ const Main = () => {
       } backdrop-blur-3xl `}
     >
       <div
-        className={`w-full h-[100vh] overflow-y-auto hideScrollbar pb-10
+        className={`w-full h-[92vh] overflow-y-auto hideScrollbar pb-10
         `}
       >
         <Outlet />
