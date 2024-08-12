@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { FaDotCircle, FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
+import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import {
   Link,
   Outlet,
@@ -41,7 +41,7 @@ const Main = () => {
       } backdrop-blur-3xl `}
     >
       <div
-        className={`w-full h-[100vh] overflow-y-auto hideScrollbar pb-10
+        className={`w-full h-full overflow-y-auto hideScrollbar pb-10
         `}
       >
         <Outlet />
