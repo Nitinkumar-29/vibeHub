@@ -51,29 +51,27 @@ export const AuthContextProvider = ({ children }) => {
   // login user
   const login = async () => {
     setIsLoading(true);
-    await signInWithEmailAndPassword(
-      auth,
-      loginCredentials.email,
-      loginCredentials.password
-    )
-      .then((userCredential) => {
-        const user = userCredential.user;
-        updatePasswordStatus();
-        localStorage.setItem("currentUser", user.uid);
-        setIsLoading(false);
-        navigate("/");
-        setLoginCredentials({ email: "", password: "" });
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-        setIsLoading(false);
-        setLoading(false);
-        setError("Invalid credentials");
-        setLoginCredentials({ email: "", password: "" });
-      });
+    try {
+      const result = await signInWithEmailAndPassword(
+        auth,
+        loginCredentials.email,
+        loginCredentials.password
+      );
+      const user = result.user;
+      updatePasswordStatus();
+      setIsLoading(false);
+      navigate("/");
+      localStorage.setItem("currentUser", user.uid);
+      setLoginCredentials({ email: "", password: "" });
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+      setLoading(false);
+      setError("Invalid credentials");
+      setLoginCredentials({ email: "", password: "" });
+    }
   };
+
   const generateUsername = (name) => {
     const randomDigits = Math.floor(1000 + Math.random() * 9000); // Generates a random number between 1000 and 9999
     return `${name}${randomDigits}`;
