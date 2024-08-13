@@ -83,7 +83,7 @@ const Home = () => {
       {!postsLoading ? (
         <div className="flex flex-col justify-center items-center h-fit">
           <div
-            className={`z-20 ${position} top-0 ${
+            className={`z-20 fixed top-0 ${
               theme === "dark" ? "bg-black" : "bg-white"
             }  flex justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
           >

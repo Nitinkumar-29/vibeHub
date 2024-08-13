@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useNavigate,
 } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./authentication/Login";
@@ -33,11 +34,6 @@ import { ChatProvider } from "./context/ChatContext/ChatContext";
 import Accessibility from "./components/Accessibility";
 
 function App() {
-  const currentUser = localStorage.getItem("currentUser");
-  const RequireAuth = ({ children }) => {
-    return currentUser ? children : <Navigate to="/login" />;
-  };
-
   return (
     <>
       <Router>
@@ -47,25 +43,10 @@ function App() {
               <PostProvider>
                 <Toaster position="top-left" />
                 <Routes>
-                  <Route
-                    exact
-                    path="/"
-                    element={
-                      <RequireAuth>
-                        <Main />
-                      </RequireAuth>
-                    }
-                  >
+                  <Route exact path="/" element={<Main />}>
                     <Route path="/" element={<Home />} />
                     <Route path="/createPost" element={<CreatePost />} />
-                    <Route
-                      path="/userProfile"
-                      element={
-                        <RequireAuth>
-                          <UserProfile />
-                        </RequireAuth>
-                      }
-                    >
+                    <Route path="/userProfile" element={<UserProfile />}>
                       <Route
                         path="/userProfile/yourPosts"
                         element={<UserPosts />}

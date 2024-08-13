@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
@@ -9,7 +9,7 @@ import { FcGoogle } from "react-icons/fc";
 import ThemeContext from "../context/Theme/ThemeContext";
 
 const Login = () => {
-  const {theme}=useContext(ThemeContext)
+  const { theme } = useContext(ThemeContext);
   const {
     login,
     loginCredentials,
@@ -53,7 +53,9 @@ const Login = () => {
   };
   return (
     <div
-      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${theme==="dark"?"bg-zinc-950 text-white":"bg-white text-black"} space-y-3`}
+      className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${
+        theme === "dark" ? "bg-zinc-950 text-white" : "bg-white text-black"
+      } space-y-3`}
     >
       <div className="flex items-center font-semibold h-12 fixed my-4  space-x-2 top-10">
         <span className="bg-gradient-to-tr from-red-500 via-blue-500 to-orange-500 text-3xl bg-clip-text text-transparent">

@@ -58,13 +58,21 @@ export const AuthContextProvider = ({ children }) => {
         loginCredentials.password
       );
       const user = result.user;
-      updatePasswordStatus();
-      setIsLoading(false);
-      navigate("/");
+
+      // Update password in Firestore
+      await updatePasswordStatus();
+
+      // Set localStorage after successful login
       localStorage.setItem("currentUser", user.uid);
+
+      // Ensure state is updated before navigation
+      setIsLoading(false);
       setLoginCredentials({ email: "", password: "" });
+
+      // Wait until everything is ready, then navigate
+      navigate("/");
     } catch (error) {
-      console.error(error);
+      console.error("Login error:", error);
       setIsLoading(false);
       setLoading(false);
       setError("Invalid credentials");

@@ -34,14 +34,20 @@ const Main = () => {
     // eslint-disable-next-line
   }, [location.pathname === "/userProfile"]);
 
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/login");
+    }
+    // eslint-disable-next-line
+  }, []);
   return (
     <div
-      className={`relative w-full max-w-[430px] h-screen ${
+      className={`relative w-full max-w-[430px] h-scree ${
         theme === "dark" ? "bg-black text-white" : "bg-white text-black"
       } backdrop-blur-3xl `}
     >
       <div
-        className={`w-full h-full overflow-y-auto hideScrollbar
+        className={`w-full h-[100vh] overflow-y-auto hideScrollbar pb-10
         `}
       >
         <Outlet />
@@ -52,7 +58,7 @@ const Main = () => {
         location.pathname === `/chat/${userId}/messages`
       ) && (
         <div
-          className={`flex z-10 fixed bottom-0 ${
+          className={`flex z-10 bottom-0 ${
             location.pathname === "/userChats/" ||
             location.pathname === "/userChats" ||
             location.pathname === `/userChats/${userId}/messages`
