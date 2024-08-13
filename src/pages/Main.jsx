@@ -41,7 +41,7 @@ const Main = () => {
       } backdrop-blur-3xl `}
     >
       <div
-        className={`w-full h-[90vh] overflow-y-auto hideScrollbar
+        className={`w-full h-full overflow-y-auto hideScrollbar
         `}
       >
         <Outlet />
@@ -58,7 +58,7 @@ const Main = () => {
             location.pathname === `/userChats/${userId}/messages`
               ? "hidden"
               : "flex"
-          } justify-between items-center px-4 pt-4 w-full max-w-[430px] ${
+          } justify-between items-center p-4 w-full max-w-[430px] ${
             theme === "dark" ? "bg-black" : "bg-white"
           } bg-opacity-80 backdrop-blur-3xl border-gray-900 border-t-[.5px]`}
         >
