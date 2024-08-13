@@ -58,7 +58,7 @@ const Main = () => {
         location.pathname === `/chat/${userId}/messages`
       ) && (
         <div
-          className={`flex z-10 bottom-0 ${
+          className={`flex z-10 fixed bottom-0 ${
             location.pathname === "/userChats/" ||
             location.pathname === "/userChats" ||
             location.pathname === `/userChats/${userId}/messages`
