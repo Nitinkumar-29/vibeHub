@@ -351,7 +351,7 @@ const Chats = () => {
                 )}
               </div>
             )}
-            {allChats.length > 0 && (
+            {(!isSearchUsers && allChats.length > 0) && (
               <div className="relative flex space-x-4 items-center w-[95%] overflow-x-auto scrollbarH pb-2">
                 {allChats?.filter(
                   (chat) =>
