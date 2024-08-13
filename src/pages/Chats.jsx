@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { formatTime } from "../utils/FormatTime";
+import { chat_formatTime } from "../utils/Chat_formatTime";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { auth, db } from "../firebase";
@@ -496,7 +496,13 @@ const Chats = () => {
                                   <div className="flex flex-col justify-center -space-y-1">
                                     <div className="flex space-x-3">
                                       <span className="font-semibold">
-                                        {otherParticipant?.name}
+                                        {otherParticipant?.name &&
+                                        otherParticipant?.name.length > 15
+                                          ? `${otherParticipant?.name.slice(
+                                              0,
+                                              15
+                                            )}...`
+                                          : otherParticipant?.name}
                                       </span>
                                       {chat.timeStamp && (
                                         <div
@@ -514,7 +520,7 @@ const Chats = () => {
                                             &nbsp;
                                           </span>
                                           <span className={``}>
-                                            {formatTime(chat?.lastUpdated)}
+                                            {chat_formatTime(chat?.lastUpdated)}
                                           </span>
                                         </div>
                                       )}
@@ -646,7 +652,13 @@ const Chats = () => {
                                   <div className="flex flex-col justify-center -space-y-1">
                                     <div className="flex space-x-3">
                                       <span className="font-semibold">
-                                        {otherParticipant?.name}
+                                        {otherParticipant?.name &&
+                                        otherParticipant?.name.length > 15
+                                          ? `${otherParticipant?.name.slice(
+                                              0,
+                                              15
+                                            )}...`
+                                          : otherParticipant?.name}
                                       </span>
                                       {chat.timeStamp && (
                                         <div
@@ -664,7 +676,7 @@ const Chats = () => {
                                             &nbsp;
                                           </span>
                                           <span className={``}>
-                                            {formatTime(chat?.lastUpdated)}
+                                            {chat_formatTime(chat?.lastUpdated)}
                                           </span>
                                         </div>
                                       )}

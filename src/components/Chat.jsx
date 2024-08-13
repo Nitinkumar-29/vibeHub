@@ -10,8 +10,8 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { chat_formatTime } from "../utils/Chat_formatTime";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { formatTime } from "../utils/FormatTime";
 import { BiLoader } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
 import { IoSend } from "react-icons/io5";
@@ -539,7 +539,7 @@ const Chat = () => {
                           theme === "dark" ? "text-gray-400" : "text-gray-400"
                         }`}
                       >
-                        {formatTime(message?.timeStamp)}
+                        {chat_formatTime(message?.timeStamp)}
                       </span>
                     </div>
                   </div>

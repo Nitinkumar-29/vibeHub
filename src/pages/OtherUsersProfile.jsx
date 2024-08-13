@@ -439,7 +439,6 @@ const OtherUsersProfile = () => {
                 className="h-16 w-16 object-cover rounded-full"
                 alt=""
               />
-              <span className="">{data?.name}</span>
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
@@ -454,7 +453,10 @@ const OtherUsersProfile = () => {
               <div className="flex flex-col items-center">
                 <span className="text-3xl">{data?.followers?.length || 0}</span>
                 <Link
-                  to={`/users/${userId}/profile/followers`}
+                  to={
+                    data?.following?.includes(userId) &&
+                    `/users/${userId}/profile/followers`
+                  }
                   className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Followers
@@ -463,7 +465,10 @@ const OtherUsersProfile = () => {
               <div className="flex flex-col items-center">
                 <span className="text-3xl">{data?.following?.length || 0}</span>
                 <Link
-                  to={`/users/${userId}/profile/following`}
+                  to={
+                    data?.following?.includes(userId) &&
+                    `/users/${userId}/profile/following`
+                  }
                   className={`text-sm font-semibold px-3 py-1 `}
                 >
                   Following
@@ -471,14 +476,18 @@ const OtherUsersProfile = () => {
               </div>
             </div>
           </div>
-          <div
-            className={`w-full ${
-              theme === "dark" ? "text-zinc-400" : "text-zinc-600"
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: HighLightLinks(data?.bio || ""),
-            }}
-          ></div>
+          <div className="flex flex-col space-y-1 w-full">
+            <span className="w-full">{data?.name}</span>
+
+            <div
+              className={`w-full ${
+                theme === "dark" ? "text-zinc-400" : "text-zinc-600"
+              }`}
+              dangerouslySetInnerHTML={{
+                __html: HighLightLinks(data?.bio || ""),
+              }}
+            ></div>
+          </div>
           <div className="flex justify-between space-x-6 w-full">
             <button
               onClick={() => handleFollow(currentUser)}

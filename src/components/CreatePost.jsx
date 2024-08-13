@@ -420,7 +420,7 @@ const CreatePost = () => {
                 {files?.map((file, index) => (
                   <div key={index} className="relative w-full">
                     {file.type.startsWith("image/") && (
-                      <div className="w-[11.8rem] h-[9rem] relative">
+                      <div className="w-[11.1rem] h-[9rem] relative">
                         <img
                           onMouseDown={BiZoomIn}
                           src={URL.createObjectURL(file)}

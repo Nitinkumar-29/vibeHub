@@ -244,7 +244,7 @@ const Post = () => {
             </div>
           )}
           {postData?.userId && (
-            <div className="flex flex-col items-center space-y-4 w-full rounded-sm">
+            <div className="flex flex-col items-center space-y-4 w-full rounded-sm pb-16">
               <div
                 className={`flex items-end w-[93%] space-x-1 my-5 mx-auto border-b-[1px] ${
                   theme === "dark" ? "border-gray-400" : "border-gray-800"

@@ -72,7 +72,7 @@ const Explore = () => {
     <>
       {allUsers && explorePosts ? (
         <div
-          className={`relative w-full bg-inherit pb-20 min-h-[92vh] overflow-y-auto hideScrollbar`}
+          className={`relative w-full bg-inherit pb-6 min-h-[92vh] overflow-y-auto hideScrollbar`}
         >
           <div
             ref={componentRef}
@@ -177,7 +177,7 @@ const Explore = () => {
                             <img
                               src={post?.fileURLs[0]}
                               alt="post media"
-                              className="h-40 w-40 object-cover rounded-sm"
+                              className="h-36 w-40 object-cover rounded-sm"
                             />
                           )}
                         </div>

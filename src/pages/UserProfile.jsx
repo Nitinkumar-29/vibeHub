@@ -85,7 +85,6 @@ const UserProfile = () => {
                 className="h-16 w-16 object-cover rounded-full duration-300"
                 alt=""
               />
-              <span>{currentUserData?.name}</span>
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
@@ -125,6 +124,8 @@ const UserProfile = () => {
             </div>
           </div>
           <div className="flex flex-col items-start w-full space-y-2 px-4">
+            <span>{currentUserData?.name}</span>
+
             <div
               className={`${
                 theme === "dark" ? "text-zinc-400" : "text-zinc-600"
