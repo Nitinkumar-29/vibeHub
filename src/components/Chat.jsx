@@ -55,7 +55,6 @@ const Chat = () => {
     deleteMessage,
     addReaction,
     removeReaction,
-    allChats,
     activeChatId,
   } = useContext(ChatContext);
   const messageInputRef = useRef(null);
@@ -104,7 +103,6 @@ const Chat = () => {
   };
 
   const handleDownload = async (event) => {
-    console.log("clicked");
     event.stopPropagation();
     try {
       if (!selectedMedia) {
@@ -123,9 +121,8 @@ const Chat = () => {
       link.href = blobUrl;
       // Determine the type of the media for setting the download attribute
       const mediaType = blob.type.split("/")[0]; // Extract "image" or "video"
-      link.download = `downloaded-media.${
-        mediaType === "image" ? "jpg" : "mp4"
-      }`; // Set appropriate extension
+      
+      link.download = `download_media.${mediaType === "image" ? "jpg" : "mp4"}`; // Set appropriate extension
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

@@ -9,13 +9,14 @@ import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
-import { BiPause, BiPlay } from "react-icons/bi";
+import { BiDownload, BiPause, BiPlay } from "react-icons/bi";
 import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { auth } from "../firebase";
+import toast from "react-hot-toast";
 
 const Home = () => {
   const {
@@ -32,6 +33,7 @@ const Home = () => {
   const videoRef = useRef(null);
   const [position, setPosition] = useState("fixed");
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [selectedMedia, setselectedMedia] = useState(null);
 
   const handlePosition = () => {
     const currentScrollY = window.scrollY;
@@ -57,6 +59,65 @@ const Home = () => {
       videoRef.current.pause(index);
       console.log(isPlaying);
       setIsPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedMedia?.length > 0) {
+      handleDownload(); // Trigger the download when media is selected
+    }
+    // eslint-disable-next-line
+  }, [selectedMedia]);
+
+  const handleDownload = async () => {
+    console.log("clicked");
+    try {
+      if (!selectedMedia || selectedMedia.length === 0) {
+        throw new Error("No media files selected for download.");
+      }
+
+      toast.loading("Downloading media...");
+
+      // Download each media file
+      for (const mediaUrl of selectedMedia) {
+        const response = await fetch(mediaUrl, {
+          mode: "cors",
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch media: ${mediaUrl}`);
+        }
+
+        const blob = await response.blob();
+        const contentType = response.headers.get("content-type");
+
+        // Extract the file extension from the content type
+        let extension = "";
+        if (contentType.includes("image")) {
+          extension = contentType.split("/")[1]; // e.g., "jpeg", "png"
+        } else if (contentType.includes("video")) {
+          extension = contentType.split("/")[1]; // e.g., "mp4", "webm"
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+
+        // Extract filename from the URL or use a default name
+        const filename =
+          mediaUrl.split("/").pop().split("?")[0] || `download.${extension}`;
+        link.download = `${filename}.${extension}`;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }
+      toast.dismiss();
+      toast.success("Media downloaded successfully");
+      setselectedMedia(null);
+    } catch (error) {
+      console.error("Error downloading the media:", error.message);
+      toast.error("Failed to download media.");
     }
   };
 
@@ -143,6 +204,15 @@ const Home = () => {
                             </span>
                           </Link>
                         </div>
+                        {post.fileURLs.length > 0 && (
+                          <button
+                            onClick={() => {
+                              setselectedMedia(post?.fileURLs); // Set the selected media
+                            }}
+                          >
+                            <BiDownload size={25} />
+                          </button>
+                        )}
                       </div>
                       <div className="w-full h-full ">
                         {post?.postCaption && (
@@ -207,7 +277,7 @@ const Home = () => {
                                     onEnded={handleEnded}
                                     ref={videoRef}
                                     autoFocus={true}
-                                    className="h-[80%] w-full object-contain rounded-md"
+                                    className="h-[540px] w-full object-cover rounded-md"
                                   >
                                     <source src={fileURL} type="video/mp4" />
                                   </video>
