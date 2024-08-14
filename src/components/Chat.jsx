@@ -12,9 +12,9 @@ import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { chat_formatTime } from "../utils/Chat_formatTime";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { BiInfoCircle, BiLoader } from "react-icons/bi";
+import { BiInfoCircle, BiLoader, BiPause } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
-import { IoSend } from "react-icons/io5";
+import { IoPause, IoPlay, IoSend } from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
 import { TiAttachmentOutline } from "react-icons/ti";
 import {
@@ -39,7 +39,6 @@ const Chat = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
   const currentUser = localStorage.getItem("currentUser");
-
   const [messageEmojiPicker, setMessageEmojiPicker] = useState(false);
   const {
     sendMessage,
@@ -121,7 +120,7 @@ const Chat = () => {
       link.href = blobUrl;
       // Determine the type of the media for setting the download attribute
       const mediaType = blob.type.split("/")[0]; // Extract "image" or "video"
-      
+
       link.download = `download_media.${mediaType === "image" ? "jpg" : "mp4"}`; // Set appropriate extension
       document.body.appendChild(link);
       link.click();
@@ -232,11 +231,9 @@ const Chat = () => {
     videoRef.current.click(index);
     if (isPlaying === false) {
       videoRef.current.play(index);
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause(index);
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };
@@ -280,7 +277,7 @@ const Chat = () => {
   useEffect(() => {
     handleFetchChatMessages(userId);
     // eslint-disable-next-line
-  }, [userId, location.pathname]);
+  }, [userId]);
 
   useEffect(() => {
     handleFetchChatUserData();
@@ -343,7 +340,7 @@ const Chat = () => {
       {!loadingMessages ? (
         <div
           ref={messageContainerRef}
-          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pb-8 pt-4`}
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-8`}
         >
           {messages
             ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
@@ -565,18 +562,37 @@ const Chat = () => {
               <div className="relative ">
                 <div className="flex self-start relative w-fit">
                   {selectedMedia.includes(".mp4") ? (
-                    <video
-                      onClick={() => {
-                        handlePlayPause();
-                      }}
-                      id="modal-media"
-                      onEnded={handleEnded}
-                      ref={videoRef}
-                      autoFocus={true}
-                      className="h-[500px] w-full object-contain rounded-md "
-                    >
-                      <source src={selectedMedia} type="video/mp4" />
-                    </video>
+                    <div className="relative">
+                      <video
+                        onClick={() => {
+                          handlePlayPause();
+                        }}
+                        id="modal-media"
+                        onEnded={handleEnded}
+                        ref={videoRef}
+                        autoFocus={true}
+                        className="h-[540px] w-full object-contain rounded-md "
+                      >
+                        <source src={selectedMedia} type="video/mp4" />
+                      </video>
+                      {!isPlaying ? (
+                        <IoPlay
+                          onClick={() => {
+                            handlePlayPause();
+                          }}
+                          size={25}
+                          className="absolute top-[50%] left-[50%] cursor-pointer"
+                        />
+                      ) : (
+                        <IoPause
+                          onClick={() => {
+                            handlePlayPause();
+                          }}
+                          size={25}
+                          className="absolute top-[50%] left-[50%] cursor-pointer"
+                        />
+                      )}
+                    </div>
                   ) : (
                     <img
                       src={selectedMedia}
