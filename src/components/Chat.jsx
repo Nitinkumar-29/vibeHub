@@ -12,7 +12,7 @@ import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { chat_formatTime } from "../utils/Chat_formatTime";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { BiLoader } from "react-icons/bi";
+import { BiInfoCircle, BiLoader } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
 import { IoSend } from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
@@ -55,9 +55,11 @@ const Chat = () => {
     deleteMessage,
     addReaction,
     removeReaction,
+    allChats,
+    activeChatId,
   } = useContext(ChatContext);
   const messageInputRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMedia, setselectedMedia] = useState(null);
   const [showReactionMenu, setShowReactionMenu] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
 
@@ -80,7 +82,7 @@ const Chat = () => {
   };
 
   const handleClickOutside = (event) => {
-    const modalImage = document.getElementById("modal-image");
+    const modalImage = document.getElementById("modal-media");
     const download = document.getElementById("modal-background");
     if (
       modalImage &&
@@ -98,17 +100,17 @@ const Chat = () => {
   };
 
   const handleCloseModal = () => {
-    setSelectedImage(null);
+    setselectedMedia(null);
   };
 
   const handleDownload = async (event) => {
     console.log("clicked");
     event.stopPropagation();
     try {
-      if (!selectedImage) {
+      if (!selectedMedia) {
         throw new Error("Selected image URL is not valid.");
       }
-      const response = await fetch(selectedImage, {
+      const response = await fetch(selectedMedia, {
         mode: "cors", // Ensure CORS mode is enabled
       });
       if (!response.ok) {
@@ -119,14 +121,18 @@ const Chat = () => {
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = "image.jpg"; // You can set a dynamic filename if needed
+      // Determine the type of the media for setting the download attribute
+      const mediaType = blob.type.split("/")[0]; // Extract "image" or "video"
+      link.download = `downloaded-media.${
+        mediaType === "image" ? "jpg" : "mp4"
+      }`; // Set appropriate extension
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
       handleCloseModal();
       toast.dismiss();
-      toast.success("Image downloaded");
+      toast.success("Media downloaded");
     } catch (error) {
       console.error("Error downloading the image:", error.message);
       if (error.code === "resource-exhausted") {
@@ -308,28 +314,33 @@ const Chat = () => {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div
-        className={`flex items-center space-x-2 p-4 ${
-          theme === "dark" ? "bg-black" : "bg-zinc-200"
-        } backdrop-blur-3xl bg-opacity-30 `}
-      >
-        <MdArrowBackIos
-          onClick={() => {
-            navigate(-1);
-          }}
-          className="cursor-pointer"
-          size={25}
-        />
-        <Link
-          to={`/users/${userId && userId}/profile`}
-          className="flex items-center space-x-2"
+      <div className="flex justify-between w-full items-center p-4">
+        <div
+          className={`flex items-center space-x-2 ${
+            theme === "dark" ? "bg-black" : "bg-zinc-200"
+          } backdrop-blur-3xl bg-opacity-30 `}
         >
-          <img
-            src={chatUserData?.img}
-            className="h-7 w-7 rounded-full object-cover "
-            alt=""
+          <MdArrowBackIos
+            onClick={() => {
+              navigate(-1);
+            }}
+            className="cursor-pointer"
+            size={25}
           />
-          <span>{chatUserData?.user_name}</span>
+          <Link
+            to={`/users/${userId && userId}/profile`}
+            className="flex items-center space-x-2"
+          >
+            <img
+              src={chatUserData?.img}
+              className="h-7 w-7 rounded-full object-cover "
+              alt=""
+            />
+            <span>{chatUserData?.user_name}</span>
+          </Link>
+        </div>
+        <Link to={`/chat/${activeChatId}/settings`}>
+          <BiInfoCircle size={25} className="cursor-pointer" />
         </Link>
       </div>
       {!loadingMessages ? (
@@ -415,13 +426,13 @@ const Chat = () => {
                             >
                               {message.fileURLs &&
                                 message.fileURLs.map((fileURL, index) => (
-                                  <div key={index} className="relative">
+                                  <div key={index} className="m-1">
                                     {fileURL?.includes(".mp4") ? (
                                       <div>
                                         {fileURL?.length > 0 ? (
                                           <video
                                             onClick={() => {
-                                              handlePlayPause(index);
+                                              setselectedMedia(fileURL);
                                             }}
                                             onEnded={handleEnded}
                                             ref={videoRef}
@@ -442,7 +453,7 @@ const Chat = () => {
                                         src={fileURL}
                                         alt={`file-${index}`}
                                         onClick={() => {
-                                          setSelectedImage(fileURL);
+                                          setselectedMedia(fileURL);
                                         }}
                                         className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
                                       />
@@ -548,7 +559,7 @@ const Chat = () => {
             })}
 
           {/* Modal */}
-          {selectedImage && (
+          {selectedMedia && (
             <div
               onClick={handleClickOutside}
               id="modal-background"
@@ -556,23 +567,39 @@ const Chat = () => {
             >
               <div className="relative ">
                 <div className="flex self-start relative w-fit">
-                  <img
-                    src={selectedImage}
-                    alt="preview"
-                    id="modal-image"
-                    className="w-full h-fit max-h-[30rem] object-cover rounded-md"
-                  />
+                  {selectedMedia.includes(".mp4") ? (
+                    <video
+                      onClick={() => {
+                        handlePlayPause();
+                      }}
+                      id="modal-media"
+                      onEnded={handleEnded}
+                      ref={videoRef}
+                      autoFocus={true}
+                      className="h-[500px] w-full object-contain rounded-md "
+                    >
+                      <source src={selectedMedia} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img
+                      src={selectedMedia}
+                      alt="preview"
+                      id="modal-media"
+                      className="w-full h-fit max-h-[30rem] object-cover rounded-md"
+                    />
+                  )}
                 </div>
-
-                <button
-                  id="download"
-                  onClick={handleDownload}
-                  className={`absolute bottom-1 right-1 ${
-                    theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-                  }  p-2 rounded`}
-                >
-                  <AiOutlineDownload size={25} />
-                </button>
+                {selectedMedia.length > 0 && (
+                  <button
+                    id="download"
+                    onClick={handleDownload}
+                    className={`absolute bottom-1 right-1 ${
+                      theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                    }  p-2 rounded`}
+                  >
+                    <AiOutlineDownload size={25} />
+                  </button>
+                )}
               </div>
             </div>
           )}

@@ -566,6 +566,7 @@ export const ChatProvider = ({ children }) => {
         fetchMessageRequestChats,
         messageRequestChats,
         acceptMessageRequest,
+        activeChatId,
       }}
     >
       {children}

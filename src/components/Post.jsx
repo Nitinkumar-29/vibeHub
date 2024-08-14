@@ -234,7 +234,11 @@ const Post = () => {
                   {postData?.likes?.length !== 0 && (
                     <span>{postData?.likes?.length}&nbsp;</span>
                   )}
-                  <span>{postData?.likes?.length > 1 ? "likes" : "like"}</span>
+                  {postData?.likes?.length !== 0 && (
+                    <span>
+                      {postData?.likes?.length > 1 ? "likes" : "like"}
+                    </span>
+                  )}
                 </div>
                 <span className="text-sm text-zinc-400">
                   {postData?.timeStamp &&

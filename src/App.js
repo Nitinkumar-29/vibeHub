@@ -1,10 +1,4 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Main from "./pages/Main";
 import Login from "./authentication/Login";
 import SignUp from "./authentication/SignUp";
@@ -32,6 +26,7 @@ import AccountSettings from "./components/AccountSettings";
 import { ThemeProvider } from "./context/Theme/ThemeContext";
 import { ChatProvider } from "./context/ChatContext/ChatContext";
 import Accessibility from "./components/Accessibility";
+import ChatSettings from "./components/ChatSettings";
 
 function App() {
   return (
@@ -81,6 +76,10 @@ function App() {
                     </Route>
                     <Route path="/user/:Id?/chats" element={<Chats />} />
                     <Route path="/chat/:userId?/messages" element={<Chat />} />
+                    <Route
+                      path="/chat/:chatId?/settings"
+                      element={<ChatSettings />}
+                    />
                     <Route path="/explore" element={<Explore />} />
                     <Route path="/posts/:id" element={<Post />} />
                     <Route path="/userProfile/settings/" element={<Settings />}>
