@@ -41,11 +41,9 @@ const Post = () => {
     videoRef.current.click();
     if (isPlaying === false) {
       videoRef.current.play();
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause();
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };

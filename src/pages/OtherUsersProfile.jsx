@@ -109,7 +109,11 @@ const OtherUsersProfile = () => {
 
   const handleOtherUserImagePostsData = async () => {
     try {
-      const q = query(collection(db, "posts"), where("userId", "==", userId));
+      const q = query(
+        collection(db, "posts"),
+        where("userId", "==", userId),
+        where("archived", "==", false)
+      );
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -211,7 +215,11 @@ const OtherUsersProfile = () => {
         return;
       }
 
-      const q = query(collection(db, "posts"), where("userId", "==", userId));
+      const q = query(
+        collection(db, "posts"),
+        where("userId", "==", userId),
+        where("archived", "==", false)
+      );
       const querySnapshot = await getDocs(q);
       const posts = querySnapshot.docs.map((doc) => ({
         id: doc.id,

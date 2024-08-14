@@ -90,7 +90,10 @@ const UserProfile = () => {
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
-                <span className="text-3xl">{userPosts?.length || 0}</span>
+                <span className="text-3xl">
+                  {userPosts?.filter((post) => !post.archived === true)
+                    ?.length || 0}
+                </span>
                 <Link
                   to="/userProfile/yourPosts"
                   className={`text-sm font-semibold px-3 py-1 `}
@@ -189,18 +192,20 @@ const UserProfile = () => {
                 <BsHeartFill size={22} />
               </Link>
             </span>
-            {userPosts?.filter((post)=>post.archived===true).length>0&&<span className="w-full flex justify-center">
-              <Link
-                to={`/userProfile/archivedPosts`}
-                className={`${
-                  location.pathname === "/userProfile/archivedPosts"
-                    ? `${theme === "dark" ? "text-white" : "text-black"}`
-                    : "text-gray-400"
-                } p-2 text-center`}
-              >
-                <IoArchive size={23} />
-              </Link>
-            </span>}
+            {userPosts?.filter((post) => post.archived === true).length > 0 && (
+              <span className="w-full flex justify-center">
+                <Link
+                  to={`/userProfile/archivedPosts`}
+                  className={`${
+                    location.pathname === "/userProfile/archivedPosts"
+                      ? `${theme === "dark" ? "text-white" : "text-black"}`
+                      : "text-gray-400"
+                  } p-2 text-center`}
+                >
+                  <IoArchive size={23} />
+                </Link>
+              </span>
+            )}
           </div>
         ) : (
           <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">
