@@ -340,7 +340,8 @@ const Chat = () => {
       {!loadingMessages ? (
         <div
           ref={messageContainerRef}
-          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-8`}
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-8" 
+          `}
         >
           {messages
             ?.sort((a, b) => a?.timeStamp - b?.timeStamp)

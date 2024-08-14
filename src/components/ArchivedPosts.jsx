@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import PostContext from "../context/PostContext/PostContext";
+import { formatTime } from "../utils/FormatTime";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { FaUser } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import { Carousel } from "react-responsive-carousel";
@@ -8,28 +10,28 @@ import { BsHeartFill } from "react-icons/bs";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
-import { formatTime } from "../utils/FormatTime";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { BiPause, BiPlay } from "react-icons/bi";
 import { HighLightLinks } from "../utils/HighlightLinks";
-import { AuthContext } from "../context/AuthContext";
+import { BiPause, BiPlay } from "react-icons/bi";
 
-const UserPosts = () => {
-  const menuRefs = useRef({});
-  const currentUser = localStorage.getItem("currentUser");
+const ArchivedPosts = () => {
   const {
     userPosts,
-    handleDeletePost,
     handleArchivePost,
+    handleDeletePost,
     handleLikePost,
     handleSavePost,
   } = useContext(PostContext);
   const { currentUserData } = useContext(AuthContext);
+  const currentUser = localStorage.getItem("currentUser");
   const [toggleMenu, setToggleMenu] = useState({});
   const { theme } = useContext(ThemeContext);
-
+  const [isEdit, setIsEdit] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
+  const menuRefs = useRef({});
+  const navigate = useNavigate();
+
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
     if (isPlaying === false) {
@@ -44,6 +46,7 @@ const UserPosts = () => {
   const handleEnded = () => {
     setIsPlaying(false);
   };
+
   // Function to handle menu toggle for a specific post
   const handlePostMenuToggle = (postId) => {
     setToggleMenu((prevState) => ({
@@ -66,6 +69,10 @@ const UserPosts = () => {
     });
   };
 
+  const handleEditPost = (postId) => {
+    setIsEdit(!isEdit);
+  };
+
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -73,18 +80,18 @@ const UserPosts = () => {
     };
   }, []);
 
-  const [isEdit, setIsEdit] = useState(false);
-
-  const handleEditPost = (postId) => {
-    setIsEdit(!isEdit);
-  };
-
+  useEffect(() => {
+    if (userPosts?.filter((post) => post.archived === true).length === 0) {
+      navigate("/userProfile/yourPosts");
+    }
+    // eslint-disable-next-line
+  }, [userPosts]);
   return (
     <>
       <div className="pb-2 space-y-3 w-full">
         {userPosts?.length > 0 ? (
           userPosts
-            ?.filter((post) => !post.archived === true)
+            ?.filter((post) => post.archived === true)
             .map((post) => {
               return (
                 <div
@@ -154,11 +161,10 @@ const UserPosts = () => {
                           <button
                             onClick={() => {
                               handleArchivePost(post.id);
-                              
                             }}
                             className="text-sm"
                           >
-                            Archive
+                            UnArchive
                           </button>
                         </div>
                       </div>
@@ -308,13 +314,7 @@ const UserPosts = () => {
             })
         ) : (
           <div className="w-full flex justify-center mt-10">
-            <span>0 posts? &nbsp;</span>
-            <Link
-              to="/createPost"
-              className="underline underline-offset-2 decoration-slate-400"
-            >
-              Create a Post
-            </Link>{" "}
+            <span>no archived post</span>
           </div>
         )}
       </div>
@@ -322,4 +322,4 @@ const UserPosts = () => {
   );
 };
 
-export default UserPosts;
+export default ArchivedPosts;

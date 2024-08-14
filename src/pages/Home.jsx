@@ -53,11 +53,9 @@ const Home = () => {
     videoRef.current.click(index);
     if (isPlaying === false) {
       videoRef.current.play(index);
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause(index);
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };
@@ -169,6 +167,7 @@ const Home = () => {
             <div className="flex flex-col w-full h-fit space-y-4">
               {homePagePosts.length > 0 ? (
                 homePagePosts
+                  .filter((post) => !post.archived === true)
                   ?.sort((a, b) => b.timeStamp - a.timeStamp)
                   .map((post, index) => (
                     <div
@@ -290,16 +289,25 @@ const Home = () => {
                                 )}
 
                                 {fileURL.includes(".mp4") && (
-                                  <button
-                                    onClick={() => handlePlayPause()}
-                                    className="z-20 absolute top-[50%]"
-                                  >
+                                  <span className="z-20 absolute top-[50%]">
                                     {isPlaying ? (
-                                      <BiPause className="z-20" size={40} />
+                                      <BiPause
+                                        onClick={() => {
+                                          handlePlayPause(index);
+                                        }}
+                                        className="z-20"
+                                        size={40}
+                                      />
                                     ) : (
-                                      <BiPlay className="z-20" size={40} />
+                                      <BiPlay
+                                        onClick={() => {
+                                          handlePlayPause(index);
+                                        }}
+                                        className="z-20"
+                                        size={40}
+                                      />
                                     )}
-                                  </button>
+                                  </span>
                                 )}
                               </div>
                             ))}

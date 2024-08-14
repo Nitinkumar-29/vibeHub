@@ -27,6 +27,7 @@ import { ThemeProvider } from "./context/Theme/ThemeContext";
 import { ChatProvider } from "./context/ChatContext/ChatContext";
 import Accessibility from "./components/Accessibility";
 import ChatSettings from "./components/ChatSettings";
+import ArchivedPosts from "./components/ArchivedPosts";
 
 function App() {
   return (
@@ -53,6 +54,10 @@ function App() {
                       <Route
                         path="/userProfile/likedPosts"
                         element={<UserLikedPosts />}
+                      />
+                      <Route
+                        path="/userProfile/archivedPosts"
+                        element={<ArchivedPosts />}
                       />
                       <Route
                         path="/userProfile/:userId?/followers"

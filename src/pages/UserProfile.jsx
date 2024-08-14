@@ -4,13 +4,15 @@ import { TfiLayoutListPost } from "react-icons/tfi";
 import PostContext from "../context/PostContext/PostContext";
 import ThemeContext from "../context/Theme/ThemeContext";
 import {
+  IoArchive,
+  IoArchiveOutline,
   IoLockClosedOutline,
   IoLockOpenOutline,
   IoSaveSharp,
 } from "react-icons/io5";
 import { BsHeartFill, BsPencilFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
-import { MdArrowBackIos } from "react-icons/md";
+import { MdArrowBackIos, MdOutlineArchive } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { HighLightLinks } from "../utils/HighlightLinks";
 
@@ -148,6 +150,7 @@ const UserProfile = () => {
       <div className="flex flex-col items-center w-full">
         {location.pathname === `/userProfile/yourPosts` ||
         location.pathname === `/userProfile/likedPosts` ||
+        location.pathname === `/userProfile/archivedPosts` ||
         location.pathname === `/userProfile/savedPosts` ? (
           <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">
             <span className="w-full flex justify-center">
@@ -186,6 +189,18 @@ const UserProfile = () => {
                 <BsHeartFill size={22} />
               </Link>
             </span>
+            {userPosts?.filter((post)=>post.archived===true).length>0&&<span className="w-full flex justify-center">
+              <Link
+                to={`/userProfile/archivedPosts`}
+                className={`${
+                  location.pathname === "/userProfile/archivedPosts"
+                    ? `${theme === "dark" ? "text-white" : "text-black"}`
+                    : "text-gray-400"
+                } p-2 text-center`}
+              >
+                <IoArchive size={23} />
+              </Link>
+            </span>}
           </div>
         ) : (
           <div className="w-full flex justify-evenly border-y-[1px] border-gray-400">

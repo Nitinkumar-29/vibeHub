@@ -49,6 +49,38 @@ export const PostProvider = ({ children }) => {
     setUserDataWithPostId(userDataWithPostUserId);
   };
 
+  // archive a post, posted by current user, can archvie only
+  const handleArchivePost = async (id) => {
+    if (!id) return;
+    try {
+      toast.loading("processing...");
+      const postRef = doc(db, "posts", id);
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.exists ? postSnap.data() : {};
+      if (postData.archived === true) {
+        await Promise.all([
+          updateDoc(postRef, {
+            archived: false,
+          }),
+        ]);
+        toast.dismiss();
+        toast.success("unarchived");
+        handleFetchUserPosts();
+      } else {
+        await Promise.all([
+          updateDoc(postRef, {
+            archived: true,
+          }),
+        ]);
+        toast.dismiss();
+        toast.success("archived");
+        handleFetchUserPosts();
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const formatDate = (timestamp) => {
     const date = new Date(
       timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000
@@ -723,6 +755,7 @@ export const PostProvider = ({ children }) => {
         likedPosts,
         otherPublicPostsHomePage,
         error,
+        handleArchivePost,
       }}
     >
       {children}
