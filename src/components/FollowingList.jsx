@@ -34,9 +34,7 @@ const FollowingList = () => {
         };
       })
     );
-    console.log({ followingData });
     setFollowingList(followingData);
-    console.log("followers", followingList);
   };
 
   // Handle follow/unfollow
@@ -76,10 +74,6 @@ const FollowingList = () => {
           toast.success(`You are now following ${docSnapData.name}`);
           handleFetchFollowingList();
         }
-      } else {
-        console.log("User document does not exist");
-        toast.dismiss(toastId);
-        toast.error("User not found");
       }
     } catch (error) {
       toast.dismiss();

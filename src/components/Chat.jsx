@@ -333,9 +333,6 @@ const Chat = () => {
             <span>{chatUserData?.user_name}</span>
           </Link>
         </div>
-        <Link to={`/chat/${activeChatId}/settings`}>
-          <BiInfoCircle size={25} className="cursor-pointer" />
-        </Link>
       </div>
       {!loadingMessages ? (
         <div

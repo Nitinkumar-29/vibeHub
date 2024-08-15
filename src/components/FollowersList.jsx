@@ -57,10 +57,6 @@ const FollwersList = () => {
           toast.success(`You are now following ${docSnapData.name}`);
           handleFetchFollowersList();
         }
-      } else {
-        console.log("User document does not exist");
-        toast.dismiss();
-        toast.error("User not found");
       }
     } catch (error) {
       toast.dismiss();
@@ -87,9 +83,7 @@ const FollwersList = () => {
         };
       })
     );
-    console.log({ followersData });
     setFollowersList(followersData);
-    console.log("followers", followersList);
   };
 
   // handleRemoveFollower
@@ -116,8 +110,6 @@ const FollwersList = () => {
         setFollowersList(updatedList);
         toast.dismiss();
         toast.success("Removed");
-      } else {
-        console.log("not found");
       }
     } catch (error) {}
   };
@@ -198,7 +190,6 @@ const FollwersList = () => {
                       <button
                         onClick={() => {
                           handleRemoveFollower(follower.id);
-                          console.log(follower.id, userId, currentUser);
                         }}
                         className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
                       >

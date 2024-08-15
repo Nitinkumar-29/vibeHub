@@ -454,7 +454,8 @@ const OtherUsersProfile = () => {
                 <span className="text-3xl">{data?.followers?.length || 0}</span>
                 <Link
                   to={
-                    data?.following?.includes(userId) &&
+                    (data?.following?.includes(currentUser) ||
+                      data?.accountType === !"private") &&
                     `/users/${userId}/profile/followers`
                   }
                   className={`text-sm font-semibold px-3 py-1 `}
@@ -466,7 +467,8 @@ const OtherUsersProfile = () => {
                 <span className="text-3xl">{data?.following?.length || 0}</span>
                 <Link
                   to={
-                    data?.following?.includes(userId) &&
+                    (data?.following?.includes(currentUser) ||
+                      data?.accountType === !"private") &&
                     `/users/${userId}/profile/following`
                   }
                   className={`text-sm font-semibold px-3 py-1 `}
