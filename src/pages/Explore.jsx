@@ -7,7 +7,7 @@ import PostContext from "../context/PostContext/PostContext";
 import { GiSpinningSword } from "react-icons/gi";
 import ThemeContext from "../context/Theme/ThemeContext";
 import "../styles/overflow_scroll.css";
-import { CgClose } from "react-icons/cg";
+import { CgClose, CgSpinner } from "react-icons/cg";
 
 const Explore = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -70,7 +70,7 @@ const Explore = () => {
 
   return (
     <>
-      {allUsers && explorePosts ? (
+      {allUsers && explorePosts.length > 0 ? (
         <div
           className={`relative w-full bg-inherit pb-6 min-h-[92vh] overflow-y-auto hideScrollbar`}
         >
@@ -190,8 +190,8 @@ const Explore = () => {
           )}
         </div>
       ) : (
-        <div className="max-h-screen">
-          <GiSpinningSword className="text-red-600 h-50 w-50 animate-spin" />
+        <div className="flex items-center justify-center w-full h-screen">
+          <CgSpinner size={40} className="animate-spin" />
         </div>
       )}
     </>

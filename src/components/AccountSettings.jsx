@@ -120,7 +120,6 @@ const AccountSettings = () => {
 
       const unsubscribe = onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
-          console.log("Current data: ", doc.data());
           setCurrentUserData(doc.data());
         } else {
           console.log("No such document!");

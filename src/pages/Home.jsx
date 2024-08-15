@@ -21,7 +21,6 @@ import toast from "react-hot-toast";
 const Home = () => {
   const {
     handleLikePost,
-    currentUser,
     homePagePosts,
     fetchHomePagePosts,
     postsLoading,
@@ -34,6 +33,7 @@ const Home = () => {
   const [position, setPosition] = useState("fixed");
   const [lastScrollY, setLastScrollY] = useState(0);
   const [selectedMedia, setselectedMedia] = useState(null);
+  const currentUser = localStorage.getItem("currentUser")
 
   const handlePosition = () => {
     const currentScrollY = window.scrollY;
@@ -159,7 +159,7 @@ const Home = () => {
                 Vibehub
               </span>
             </Link>
-            <Link to={`user/${auth?.currentUser?.uid}/notifications`}>
+            <Link to={`user/${currentUser}/notifications`}>
               <IoNotificationsSharp size={25} />
             </Link>
           </div>
@@ -190,7 +190,7 @@ const Home = () => {
                               window.scrollTo(0, 0);
                             }}
                             to={
-                              auth.currentUser?.uid === post?.userId
+                              currentUser === post?.userId
                                 ? `/userProfile/yourPosts`
                                 : `/users/${post?.userId}/profile`
                             }
@@ -232,7 +232,7 @@ const Home = () => {
                                   window.scrollTo(0, 0);
                                 }}
                                 to={
-                                  auth.currentUser.uid === user?.userId
+                                  currentUser === user?.userId
                                     ? `/userProfile/yourPosts`
                                     : `/users/${user?.userId}/profile`
                                 }
@@ -318,10 +318,10 @@ const Home = () => {
                             <div
                               className="flex items-center cursor-pointer"
                               onClick={() =>
-                                handleLikePost(post?.id, auth.currentUser?.uid)
+                                handleLikePost(post?.id,currentUser)
                               }
                             >
-                              {post?.likes?.includes(auth.currentUser?.uid) ? (
+                              {post?.likes?.includes(currentUser) ? (
                                 <BsHeartFill
                                   size={20}
                                   className="text-red-600 cursor-pointer"
@@ -345,10 +345,10 @@ const Home = () => {
                           <div
                             className=""
                             onClick={() =>
-                              handleSavePost(post?.id, auth.currentUser?.uid)
+                              handleSavePost(post?.id, currentUser)
                             }
                           >
-                            {post?.saves?.includes(auth.currentUser?.uid) ? (
+                            {post?.saves?.includes(currentUser) ? (
                               <RxBookmarkFilled
                                 className="text-pink-600 cursor-pointer"
                                 size={28}
@@ -431,7 +431,7 @@ const Home = () => {
                                 window.scrollTo(0, 0);
                               }}
                               to={
-                                auth.currentUser?.uid === post?.userId
+                                currentUser === post?.userId
                                   ? `/userProfile/yourPosts`
                                   : `/users/${post?.userId}/profile`
                               }
@@ -522,12 +522,12 @@ const Home = () => {
                                 onClick={() =>
                                   handleLikePost(
                                     post?.id,
-                                    auth.currentUser?.uid
+                                    currentUser
                                   )
                                 }
                               >
                                 {post?.likes?.includes(
-                                  auth.currentUser?.uid
+                                  currentUser
                                 ) ? (
                                   <BsHeartFill
                                     size={20}
@@ -552,10 +552,10 @@ const Home = () => {
                             <div
                               className=""
                               onClick={() =>
-                                handleSavePost(post?.id, auth.currentUser?.uid)
+                                handleSavePost(post?.id, currentUser)
                               }
                             >
-                              {post?.saves?.includes(auth.currentUser?.uid) ? (
+                              {post?.saves?.includes(currentUser) ? (
                                 <RxBookmarkFilled
                                   className="text-pink-600 cursor-pointer"
                                   size={28}
