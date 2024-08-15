@@ -454,7 +454,7 @@ const OtherUsersProfile = () => {
                 <span className="text-3xl">{data?.followers?.length || 0}</span>
                 <Link
                   to={
-                    (data?.following?.includes(currentUser) ||
+                    (data?.followers?.includes(currentUser) ||
                       data?.accountType === !"private") &&
                     `/users/${userId}/profile/followers`
                   }
@@ -467,7 +467,7 @@ const OtherUsersProfile = () => {
                 <span className="text-3xl">{data?.following?.length || 0}</span>
                 <Link
                   to={
-                    (data?.following?.includes(currentUser) ||
+                    (data?.followers?.includes(currentUser) ||
                       data?.accountType === !"private") &&
                     `/users/${userId}/profile/following`
                   }

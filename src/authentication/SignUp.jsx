@@ -11,6 +11,7 @@ import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import ThemeContext from "../context/Theme/ThemeContext";
+import { EmailVerification } from "./NeverBounceEmailVerification";
 
 const SignUp = () => {
   const imageRef = useRef();
@@ -25,7 +26,7 @@ const SignUp = () => {
   const [file, setFile] = useState("");
   const navigate = useNavigate();
   const [passwordType, setPasswordType] = useState("password");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(null);
 
   const handleTogglePasswordType = () => {
     if (passwordType === "password") {
@@ -69,7 +70,7 @@ const SignUp = () => {
   };
 
   const generateUsername = (name) => {
-    const randomDigits = Math.floor(1000 + Math.random() * 9000); // Generates a random number between 1000 and 9999
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
     return `${name}${randomDigits}`;
   };
   const username = data.name.split(" ");
@@ -78,13 +79,26 @@ const SignUp = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(false);
+    if (!data.email) {
+      setError("No email address provided");
+      return;
+    }
     try {
+      setLoading(true); 
+      // Perform email verification
+      const result = await EmailVerification(data.email);
+
+      if (result.status === "invalid") {
+        setError("Invalid email");
+        return
+      }
+      // Create user with email and password
       const response = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password
       );
+      // Set user data in Firestore
       await setDoc(doc(db, "users", response.user.uid), {
         ...data,
         followers: data.followers || [],
@@ -99,7 +113,6 @@ const SignUp = () => {
         password: "",
       });
       setFile("");
-      setLoading(true);
       localStorage.setItem("currentUser", response.user.uid);
       navigate("/userProfile");
       console.log(response.user, data);
@@ -107,6 +120,8 @@ const SignUp = () => {
     } catch (error) {
       console.error(error);
       setError("Email already in use");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -176,6 +191,9 @@ const SignUp = () => {
               {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
             </span>
           </div>
+          {loading === false && (
+            <span className="text-red-600 text-sm my-1">{error}</span>
+          )}
           <button
             disabled={
               data.password.length === 0 ||
@@ -192,9 +210,9 @@ const SignUp = () => {
             type="submit"
           >
             {loading ? (
-              "Submit"
-            ) : (
               <AiOutlineLoading3Quarters className="animate-spin my-1" />
+            ) : (
+              "Submit"
             )}
           </button>
           <span>
