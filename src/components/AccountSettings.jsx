@@ -33,7 +33,6 @@ const AccountSettings = () => {
     const docRef = doc(db, "users", currentUser);
     const docSnap = await getDoc(docRef);
     const docSnapShot = docSnap.exists() ? docSnap.data() : {};
-    console.log(docSnapShot);
     setCurrentUserData(docSnapShot);
   };
 

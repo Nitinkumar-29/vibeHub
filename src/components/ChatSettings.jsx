@@ -1,8 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { doc } from "firebase/firestore";
-import { db } from "../firebase";
 
 const Chat_settings = () => {
   const { chatId } = useParams();
@@ -17,7 +15,6 @@ const Chat_settings = () => {
       const chat = allChats.filter((chat) => chat?.id === chatId);
       console.log(chat);
       setChatData(chat);
-      console.log(chatData);
     }
     try {
       if (!chatData) return "no data";
@@ -25,7 +22,6 @@ const Chat_settings = () => {
         (user) => user.id !== currentUser
       );
       setOtherUserData(otherUserId);
-      console.log(otherUserData);
     } catch (error) {
       console.error(error);
     }
