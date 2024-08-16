@@ -68,13 +68,13 @@ const FollowingList = () => {
                 .map((following, index) => {
                   return (
                     <div
-                      className="flex justify-start space-x-6 w-full"
+                      className="flex justify-start items-center space-x-4 w-full"
                       key={index}
                     >
                       <div>
                         <img
                           src={following?.data?.img}
-                          className="h-10 w-10 object-cover rounded-full"
+                          className="h-12 w-12 object-cover rounded-full"
                           alt=""
                         />
                       </div>
@@ -103,7 +103,7 @@ const FollowingList = () => {
                               handleFollow(following.id);
                               setFollowingId(following.id);
                             }}
-                            className="text-center px-3 py-2 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
+                            className="text-center px-2 py-1 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
                           >
                             Unfollow
                           </button>
@@ -119,7 +119,7 @@ const FollowingList = () => {
                                   handleFollow(following.id);
                                   setFollowingId(following.id);
                                 }}
-                                className="text-center px-3 py-2 border-[1px] border-gray-700 rounded-md w-28"
+                                className="text-center px-2 py-1 border-[1px] border-gray-700 rounded-md w-28"
                               >
                                 {following?.data?.followRequests?.includes(
                                   currentUser
