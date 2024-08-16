@@ -34,6 +34,7 @@ import { HighLightLinks } from "../utils/HighlightLinks";
 import { MdArrowBackIos } from "react-icons/md";
 import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
 import { AuthContext } from "../context/AuthContext";
+import { PostLink } from "../utils/PostedLinks";
 
 const OtherUsersProfile = () => {
   const { userId } = useParams();
@@ -673,12 +674,14 @@ const OtherUsersProfile = () => {
                                       </Link>
                                     </div>
                                   </div>
-                                  <p
-                                    className="whitespace-pre-wrap"
-                                    dangerouslySetInnerHTML={{
-                                      __html: HighLightLinks(post?.postCaption),
-                                    }}
-                                  />
+                                  {post?.postCaption && (
+                                    <div
+                                      className="whitespace-pre-wrap px-4 pb-2"
+                                      dangerouslySetInnerHTML={{
+                                        __html: PostLink(post?.postCaption),
+                                      }}
+                                    ></div>
+                                  )}
                                   <div className="mb-1 flex flex-wrap">
                                     {post?.mentionedUsers?.map(
                                       (user, index) => {
@@ -830,14 +833,16 @@ const OtherUsersProfile = () => {
                                         </Link>
                                       </div>
                                     </div>
-                                    <p
-                                      className="whitespace-pre-wrap px-4"
-                                      dangerouslySetInnerHTML={{
-                                        __html: HighLightLinks(
-                                          taggedPost?.postCaption
-                                        ),
-                                      }}
-                                    />
+                                    {taggedPost?.postCaption && (
+                                      <div
+                                        className="whitespace-pre-wrap px-4 pb-2"
+                                        dangerouslySetInnerHTML={{
+                                          __html: PostLink(
+                                            taggedPost?.postCaption
+                                          ),
+                                        }}
+                                      ></div>
+                                    )}
                                     <div className="px-2 mb-1 flex flex-wrap">
                                       {taggedPost?.mentionedUsers?.map(
                                         (user, index) => {

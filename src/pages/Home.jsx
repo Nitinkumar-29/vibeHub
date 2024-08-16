@@ -434,7 +434,12 @@ const Home = () => {
                         </div>
                         <div className="w-full h-full">
                           {post?.postCaption && (
-                            <p className="px-4 py-2">{post?.postCaption}</p>
+                            <div
+                              className="whitespace-pre-wrap px-4 pb-2"
+                              dangerouslySetInnerHTML={{
+                                __html: PostLink(post?.postCaption),
+                              }}
+                            ></div>
                           )}
                           <div className="px-2 my-1 flex flex-wrap">
                             {post?.mentionedUsers?.map((user, index) => {

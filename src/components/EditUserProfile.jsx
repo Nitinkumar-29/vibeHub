@@ -120,7 +120,7 @@ const EditUserProfile = () => {
         {isUpdating === false ? (
           <img
             src={currentUserData.img}
-            className="h-20 w-20 rounded-full"
+            className="h-20 w-20 rounded-full bg-cover"
             alt=""
           />
         ) : (

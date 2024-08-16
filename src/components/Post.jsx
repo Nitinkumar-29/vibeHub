@@ -14,6 +14,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { formatTime } from "../utils/FormatTime";
 import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { PostLink } from "../utils/PostedLinks";
 
 const Post = () => {
   const {
@@ -113,13 +114,15 @@ const Post = () => {
                   </span>
                 </div>
               </div>
-              <div className="flex flex-wrap py-1">
-                <p
-                  className="px-4 whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{
-                    __html: HighLightLinks(postData?.postCaption),
-                  }}
-                />
+              <div className="py-1">
+                {postData?.postCaption && (
+                  <div
+                    className="whitespace-pre-wrap px-4 pb-2"
+                    dangerouslySetInnerHTML={{
+                      __html: PostLink(postData?.postCaption),
+                    }}
+                  ></div>
+                )}
                 {postData?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
