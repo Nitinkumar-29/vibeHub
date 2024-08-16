@@ -4,7 +4,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { BsHeartFill } from "react-icons/bs";
+import { BsDot, BsHeartFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
@@ -15,8 +15,8 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
-import { auth } from "../firebase";
 import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
 
 const Home = () => {
   const {
@@ -30,24 +30,9 @@ const Home = () => {
   const { theme } = useContext(ThemeContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
-  const [position, setPosition] = useState("fixed");
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [selectedMedia, setselectedMedia] = useState(null);
-  const currentUser = localStorage.getItem("currentUser")
-
-  const handlePosition = () => {
-    const currentScrollY = window.scrollY;
-
-    if (currentScrollY < lastScrollY) {
-      // Scrolling down
-      setPosition("fixed");
-    } else {
-      // Scrolling up
-      setPosition("static");
-    }
-
-    setLastScrollY(currentScrollY);
-  };
+  const currentUser = localStorage.getItem("currentUser");
+  const { followRequestsData } = useContext(AuthContext);
 
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
@@ -127,16 +112,6 @@ const Home = () => {
     fetchHomePagePosts();
     // eslint-disable-next-line
   }, [currentUser]);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handlePosition);
-
-    return () => {
-      window.removeEventListener("scroll", handlePosition);
-    };
-    // eslint-disable-next-line
-  }, [lastScrollY]);
-
   return (
     <>
       {!postsLoading ? (
@@ -159,8 +134,13 @@ const Home = () => {
                 Vibehub
               </span>
             </Link>
-            <Link to={`user/${currentUser}/notifications`}>
+            <Link to={`user/${currentUser}/notifications`} className="relative">
               <IoNotificationsSharp size={25} />
+              {followRequestsData.length !== 0 && (
+                <span className="text-red-600 absolute -top-1 left-4 font-medium">
+                  <BsDot size={20} />
+                </span>
+              )}
             </Link>
           </div>
           <div className="flex justify-center w-full h-full pt-16">
@@ -318,7 +298,7 @@ const Home = () => {
                             <div
                               className="flex items-center cursor-pointer"
                               onClick={() =>
-                                handleLikePost(post?.id,currentUser)
+                                handleLikePost(post?.id, currentUser)
                               }
                             >
                               {post?.likes?.includes(currentUser) ? (
@@ -520,15 +500,10 @@ const Home = () => {
                               <div
                                 className="flex items-center cursor-pointer"
                                 onClick={() =>
-                                  handleLikePost(
-                                    post?.id,
-                                    currentUser
-                                  )
+                                  handleLikePost(post?.id, currentUser)
                                 }
                               >
-                                {post?.likes?.includes(
-                                  currentUser
-                                ) ? (
+                                {post?.likes?.includes(currentUser) ? (
                                   <BsHeartFill
                                     size={20}
                                     className="text-red-600 cursor-pointer"

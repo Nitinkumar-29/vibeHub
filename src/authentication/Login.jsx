@@ -1,12 +1,13 @@
 import React, { useContext, useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { BsEye, BsEyeSlash } from "react-icons/bs";
 import { FcGoogle } from "react-icons/fc";
 import ThemeContext from "../context/Theme/ThemeContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const { theme } = useContext(ThemeContext);
@@ -18,6 +19,7 @@ const Login = () => {
     isLoading,
     handleSignInWithGoogle,
     error,
+    setError,
   } = useContext(AuthContext);
   const [passwordType, setPasswordType] = useState("password");
 
@@ -43,14 +45,22 @@ const Login = () => {
 
   // reset user password
   const handleResetPassword = async () => {
-    await sendPasswordResetEmail(auth, loginCredentials.email)
-      .then(() => {
-        console.log("Please check email");
-      })
-      .catch((error) => {
-        console.log(error);
+    if (!loginCredentials.email) return setError("Provide email address");
+    try {
+      toast.loading(
+        `Sending password reset mail to ${loginCredentials.email} `
+      );
+      await sendPasswordResetEmail(auth, loginCredentials.email);
+      console.log("Password reset email sent successfully.");
+      toast.dismiss();
+      toast.success("Please check your mail box", {
+        duration: 1000,
       });
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+    }
   };
+
   return (
     <div
       className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${

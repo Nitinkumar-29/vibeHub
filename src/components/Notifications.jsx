@@ -16,6 +16,7 @@ const Notifications = () => {
   const [infoToggle, setInfoToggle] = useState(true);
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
+  
   // reject follow request
   const rejectRequest = async (id) => {
     toast.loading("processing...");

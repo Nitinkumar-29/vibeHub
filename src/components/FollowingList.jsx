@@ -74,7 +74,7 @@ const FollowingList = () => {
                       <div>
                         <img
                           src={following?.data?.img}
-                          className="h-12 w-12 object-cover rounded-full"
+                          className="h-10 w-10 object-cover rounded-full"
                           alt=""
                         />
                       </div>
@@ -105,14 +105,14 @@ const FollowingList = () => {
                             }}
                             className="text-center px-2 py-1 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
                           >
-                            Unfollow
+                            Following
                           </button>
                         ) : (
                           <div className="flex items-center">
                             {following.id === currentUser ? (
-                              <button className="text-center px-3 py-2 text-green-600 rounded-md w-28">
+                              <span className="text-center px-2 py-1 text-green-600 rounded-md w-28">
                                 You
-                              </button>
+                              </span>
                             ) : (
                               <button
                                 onClick={() => {
@@ -123,9 +123,13 @@ const FollowingList = () => {
                               >
                                 {following?.data?.followRequests?.includes(
                                   currentUser
-                                )
-                                ? <span className="text-violet-600">Follow Back</span>
-                                : <span className="text-blue-600">Follow</span>}
+                                ) ? (
+                                  <span className="text-orange-600">
+                                    Requested
+                                  </span>
+                                ) : (
+                                  <span className="text-blue-600">Follow</span>
+                                )}
                               </button>
                             )}
                           </div>

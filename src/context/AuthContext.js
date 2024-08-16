@@ -76,7 +76,6 @@ export const AuthContextProvider = ({ children }) => {
       setIsLoading(false);
       setLoading(false);
       setError("Invalid credentials");
-      setLoginCredentials({ email: "", password: "" });
     }
   };
 
@@ -275,13 +274,10 @@ export const AuthContextProvider = ({ children }) => {
   }, [currentUser]);
 
   const acceptFollowRequest = async (userId) => {
-    toast.loading("Processing...");
-
     if (!currentUser) {
       toast.error("Invalid user ID");
       return;
     }
-
     try {
       const userRef = doc(db, "users", currentUser);
       const targetRef = doc(db, "users", userId);
@@ -295,36 +291,25 @@ export const AuthContextProvider = ({ children }) => {
           following: arrayUnion(currentUser),
         }),
       ]);
-      toast.dismiss();
-      toast.success("Follow request accepted!");
-      const chatsRef = collection(db, "chats");
 
-      // Query to find chats containing both users
+      const chatsRef = collection(db, "chats");
       const chatQuery = query(
         chatsRef,
         where("participants", "array-contains", currentUser)
       );
-
-      // Fetch documents that match the query
       const chatSnapshot = await getDocs(chatQuery);
-
-      // Filter the results to find the chat that also includes the other user
       const chatDocs = chatSnapshot.docs.filter((doc) => {
         const chatData = doc.data();
         return chatData.participants.includes(userId);
       });
 
       if (chatDocs.length > 0) {
-        const chatDoc = chatDocs[0]; // Assuming only one chat exists
+        const chatDoc = chatDocs[0];
         const chatId = chatDoc.id;
-        const chatRef = doc(db, "chats", chatId); // Reference to the chat document
-
-        // Update the 'messageRequest' field
+        const chatRef = doc(db, "chats", chatId); 
         await updateDoc(chatRef, {
           messageRequest: false,
         });
-      } else {
-        console.log("No chat found between these users.");
       }
     } catch (error) {
       toast.dismiss();
@@ -437,6 +422,7 @@ export const AuthContextProvider = ({ children }) => {
         isLoading,
         loading,
         error,
+        setError,
         handleFollow,
       }}
     >

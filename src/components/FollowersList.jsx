@@ -140,7 +140,7 @@ const FollwersList = () => {
                           }}
                           className="text-center px-2 py-1 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
                         >
-                          Unfollow
+                          Following
                         </button>
                       ) : (
                         <div className="flex items-center">
@@ -166,22 +166,7 @@ const FollwersList = () => {
                                   Requested
                                 </span>
                               ) : (
-                                <span>
-                                  {follower?.data?.following?.includes(
-                                    currentUser
-                                  ) &&
-                                  currentUserData?.followers?.includes(
-                                    follower?.id
-                                  ) ? (
-                                    <span className="text-violet-600">
-                                      Follow Back
-                                    </span>
-                                  ) : (
-                                    <span className="text-blue-600">
-                                      Follow
-                                    </span>
-                                  )}
-                                </span>
+                                <span className="text-blue-600">Follow</span>
                               )}
                             </button>
                           )}
