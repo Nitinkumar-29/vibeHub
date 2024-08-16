@@ -53,7 +53,7 @@ const UserSavedPosts = () => {
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
-              className="flex flex-col -space-y-1 w-full h-fit border-b-[1px] border-zinc-700 last:border-b- pb-3"
+              className="flex flex-col -space-y-1 w-full h-fit border-b-[1px] border-zinc-700 last:border-b-0 pb-3"
             >
               <div className="h-16 flex items-center space-x-4 w-full justify-start px-3">
                 {savedPost.user?.img ? (
