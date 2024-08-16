@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { db } from "../firebase";
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
-import toast from "react-hot-toast";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Link, useParams } from "react-router-dom";
 import { CgSpinner } from "react-icons/cg";
+import { AuthContext } from "../context/AuthContext";
 
 const FollowingList = () => {
   const [followingList, setFollowingList] = useState([]);
   const { userId } = useParams();
   const currentUser = localStorage.getItem("currentUser");
+  const { handleFollow } = useContext(AuthContext);
+  const [followingId, setFollowingId] = useState("");
 
   const handleFetchFollowingList = async () => {
     const docRef = doc(db, "users", userId);
@@ -37,50 +33,18 @@ const FollowingList = () => {
     setFollowingList(followingData);
   };
 
-  // Handle follow/unfollow
-  const handleManageFollow = async (id) => {
-    try {
-      const toastId = toast.loading("Processing your request");
-      const targetUserRef = doc(db, "users", id);
-      const currentUserRef = doc(db, "users", currentUser);
-      const targetUserSnap = await getDoc(targetUserRef);
-
-      if (targetUserSnap.exists()) {
-        const targetUserSnapShot = targetUserSnap.data();
-        if (targetUserSnapShot.followers.includes(currentUser)) {
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayRemove(id),
-            }),
-          ]);
-          toast.dismiss(toastId);
-          toast.success("Unfollowed");
-          handleFetchFollowingList();
-        } else {
-          // Follow the user
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayUnion(currentUser),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayUnion(id),
-            }),
-          ]);
-          toast.dismiss(toastId);
-          const docSnapData = targetUserSnapShot;
-          toast.success(`You are now following ${docSnapData.name}`);
-          handleFetchFollowingList();
-        }
-      }
-    } catch (error) {
-      toast.dismiss();
-      toast.error("Error updating followers");
-      console.error("Error updating followers:", error);
-    }
-  };
+  useEffect(() => {
+    if (!followingId) return;
+    const docRef = doc(db, "users", followingId);
+    const unsubscribe = onSnapshot(docRef, async (docSnap) => {
+      try {
+        handleFetchFollowingList();
+        setFollowingId("");
+        return () => unsubscribe();
+      } catch (error) {}
+    });
+    // eslint-disable-next-line
+  }, [followingId]);
 
   useEffect(() => {
     handleFetchFollowingList();
@@ -104,7 +68,7 @@ const FollowingList = () => {
                 .map((following, index) => {
                   return (
                     <div
-                      className="flex justify-between min-w-[90%]"
+                      className="flex justify-start space-x-6 w-full"
                       key={index}
                     >
                       <div>
@@ -120,38 +84,48 @@ const FollowingList = () => {
                             ? `/userProfile/yourPosts`
                             : `/users/${following.id}/profile`
                         }
-                        className="flex flex-col"
+                        className="flex flex-col flex-1"
                       >
-                        <span>{following?.data?.name}</span>
+                        <span>
+                          {following?.data?.name &&
+                          following?.data?.name?.length > 15
+                            ? `${following?.data?.name.slice(0, 10)}...`
+                            : following?.data?.name}
+                        </span>
                         <span className="text-sm text-gray-400">
                           {following?.data?.user_name}
                         </span>
                       </Link>
-                      <div>
+                      <div className="ml-auto">
                         {following?.data?.followers?.includes(currentUser) ? (
                           <button
-                            // eslint-disable-next-line no-undef
-                            onClick={() => handleManageFollow(following.id)}
-                            className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                            onClick={() => {
+                              handleFollow(following.id);
+                              setFollowingId(following.id);
+                            }}
+                            className="text-center px-3 py-2 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
                           >
                             Unfollow
                           </button>
                         ) : (
                           <div className="flex items-center">
                             {following.id === currentUser ? (
-                              <button
-                                // eslint-disable-next-line no-undef
-                                className="cursor-auto px-8  py-2"
-                              >
+                              <button className="text-center px-3 py-2 text-green-600 rounded-md w-28">
                                 You
                               </button>
                             ) : (
                               <button
-                                // eslint-disable-next-line no-undef
-                                onClick={() => handleManageFollow(following.id)}
-                                className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                                onClick={() => {
+                                  handleFollow(following.id);
+                                  setFollowingId(following.id);
+                                }}
+                                className="text-center px-3 py-2 border-[1px] border-gray-700 rounded-md w-28"
                               >
-                                Follow
+                                {following?.data?.followRequests?.includes(
+                                  currentUser
+                                )
+                                ? <span className="text-violet-600">Follow Back</span>
+                                : <span className="text-blue-600">Follow</span>}
                               </button>
                             )}
                           </div>

@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  onSnapshot,
   query,
   updateDoc,
   where,
@@ -21,7 +22,6 @@ import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { BsGrid3X3, BsHeartFill } from "react-icons/bs";
 import { BiPause, BiPlay, BiUserPin } from "react-icons/bi";
-import PostContext from "../context/PostContext/PostContext";
 import toast from "react-hot-toast";
 import { TfiLayoutListPost } from "react-icons/tfi";
 import { FaUser, FaUserLock } from "react-icons/fa";
@@ -33,6 +33,7 @@ import { Carousel } from "react-responsive-carousel";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { MdArrowBackIos } from "react-icons/md";
 import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
+import { AuthContext } from "../context/AuthContext";
 
 const OtherUsersProfile = () => {
   const { userId } = useParams();
@@ -43,24 +44,34 @@ const OtherUsersProfile = () => {
     // Return the stored value if available, otherwise default to 1
     return storedSection ? parseInt(storedSection) : 1;
   });
-  const [data, setData] = useState({});
   const { theme } = useContext(ThemeContext);
-  const { fetchHomePagePosts } = useContext(PostContext);
   const currentUser = localStorage.getItem("currentUser");
   const [taggedPosts, setTaggedPosts] = useState([]);
   const [otherUserImagePosts, setOtherUserImagePosts] = useState([]);
   const [otherUserPosts, setOtherUserPosts] = useState([]);
   const navigate = useNavigate();
+  const [data, setData] = useState({});
+  const { handleFollow } = useContext(AuthContext);
 
-  // Fetch user data
-  const handleFetchUserData = async () => {
-    const userRef = doc(db, "users", userId);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-      const userData = { ...userSnap.data(), userId };
-      setData(userData);
+  useEffect(() => {
+    if (!userId) return;
+    try {
+      const unsubscribe = onSnapshot(
+        doc(db, "users", userId),
+        async (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            setData(userData);
+          }
+        }
+      );
+      return () => unsubscribe();
+    } catch (error) {
+      console.error(error);
     }
-  };
+
+    // eslint-disable-next-line
+  }, [userId]);
 
   // Fetch tagged posts
   const handleTaggedPosts = async () => {
@@ -122,77 +133,8 @@ const OtherUsersProfile = () => {
   };
 
   // Handle follow/unfollow
-  const handleFollow = async () => {
-    try {
-      const toastId = toast.loading("Processing your request");
-      const targetUserRef = doc(db, "users", userId);
-      const currentUserRef = doc(db, "users", currentUser);
-      const targetUserSnap = await getDoc(targetUserRef);
-
-      if (targetUserSnap.exists()) {
-        const targetUserSnapShot = targetUserSnap.data();
-
-        if (targetUserSnapShot?.followers?.includes(currentUser)) {
-          // Unfollow the user
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayRemove(userId),
-            }),
-          ]);
-          toast.dismiss(toastId);
-          toast.success("Unfollowed");
-        } else {
-          if (targetUserSnapShot?.accountType === "private") {
-            if (!targetUserSnapShot?.followRequests?.includes(currentUser)) {
-              await Promise.all([
-                updateDoc(targetUserRef, {
-                  followRequests: arrayUnion(currentUser),
-                }),
-              ]);
-              toast.dismiss();
-              toast.success("Request Sent!");
-            } else {
-              await Promise.all([
-                updateDoc(targetUserRef, {
-                  followRequests: arrayRemove(currentUser),
-                }),
-              ]);
-              toast.dismiss();
-              toast.success("request cancelled");
-            }
-          } else {
-            // Follow the user
-            await Promise.all([
-              updateDoc(targetUserRef, {
-                followers: arrayUnion(currentUser),
-              }),
-              updateDoc(currentUserRef, {
-                following: arrayUnion(userId),
-              }),
-            ]);
-            toast.dismiss(toastId);
-            toast.success(`You are now following ${data.name}`);
-          }
-        }
-        // Fetch and update the user data after updating the followers
-        handleFetchUserData();
-        fetchHomePagePosts();
-      } else {
-        toast.dismiss(toastId);
-        toast.error("User not found");
-      }
-    } catch (error) {
-      toast.dismiss();
-      toast.error("Error updating followers");
-      console.error("Error updating followers:", error);
-    }
-  };
 
   useEffect(() => {
-    handleFetchUserData();
     handleTaggedPosts();
     handleOtherUserImagePostsData();
     // eslint-disable-next-line
@@ -393,7 +335,6 @@ const OtherUsersProfile = () => {
 
   useEffect(() => {
     handleOtherUserPostsData();
-    handleFetchUserData();
     handleTaggedPosts();
     // eslint-disable-next-line
   }, [userId]);
@@ -434,15 +375,24 @@ const OtherUsersProfile = () => {
         <div className="flex flex-col  jsutify-center items-center space-y-3 h-fit w-full p-4">
           <div className="flex justify-between w-full h-fit">
             <div className="flex flex-col items-center space-y-1">
-              <img
-                src={data?.img}
-                className="h-16 w-16 object-cover rounded-full"
-                alt=""
-              />
+              {data?.img ? (
+                <img
+                  src={data?.img}
+                  className="h-16 w-16 object-cover rounded-full"
+                  alt=""
+                />
+              ) : (
+                <FaUser size={64} className="rounded-full" />
+              )}
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">
-                <span className="text-3xl">{otherUserPosts.length}</span>
+                <span className="text-3xl">
+                  {
+                    otherUserPosts.filter((post) => !post?.archived === true)
+                      .length
+                  }
+                </span>
                 <Link
                   to={`/users/${userId}/profile`}
                   className={`text-sm font-semibold px-3 py-1 `}
@@ -455,7 +405,7 @@ const OtherUsersProfile = () => {
                 <Link
                   to={
                     (data?.followers?.includes(currentUser) ||
-                      data?.accountType === !"private") &&
+                      data?.accountType !== "private") &&
                     `/users/${userId}/profile/followers`
                   }
                   className={`text-sm font-semibold px-3 py-1 `}
@@ -468,7 +418,7 @@ const OtherUsersProfile = () => {
                 <Link
                   to={
                     (data?.followers?.includes(currentUser) ||
-                      data?.accountType === !"private") &&
+                      data?.accountType !== "private") &&
                     `/users/${userId}/profile/following`
                   }
                   className={`text-sm font-semibold px-3 py-1 `}
@@ -492,7 +442,7 @@ const OtherUsersProfile = () => {
           </div>
           <div className="flex justify-between space-x-6 w-full">
             <button
-              onClick={() => handleFollow(currentUser)}
+              onClick={() => handleFollow(userId)}
               className={` px-3 py-1 border-[.5px] ${
                 theme === "dark" ? "" : "bg-orange-700 text-white"
               } rounded-md w-full text-center`}
@@ -512,7 +462,7 @@ const OtherUsersProfile = () => {
               )}
             </button>
             <Link
-              to={`/chat/${data?.userId}/messages`}
+              to={`/chat/${userId}/messages`}
               className={`px-3 py-1 border-[.5px] ${
                 theme === "dark" ? "" : "bg-orange-700 text-white"
               } rounded-md w-full text-center`}
@@ -542,7 +492,6 @@ const OtherUsersProfile = () => {
                           : "text-gray-400"
                       } p-2  text-center`}
                     >
-                      {/* <TfiLayoutListPost size={25} /> */}
                       Followers
                     </Link>
                   </span>
@@ -556,7 +505,6 @@ const OtherUsersProfile = () => {
                           : "text-gray-400"
                       } p-2  text-center`}
                     >
-                      {/* <TfiLayoutListPost size={25} /> */}
                       Following
                     </Link>
                   </span>
@@ -570,7 +518,7 @@ const OtherUsersProfile = () => {
                     {(data?.accountType !== "private" ||
                       data?.followers?.includes(currentUser)) && (
                       <div className="flex w-full justify-around my-2">
-                        <button
+                        {otherUserImagePosts.length!==0&&<button
                           onClick={() => handleFocus(1)}
                           className={`${
                             focusedSection === 1
@@ -581,22 +529,26 @@ const OtherUsersProfile = () => {
                           } `}
                         >
                           <BsGrid3X3 size={20} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleFocus(2);
-                            handleOtherUserPostsData(userId);
-                          }}
-                          className={`${
-                            focusedSection === 2
-                              ? `${
-                                  theme === "dark" ? "text-white" : "text-black"
-                                }`
-                              : "text-gray-400"
-                          } `}
-                        >
-                          <TfiLayoutListPost size={25} />
-                        </button>
+                        </button>}
+                        {otherUserPosts.length !== 0 && (
+                          <button
+                            onClick={() => {
+                              handleFocus(2);
+                              handleOtherUserPostsData(userId);
+                            }}
+                            className={`${
+                              focusedSection === 2
+                                ? `${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-black"
+                                  }`
+                                : "text-gray-400"
+                            } `}
+                          >
+                            <TfiLayoutListPost size={25} />
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             handleFocus(3);
@@ -634,7 +586,11 @@ const OtherUsersProfile = () => {
                         {otherUserImagePosts &&
                         otherUserImagePosts.length > 0 ? (
                           otherUserImagePosts
-                            .filter((post) => post.fileURLs.length > 0)
+                            .filter(
+                              (post) =>
+                                post.fileURLs.length > 0 &&
+                                !post?.archived === true
+                            )
                             .sort((a, b) => b.timeStamp - a.timeStamp)
                             .map((post) => (
                               <Link
@@ -677,7 +633,9 @@ const OtherUsersProfile = () => {
                           otherUserPosts
                             .filter(
                               (post) =>
-                                !post?.fileURLs || post?.fileURLs.length === 0
+                                (!post?.fileURLs ||
+                                  post?.fileURLs.length === 0) &&
+                                !post?.archived === true
                             )
                             ?.sort((a, b) => b.timeStamp - a.timeStamp)
                             ?.map((post) => {

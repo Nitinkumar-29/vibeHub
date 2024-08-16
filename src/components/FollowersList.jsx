@@ -1,69 +1,23 @@
 import {
   arrayRemove,
-  arrayUnion,
   doc,
   getDoc,
+  onSnapshot,
   updateDoc,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { db } from "../firebase";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { AuthContext } from "../context/AuthContext";
 
 const FollwersList = () => {
   const [followersList, setFollowersList] = useState([]);
   const { userId } = useParams();
   const currentUser = localStorage.getItem("currentUser");
+  const { currentUserData, handleFollow } = useContext(AuthContext);
   let isOwner = userId === currentUser;
-  // Handle follow/unfollow
-  const handleManageFollow = async (id) => {
-    try {
-      toast.loading("Processing your request");
-      const targetUserRef = doc(db, "users", id);
-      const currentUserRef = doc(db, "users", currentUser);
-      const targetUserSnap = await getDoc(targetUserRef);
-      const currentUserSnap = await getDoc(currentUserRef);
-
-      if (targetUserSnap.exists() && currentUserSnap.exists()) {
-        const targetUserSnapShot = targetUserSnap.data();
-
-        // Ensure followers and following fields are arrays
-        const targetUserFollowers = targetUserSnapShot.followers || [];
-        if (targetUserFollowers.includes(currentUser)) {
-          // Unfollow the user
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayRemove(currentUser),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayRemove(id),
-            }),
-          ]);
-          toast.dismiss();
-          toast.success("Unfollowed");
-          handleFetchFollowersList();
-        } else {
-          // Follow the user
-          await Promise.all([
-            updateDoc(targetUserRef, {
-              followers: arrayUnion(currentUser),
-            }),
-            updateDoc(currentUserRef, {
-              following: arrayUnion(id),
-            }),
-          ]);
-          toast.dismiss();
-          const docSnapData = targetUserSnapShot;
-          toast.success(`You are now following ${docSnapData.name}`);
-          handleFetchFollowersList();
-        }
-      }
-    } catch (error) {
-      toast.dismiss();
-      toast.error("Error updating followers");
-      console.error("Error updating followers:", error);
-    }
-  };
+  const [followerId, setFollowerId] = useState("");
 
   const handleFetchFollowersList = async () => {
     const docRef = doc(db, "users", userId);
@@ -85,6 +39,19 @@ const FollwersList = () => {
     );
     setFollowersList(followersData);
   };
+
+  useEffect(() => {
+    if (!followerId) return;
+    const docRef = doc(db, "users", followerId);
+    const unsubscribe = onSnapshot(docRef, async (docSnap) => {
+      try {
+        handleFetchFollowersList();
+        setFollowerId("");
+        return () => unsubscribe();
+      } catch (error) {}
+    });
+    // eslint-disable-next-line
+  }, [followerId]);
 
   // handleRemoveFollower
   const handleRemoveFollower = async (id) => {
@@ -134,8 +101,11 @@ const FollwersList = () => {
             })
             .map((follower, index) => {
               return (
-                <div className="flex justify-between min-w-[90%]" key={index}>
-                  <div>
+                <div
+                  className="flex justify-start space-x-6 w-full"
+                  key={index}
+                >
+                  <div className="">
                     <img
                       src={follower?.data?.img}
                       className="h-10 w-10 object-cover rounded-full"
@@ -148,37 +118,71 @@ const FollwersList = () => {
                         ? `/userProfile/yourPosts`
                         : `/users/${follower.id}/profile`
                     }
-                    className="flex flex-col "
+                    className="flex flex-col flex-1"
                   >
-                    <span>{follower?.data?.name}</span>
+                    <span>
+                      {follower?.data?.name && follower?.data?.name?.length > 13
+                        ? `${follower?.data?.name.slice(0, 13)}...`
+                        : follower?.data?.name}
+                    </span>
                     <span className="text-sm text-gray-400">
                       {follower?.data?.user_name}
                     </span>
                   </Link>
 
                   {!isOwner && (
-                    <div>
+                    <div className="ml-auto">
                       {follower?.data?.followers?.includes(currentUser) ? (
                         <button
-                          // eslint-disable-next-line no-undef
-                          onClick={() => handleManageFollow(follower.id)}
-                          className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                          onClick={() => {
+                            handleFollow(follower.id);
+                            setFollowerId(follower.id);
+                          }}
+                          className="text-center px-3 py-2 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
                         >
-                          Unfollow &nbsp;
+                          Unfollow
                         </button>
                       ) : (
                         <div className="flex items-center">
                           {follower.id === currentUser ? (
-                            <button className="cursor-auto px-8 py-2 ">
+                            <span className="text-center px-3 py-2 text-green-600 rounded-md w-28">
                               You
-                            </button>
+                            </span>
                           ) : (
                             <button
-                              // eslint-disable-next-line no-undef
-                              onClick={() => handleManageFollow(follower.id)}
-                              className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                              onClick={() => {
+                                handleFollow(follower.id);
+                                setFollowerId(follower.id);
+                              }}
+                              className="text-center px-3 py-2 border-[1px] border-gray-700 rounded-md w-28"
                             >
-                              Follow Back
+                              {!follower?.data?.followers.includes(
+                                currentUser
+                              ) &&
+                              follower?.data?.followRequests?.includes(
+                                currentUser
+                              ) ? (
+                                <span className="text-orange-600">
+                                  Requested
+                                </span>
+                              ) : (
+                                <span>
+                                  {follower?.data?.following?.includes(
+                                    currentUser
+                                  ) &&
+                                  currentUserData?.followers?.includes(
+                                    follower?.id
+                                  ) ? (
+                                    <span className="text-violet-600">
+                                      Follow Back
+                                    </span>
+                                  ) : (
+                                    <span className="text-blue-600">
+                                      Follow
+                                    </span>
+                                  )}
+                                </span>
+                              )}
                             </button>
                           )}
                         </div>
@@ -191,7 +195,7 @@ const FollwersList = () => {
                         onClick={() => {
                           handleRemoveFollower(follower.id);
                         }}
-                        className="px-4 py-2 border-[1px] border-gray-700 rounded-md"
+                        className="text-center px-3 py-2 border-[1px] border-gray-700 text-red-600 rounded-md w-28"
                       >
                         Remove
                       </button>

@@ -15,6 +15,7 @@ import { FiSettings } from "react-icons/fi";
 import { MdArrowBackIos, MdOutlineArchive } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { FaUser } from "react-icons/fa";
 
 const UserProfile = () => {
   const currentUser = localStorage.getItem("currentUser");
@@ -82,11 +83,11 @@ const UserProfile = () => {
         <div className="relative flex flex-col items-center justify-center h-fit space-y-1 w-full">
           <div className="flex items-start justify-between px-4 w-full">
             <div className="flex flex-col items-start space-y-1">
-              <img
+              {currentUserData?.img?<img
                 src={currentUserData?.img}
                 className="h-16 w-16 object-cover rounded-full duration-300"
                 alt=""
-              />
+              />:<FaUser size={64} className="rounded-full"/>}
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">

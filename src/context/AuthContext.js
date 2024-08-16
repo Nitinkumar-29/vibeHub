@@ -363,6 +363,60 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const handleFollow = async (userId) => {
+    if (!userId) return;
+    try {
+      const targetUserRef = doc(db, "users", userId);
+      const currentUserRef = doc(db, "users", currentUser);
+      const targetUserSnap = await getDoc(targetUserRef);
+
+      if (targetUserSnap.exists()) {
+        const targetUserSnapShot = targetUserSnap.exists
+          ? targetUserSnap.data()
+          : {};
+        if (targetUserSnapShot?.followers?.includes(currentUser)) {
+          // Unfollow the user
+          await Promise.all([
+            updateDoc(targetUserRef, {
+              followers: arrayRemove(currentUser),
+            }),
+            updateDoc(currentUserRef, {
+              following: arrayRemove(userId),
+            }),
+          ]);
+        } else {
+          if (targetUserSnapShot?.accountType === "private") {
+            if (!targetUserSnapShot?.followRequests?.includes(currentUser)) {
+              await Promise.all([
+                updateDoc(targetUserRef, {
+                  followRequests: arrayUnion(currentUser),
+                }),
+              ]);
+            } else {
+              await Promise.all([
+                updateDoc(targetUserRef, {
+                  followRequests: arrayRemove(currentUser),
+                }),
+              ]);
+            }
+          } else {
+            // Follow the user
+            await Promise.all([
+              updateDoc(targetUserRef, {
+                followers: arrayUnion(currentUser),
+              }),
+              updateDoc(currentUserRef, {
+                following: arrayUnion(userId),
+              }),
+            ]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error updating followers:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -383,6 +437,7 @@ export const AuthContextProvider = ({ children }) => {
         isLoading,
         loading,
         error,
+        handleFollow,
       }}
     >
       {children}
