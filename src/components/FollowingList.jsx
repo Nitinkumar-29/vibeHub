@@ -92,7 +92,7 @@ const FollowingList = () => {
                             ? `${following?.data?.name.slice(0, 10)}...`
                             : following?.data?.name}
                         </span>
-                        <span className="text-sm text-gray-400">
+                        <span className="text-sm text-zinc-400">
                           {following?.data?.user_name}
                         </span>
                       </Link>
@@ -103,7 +103,7 @@ const FollowingList = () => {
                               handleFollow(following.id);
                               setFollowingId(following.id);
                             }}
-                            className="text-center px-2 py-1 border-[1px] border-gray-700 text-yellow-600 rounded-md w-28"
+                            className="text-center px-2 py-1 border-[1px] border-zinc-700 text-yellow-600 rounded-md w-28"
                           >
                             Following
                           </button>
@@ -119,7 +119,7 @@ const FollowingList = () => {
                                   handleFollow(following.id);
                                   setFollowingId(following.id);
                                 }}
-                                className="text-center px-2 py-1 border-[1px] border-gray-700 rounded-md w-28"
+                                className="text-center px-2 py-1 border-[1px] border-zinc-700 rounded-md w-28"
                               >
                                 {following?.data?.followRequests?.includes(
                                   currentUser

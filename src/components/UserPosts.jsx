@@ -13,6 +13,7 @@ import ThemeContext from "../context/Theme/ThemeContext";
 import { BiPause, BiPlay } from "react-icons/bi";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { AuthContext } from "../context/AuthContext";
+import { PostLink } from "../utils/PostedLinks";
 
 const UserPosts = () => {
   const menuRefs = useRef({});
@@ -81,7 +82,7 @@ const UserPosts = () => {
 
   return (
     <>
-      <div className="pb-2 space-y-3 w-full">
+      <div className="pb-5 space-y-3 w-full max-w-[430px]">
         {userPosts?.length > 0 ? (
           userPosts
             ?.filter((post) => !post.archived === true)
@@ -154,7 +155,6 @@ const UserPosts = () => {
                           <button
                             onClick={() => {
                               handleArchivePost(post.id);
-                              
                             }}
                             className="text-sm"
                           >
@@ -165,14 +165,14 @@ const UserPosts = () => {
                     </div>
                   </div>
                   <div className="w-full h-full">
-                    <div
-                      contentEditable={isEdit}
-                      suppressContentEditableWarning={true}
-                      className="px-4 whitespace-pre-wrap pb-2"
-                      dangerouslySetInnerHTML={{
-                        __html: HighLightLinks(post?.postCaption),
-                      }}
-                    ></div>
+                    {post?.postCaption && (
+                      <div
+                        className="whitespace-pre-wrap px-4 pb-2"
+                        dangerouslySetInnerHTML={{
+                          __html: PostLink(post?.postCaption),
+                        }}
+                      ></div>
+                    )}
                     {post?.mentionedUsers?.length > 0 && (
                       <div className="px-2  pb-2 flex flex-wrap">
                         {post?.mentionedUsers?.map((user, index) => {

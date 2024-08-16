@@ -10,17 +10,14 @@ import { BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 import { HighLightLinks } from "../utils/HighlightLinks";
+import { PostLink } from "../utils/PostedLinks";
 
 const UserLikedPosts = () => {
-  const {
-    handleFetchLikedPosts,
-    likedPosts,
-    handleLikePost,
-    handleSavePost,
-  } = useContext(PostContext);
+  const { handleFetchLikedPosts, likedPosts, handleLikePost, handleSavePost } =
+    useContext(PostContext);
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
-  const currentUser = localStorage.getItem("currentUser")
+  const currentUser = localStorage.getItem("currentUser");
 
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
@@ -47,7 +44,7 @@ const UserLikedPosts = () => {
   }, [currentUser]);
 
   return (
-    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-14">
+    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-4">
       {likedPosts && likedPosts.length === 0 ? (
         <div className="mt-4">
           0 posts?{" "}
@@ -97,13 +94,15 @@ const UserLikedPosts = () => {
                     </Link>
                   </div>
                 </div>
-                <div className="flex flex-wrap">
-                  <p
-                    className="px-4 pb-2"
-                    dangerouslySetInnerHTML={{
-                      __html: HighLightLinks(likedPost?.postCaption),
-                    }}
-                  />
+                <div className="">
+                  {likedPost?.postCaption && (
+                    <p
+                      className="whitespace-pre-wrap px-4 pb-2"
+                      dangerouslySetInnerHTML={{
+                        __html: PostLink(likedPost?.postCaption),
+                      }}
+                    ></p>
+                  )}
                   {likedPost?.mentionedUsers?.map((user, index) => (
                     <Link
                       key={index}

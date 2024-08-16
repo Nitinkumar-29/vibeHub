@@ -17,6 +17,7 @@ import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
+import { PostLink } from "../utils/PostedLinks";
 
 const Home = () => {
   const {
@@ -195,13 +196,14 @@ const Home = () => {
                       </div>
                       <div className="w-full h-full ">
                         {post?.postCaption && (
-                          <p
+                          <div
                             className="whitespace-pre-wrap px-4 pb-2"
                             dangerouslySetInnerHTML={{
-                              __html: HighLightLinks(post?.postCaption),
+                              __html: PostLink(post?.postCaption),
                             }}
-                          ></p>
+                          ></div>
                         )}
+
                         <div className="px-2 pb-2 flex flex-wrap">
                           {post?.mentionedUsers?.map((user, index) => {
                             return (
@@ -232,66 +234,71 @@ const Home = () => {
                           })}
                         </div>
                         <div className="flex w-full my-1 px-4">
-                          <Carousel
-                            className="carousel"
-                            showThumbs={false}
-                            autoPlay={false}
-                            infiniteLoop={true}
-                            showStatus={false}
-                            emulateTouch={true}
-                            useKeyboardArrows={true}
-                            swipeable={true}
-                            showArrows={true}
-                            showIndicators={
-                              post && post?.fileURLs.length > 1 ? true : false
-                            }
-                          >
-                            {post?.fileURLs?.map((fileURL, index) => (
-                              <div key={index} className="relative  mx-[.25px]">
-                                {fileURL.includes(".mp4") ? (
-                                  <video
-                                    onClick={() => {
-                                      handlePlayPause(index);
-                                    }}
-                                    onEnded={handleEnded}
-                                    ref={videoRef}
-                                    autoFocus={true}
-                                    className="h-[540px] w-full object-cover rounded-md"
-                                  >
-                                    <source src={fileURL} type="video/mp4" />
-                                  </video>
-                                ) : (
-                                  <img
-                                    src={fileURL}
-                                    alt=""
-                                    className="h-fit w-fit object-contain rounded-md"
-                                  />
-                                )}
+                          {post?.fileURLs?.length !== 0 && (
+                            <Carousel
+                              className="carousel"
+                              showThumbs={false}
+                              autoPlay={false}
+                              infiniteLoop={true}
+                              showStatus={false}
+                              emulateTouch={true}
+                              useKeyboardArrows={true}
+                              swipeable={true}
+                              showArrows={true}
+                              showIndicators={
+                                post && post?.fileURLs.length > 1 ? true : false
+                              }
+                            >
+                              {post?.fileURLs?.map((fileURL, index) => (
+                                <div
+                                  key={index}
+                                  className="relative  mx-[.25px]"
+                                >
+                                  {fileURL.includes(".mp4") ? (
+                                    <video
+                                      onClick={() => {
+                                        handlePlayPause(index);
+                                      }}
+                                      onEnded={handleEnded}
+                                      ref={videoRef}
+                                      autoFocus={true}
+                                      className="h-[540px] w-full object-cover rounded-md"
+                                    >
+                                      <source src={fileURL} type="video/mp4" />
+                                    </video>
+                                  ) : (
+                                    <img
+                                      src={fileURL}
+                                      alt=""
+                                      className="h-fit w-fit object-contain rounded-md"
+                                    />
+                                  )}
 
-                                {fileURL.includes(".mp4") && (
-                                  <span className="z-20 absolute top-[50%]">
-                                    {isPlaying ? (
-                                      <BiPause
-                                        onClick={() => {
-                                          handlePlayPause(index);
-                                        }}
-                                        className="z-20"
-                                        size={40}
-                                      />
-                                    ) : (
-                                      <BiPlay
-                                        onClick={() => {
-                                          handlePlayPause(index);
-                                        }}
-                                        className="z-20"
-                                        size={40}
-                                      />
-                                    )}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                          </Carousel>
+                                  {fileURL.includes(".mp4") && (
+                                    <span className="z-20 absolute top-[50%]">
+                                      {isPlaying ? (
+                                        <BiPause
+                                          onClick={() => {
+                                            handlePlayPause(index);
+                                          }}
+                                          className="z-20"
+                                          size={40}
+                                        />
+                                      ) : (
+                                        <BiPlay
+                                          onClick={() => {
+                                            handlePlayPause(index);
+                                          }}
+                                          className="z-20"
+                                          size={40}
+                                        />
+                                      )}
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </Carousel>
+                          )}
                         </div>
                         <div className="flex items-center justify-between h-fit pt-1 px-4">
                           <div className="flex items-center space-x-6">

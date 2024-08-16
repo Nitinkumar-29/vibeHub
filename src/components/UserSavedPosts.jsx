@@ -9,6 +9,7 @@ import { Carousel } from "react-responsive-carousel";
 import { BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
+import { PostLink } from "../utils/PostedLinks";
 
 const UserSavedPosts = () => {
   const { handleFetchSavedPosts, savedPosts, handleLikePost, handleSavePost } =
@@ -42,7 +43,7 @@ const UserSavedPosts = () => {
   }, [currentUser]);
 
   return (
-    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-1">
+    <div className="flex items-center w-full border-t-[1px] border-blue-950 justify-center pb-5">
       {savedPosts && savedPosts.length === 0 ? (
         <div className="mt-4">
           0 posts? <Link to="/">Try saving a post now</Link>
@@ -52,7 +53,7 @@ const UserSavedPosts = () => {
           {savedPosts?.map((savedPost) => (
             <div
               key={savedPost.id}
-              className="flex flex-col -space-y-1 w-full h-fit border-b-[1px] border-zinc-700 last:border-b-0"
+              className="flex flex-col -space-y-1 w-full h-fit border-b-[1px] border-zinc-700 last:border-b- pb-3"
             >
               <div className="h-16 flex items-center space-x-4 w-full justify-start px-3">
                 {savedPost.user?.img ? (
@@ -84,8 +85,15 @@ const UserSavedPosts = () => {
                   </Link>
                 </div>
               </div>
-              <div className="flex flex-wrap">
-                <p className="px-4 pb-2">{savedPost.postCaption}</p>
+              <div className="">
+                {savedPost?.postCaption && (
+                  <p
+                    className="whitespace-pre-wrap px-4 pb-2"
+                    dangerouslySetInnerHTML={{
+                      __html: PostLink(savedPost?.postCaption),
+                    }}
+                  ></p>
+                )}
                 {savedPost?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}

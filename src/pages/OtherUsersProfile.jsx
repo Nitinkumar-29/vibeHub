@@ -443,17 +443,15 @@ const OtherUsersProfile = () => {
           <div className="flex justify-between space-x-6 w-full">
             <button
               onClick={() => handleFollow(userId)}
-              className={` px-3 py-1 border-[.5px] ${
-                theme === "dark" ? "" : "bg-orange-700 text-white"
-              } rounded-md w-full text-center`}
+              className={` px-3 py-1 ${
+                theme === "dark" ? "border-zinc-600" : "border-zinc-950"
+              } border-[1px] rounded-md w-full text-center`}
             >
               {!data?.followers?.includes(currentUser) &&
               !data?.followRequests?.includes(currentUser) ? (
-                <span>Follow</span>
+                <span className="text-blue-600">Follow</span>
               ) : (
-                <span
-                  className={`${theme === "dark" ? "text-orange-600" : ""}`}
-                >
+                <span className="text-orange-600">
                   {data?.followRequests?.includes(currentUser) &&
                   data?.accountType === "private"
                     ? "Requested"
@@ -463,9 +461,9 @@ const OtherUsersProfile = () => {
             </button>
             <Link
               to={`/chat/${userId}/messages`}
-              className={`px-3 py-1 border-[.5px] ${
-                theme === "dark" ? "" : "bg-orange-700 text-white"
-              } rounded-md w-full text-center`}
+              className={`px-3 py-1 ${
+                theme === "dark" ? "border-zinc-600" : "border-zinc-950"
+              } border-[1px] rounded-md w-full text-center`}
             >
               Message
             </Link>
@@ -518,18 +516,22 @@ const OtherUsersProfile = () => {
                     {(data?.accountType !== "private" ||
                       data?.followers?.includes(currentUser)) && (
                       <div className="flex w-full justify-around my-2">
-                        {otherUserImagePosts.length!==0&&<button
-                          onClick={() => handleFocus(1)}
-                          className={`${
-                            focusedSection === 1
-                              ? `${
-                                  theme === "dark" ? "text-white" : "text-black"
-                                }`
-                              : "text-gray-400"
-                          } `}
-                        >
-                          <BsGrid3X3 size={20} />
-                        </button>}
+                        {otherUserImagePosts.length !== 0 && (
+                          <button
+                            onClick={() => handleFocus(1)}
+                            className={`${
+                              focusedSection === 1
+                                ? `${
+                                    theme === "dark"
+                                      ? "text-white"
+                                      : "text-black"
+                                  }`
+                                : "text-gray-400"
+                            } `}
+                          >
+                            <BsGrid3X3 size={20} />
+                          </button>
+                        )}
                         {otherUserPosts.length !== 0 && (
                           <button
                             onClick={() => {
