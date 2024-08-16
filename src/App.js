@@ -28,11 +28,13 @@ import { ChatProvider } from "./context/ChatContext/ChatContext";
 import Accessibility from "./components/Accessibility";
 import ChatSettings from "./components/ChatSettings";
 import ArchivedPosts from "./components/ArchivedPosts";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   return (
     <>
       <Router>
+        <Analytics />
         <ThemeProvider>
           <AuthContextProvider>
             <ChatProvider>
