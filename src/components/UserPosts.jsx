@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import ThemeContext from "../context/Theme/ThemeContext";
 import PostContext from "../context/PostContext/PostContext";
+import { Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import { HiDotsVertical } from "react-icons/hi";
 import { Carousel } from "react-responsive-carousel";
@@ -9,15 +10,18 @@ import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { formatTime } from "../utils/FormatTime";
-import ThemeContext from "../context/Theme/ThemeContext";
 import { BiPause, BiPlay } from "react-icons/bi";
-import { HighLightLinks } from "../utils/HighlightLinks";
 import { AuthContext } from "../context/AuthContext";
 import { PostLink } from "../utils/PostedLinks";
 
 const UserPosts = () => {
+  const videoRef = useRef(null);
   const menuRefs = useRef({});
   const currentUser = localStorage.getItem("currentUser");
+  const { currentUserData } = useContext(AuthContext);
+  const { theme } = useContext(ThemeContext);
+  const [toggleMenu, setToggleMenu] = useState({});
+  const [isPlaying, setIsPlaying] = useState(false);
   const {
     userPosts,
     handleDeletePost,
@@ -25,12 +29,7 @@ const UserPosts = () => {
     handleLikePost,
     handleSavePost,
   } = useContext(PostContext);
-  const { currentUserData } = useContext(AuthContext);
-  const [toggleMenu, setToggleMenu] = useState({});
-  const { theme } = useContext(ThemeContext);
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef(null);
   const handlePlayPause = (index) => {
     videoRef.current.click(index);
     if (isPlaying === false) {
@@ -250,7 +249,7 @@ const UserPosts = () => {
                       <div className="flex items-center space-x-6">
                         <div
                           className="flex space-x-1 items-center cursor-pointer"
-                          onClick={() => handleLikePost(post?.id, currentUser)}
+                          onClick={() => handleLikePost(post?.id)}
                         >
                           {post?.likes?.includes(currentUser) ? (
                             <BsHeartFill

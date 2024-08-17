@@ -4,6 +4,7 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Link, useParams } from "react-router-dom";
 import { CgSpinner } from "react-icons/cg";
 import { AuthContext } from "../context/AuthContext";
+import { FaUser } from "react-icons/fa";
 
 const FollowingList = () => {
   const [followingList, setFollowingList] = useState([]);
@@ -72,11 +73,15 @@ const FollowingList = () => {
                       key={index}
                     >
                       <div>
-                        <img
-                          src={following?.data?.img}
-                          className="h-10 w-10 object-cover rounded-full"
-                          alt=""
-                        />
+                      {following?.data?.img? (
+                      <img
+                        src={following?.data?.img}
+                        className="h-12 w-12 object-cover rounded-full"
+                        alt=""
+                      />
+                    ) : (
+                      <FaUser size={48} className="rounded-full" />
+                    )}
                       </div>
                       <Link
                         to={

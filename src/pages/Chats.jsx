@@ -492,8 +492,8 @@ const Chats = () => {
                                         className="rounded-full"
                                       />
                                     )}
-                                    <div className="flex flex-col justify-center -space-y-1">
-                                      <div className="flex space-x-3">
+                                    <div className="flex flex-col justify-center  -space-y-1">
+                                      <div className="flex space-x-3 w-full">
                                         <span className="font-semibold">
                                           {otherParticipant?.name &&
                                             (window.innerWidth < 412 &&

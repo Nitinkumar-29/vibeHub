@@ -10,6 +10,7 @@ import { db } from "../firebase";
 import { Link, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
+import { FaUser } from "react-icons/fa";
 
 const FollwersList = () => {
   const [followersList, setFollowersList] = useState([]);
@@ -106,11 +107,15 @@ const FollwersList = () => {
                   key={index}
                 >
                   <div className="">
-                    <img
-                      src={follower?.data?.img}
-                      className="h-12 w-12 object-cover rounded-full"
-                      alt=""
-                    />
+                    {follower?.data?.img? (
+                      <img
+                        src={follower?.data?.img}
+                        className="h-12 w-12 object-cover rounded-full"
+                        alt=""
+                      />
+                    ) : (
+                      <FaUser size={48} className="rounded-full" />
+                    )}
                   </div>
                   <Link
                     to={

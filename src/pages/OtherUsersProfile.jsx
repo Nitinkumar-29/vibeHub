@@ -35,6 +35,7 @@ import { MdArrowBackIos } from "react-icons/md";
 import { IoLockClosedOutline, IoLockOpenOutline } from "react-icons/io5";
 import { AuthContext } from "../context/AuthContext";
 import { PostLink } from "../utils/PostedLinks";
+import ChatContext from "../context/ChatContext/ChatContext";
 
 const OtherUsersProfile = () => {
   const { userId } = useParams();
@@ -47,12 +48,14 @@ const OtherUsersProfile = () => {
   });
   const { theme } = useContext(ThemeContext);
   const currentUser = localStorage.getItem("currentUser");
+  const { messageRequestChats } = useContext(ChatContext);
   const [taggedPosts, setTaggedPosts] = useState([]);
   const [otherUserImagePosts, setOtherUserImagePosts] = useState([]);
   const [otherUserPosts, setOtherUserPosts] = useState([]);
   const navigate = useNavigate();
   const [data, setData] = useState({});
   const { handleFollow } = useContext(AuthContext);
+  const [postId, setPostId] = useState("");
 
   useEffect(() => {
     if (!userId) return;
@@ -167,149 +170,172 @@ const OtherUsersProfile = () => {
   };
 
   const handleLikePost = async (id) => {
+    if (!id) return;
+
     try {
-      toast.loading("updating likes...");
       const postRef = doc(db, "posts", id);
       const postSnap = await getDoc(postRef);
       if (postSnap.exists()) {
         const postData = postSnap.data();
         const likes = postData.likes || [];
-        let updatedPosts;
-        let updatedTaggedPosts;
-        if (likes.includes(currentUser)) {
-          // Update database
-          await updateDoc(postRef, {
-            likes: arrayRemove(currentUser),
-          });
-          toast.dismiss();
-          // Optimistically update UI
-          updatedPosts = otherUserPosts.map((post) =>
+        const hasLiked = likes.includes(currentUser);
+        // Optimistically update UI
+        setOtherUserPosts((prevPosts) =>
+          prevPosts.map((post) =>
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter((uid) => uid !== currentUser),
+                  likes: hasLiked
+                    ? post.likes.filter((uid) => uid !== currentUser)
+                    : [...post.likes, currentUser],
                 }
               : post
-          );
-          updatedTaggedPosts = taggedPosts.map((post) =>
+          )
+        );
+        setTaggedPosts((prevPosts) =>
+          prevPosts.map((post) =>
             post.id === id
               ? {
                   ...post,
-                  likes: post.likes.filter((uid) => uid !== currentUser),
+                  likes: hasLiked
+                    ? post.likes.filter((uid) => uid !== currentUser)
+                    : [...post.likes, currentUser],
                 }
               : post
-          );
-          setOtherUserPosts(updatedPosts);
-          setTaggedPosts(updatedTaggedPosts);
-          toast.success("Like removed");
-        } else {
-          // Update database
-          await updateDoc(postRef, {
-            likes: arrayUnion(currentUser),
-          });
-          toast.dismiss();
-          // Optimistically update UI
-          updatedPosts = otherUserPosts.map((post) =>
-            post.id === id
-              ? {
-                  ...post,
-                  likes: [...post.likes, currentUser],
-                }
-              : post
-          );
-          updatedTaggedPosts = taggedPosts.map((post) =>
-            post.id === id
-              ? {
-                  ...post,
-                  likes: [...post.likes, currentUser],
-                }
-              : post
-          );
-          setOtherUserPosts(updatedPosts);
-          setTaggedPosts(updatedTaggedPosts);
-          toast.success("Liked");
-
-          // handleOtherUserPostsData();
-        }
+          )
+        );
+        // Update the database
+        await updateDoc(postRef, {
+          likes: hasLiked ? arrayRemove(currentUser) : arrayUnion(currentUser),
+        });
       }
     } catch (error) {
       console.error("Error liking post: ", error);
-      toast.dismiss();
       toast.error("Could not process.");
     }
   };
 
+  useEffect(() => {
+    if (!postId) return;
+    const postRef = doc(db, "posts", postId);
+    const unsubscribe = onSnapshot(postRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const postData = docSnap.data();
+
+        setOtherUserPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId ? { ...post, likes: postData.likes } : post
+          )
+        );
+        setTaggedPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId ? { ...post, likes: postData.likes } : post
+          )
+        );
+      }
+    });
+
+    return () => unsubscribe(); // Clean up the listener on unmount
+  }, [postId]);
+
   const handleSavePost = async (id, otherUserId) => {
+    if (!id) return;
+    setPostId(id);
     try {
-      toast.loading("Updating collection...");
       const postRef = doc(db, "posts", id);
       const postSnap = await getDoc(postRef);
-      if (postSnap.exists()) {
-        const postData = postSnap?.data(); // This is the fetched data
-        const saves = postData?.saves || []; // Initialize saves array from fetched data
 
-        if (saves.includes(currentUser)) {
+      if (postSnap.exists()) {
+        const postData = postSnap.data();
+        const saves = postData.saves || [];
+        const isSaved = saves.includes(currentUser);
+
+        if (isSaved) {
           await updateDoc(postRef, {
             saves: arrayRemove(currentUser),
           });
 
-          toast.dismiss();
           setOtherUserPosts((prevPosts) =>
-            prevPosts?.map((post) =>
-              post?.id === id
+            prevPosts.map((post) =>
+              post.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter((uid) => uid !== currentUser),
+                    saves: post.saves.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
           );
           setTaggedPosts((prevPosts) =>
-            prevPosts?.map((post) =>
-              post?.id === id
+            prevPosts.map((post) =>
+              post.id === id
                 ? {
                     ...post,
-                    saves: post?.saves?.filter((uid) => uid !== currentUser),
+                    saves: post.saves.filter((uid) => uid !== currentUser),
                   }
                 : post
             )
           );
-          toast.success("removed");
-          handleOtherUserPostsData(otherUserId);
         } else {
           await updateDoc(postRef, {
             saves: arrayUnion(currentUser),
           });
-          toast.dismiss();
+
           setOtherUserPosts((prevPosts) =>
-            prevPosts?.map((post) =>
-              post?.id === id
+            prevPosts.map((post) =>
+              post.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser],
+                    saves: [...post.saves, currentUser],
                   }
                 : post
             )
           );
           setTaggedPosts((prevPosts) =>
-            prevPosts?.map((post) =>
-              post?.id === id
+            prevPosts.map((post) =>
+              post.id === id
                 ? {
                     ...post,
-                    saves: [...post?.saves, currentUser],
+                    saves: [...post.saves, currentUser],
                   }
                 : post
             )
           );
-          toast.success("saved");
-          handleOtherUserPostsData();
+        }
+        if (otherUserId) {
+          handleOtherUserPostsData(otherUserId);
         }
       } else {
+        console.log("Post does not exist");
       }
     } catch (error) {
-      console.error("Error saving post: ", error);
+      console.error("Error saving post:", error);
+      toast.error("Failed to update save");
     }
   };
+
+  useEffect(() => {
+    if (!postId) return;
+    const postRef = doc(db, "posts", postId);
+    const unsubscribe = onSnapshot(postRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const postData = docSnap.data();
+
+        // Update otherUserPosts
+        const updatedOtherUserPosts = otherUserPosts.map((post) =>
+          post.id === postId ? { ...post, saves: postData.saves } : post
+        );
+        setOtherUserPosts(updatedOtherUserPosts);
+
+        // Update taggedPosts
+        const updatedTaggedPosts = taggedPosts.map((post) =>
+          post.id === postId ? { ...post, saves: postData.saves } : post
+        );
+        setTaggedPosts(updatedTaggedPosts);
+      }
+    });
+
+    return () => unsubscribe(); // Clean up listener on component unmount
+  }, [postId, otherUserPosts, setOtherUserPosts, taggedPosts, setTaggedPosts]);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
@@ -533,25 +559,28 @@ const OtherUsersProfile = () => {
                             <BsGrid3X3 size={20} />
                           </button>
                         )}
-                        {otherUserPosts.length !== 0 && (
-                          <button
-                            onClick={() => {
-                              handleFocus(2);
-                              handleOtherUserPostsData(userId);
-                            }}
-                            className={`${
-                              focusedSection === 2
-                                ? `${
-                                    theme === "dark"
-                                      ? "text-white"
-                                      : "text-black"
-                                  }`
-                                : "text-gray-400"
-                            } `}
-                          >
-                            <TfiLayoutListPost size={25} />
-                          </button>
-                        )}
+                        {otherUserPosts.length !== 0 &&
+                          otherUserPosts.filter(
+                            (post) => post?.fileURLs.length === 0
+                          ).length !== 0 && (
+                            <button
+                              onClick={() => {
+                                handleFocus(2);
+                                handleOtherUserPostsData(userId);
+                              }}
+                              className={`${
+                                focusedSection === 2
+                                  ? `${
+                                      theme === "dark"
+                                        ? "text-white"
+                                        : "text-black"
+                                    }`
+                                  : "text-gray-400"
+                              } `}
+                            >
+                              <TfiLayoutListPost size={25} />
+                            </button>
+                          )}
                         <button
                           onClick={() => {
                             handleFocus(3);
@@ -628,7 +657,7 @@ const OtherUsersProfile = () => {
                       </div>
                       {/* text based posts */}
                       <div
-                        className={`w-full flex flex-col items-center space-y-6 pt-2 ${
+                        className={`w-full flex flex-col items-center space-y-6 pt-2 pb-8 ${
                           focusedSection === 2 ? "flex" : "hidden"
                         }`}
                       >
@@ -648,13 +677,13 @@ const OtherUsersProfile = () => {
                                     {data?.img ? (
                                       <img
                                         src={data?.img}
-                                        className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
+                                        className="w-12 h-12 object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
                                         alt=""
                                       />
                                     ) : (
                                       <FaUser size={48} />
                                     )}
-                                    <div className="flex w-full justify-between items-center space-x-1">
+                                    <div className="flex w-fit justify-between items-center space-x-1">
                                       <Link
                                         onClick={() => {
                                           window.scrollTo(0, 0);
@@ -676,7 +705,7 @@ const OtherUsersProfile = () => {
                                   </div>
                                   {post?.postCaption && (
                                     <div
-                                      className="whitespace-pre-wrap px-4 pb-2"
+                                      className="whitespace-pre-wrap pb-2"
                                       dangerouslySetInnerHTML={{
                                         __html: PostLink(post?.postCaption),
                                       }}

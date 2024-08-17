@@ -13,8 +13,10 @@ import { GoPaperAirplane } from "react-icons/go";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { formatTime } from "../utils/FormatTime";
 import { CgSpinner } from "react-icons/cg";
-import { HighLightLinks } from "../utils/HighlightLinks";
 import { PostLink } from "../utils/PostedLinks";
+import { db } from "../firebase";
+import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
+import { AuthContext } from "../context/AuthContext";
 
 const Post = () => {
   const {
@@ -23,6 +25,7 @@ const Post = () => {
     postComment,
     setPostComment,
     postComments,
+    setPostComments,
     isPublished,
     handleDeleteComment,
     handleLikeComment,
@@ -37,6 +40,7 @@ const Post = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef(null);
   const currentUser = localStorage.getItem("currentUser");
+  const { currentUserData } = useContext(AuthContext);
 
   const handlePlayPause = () => {
     videoRef.current.click();
@@ -68,6 +72,28 @@ const Post = () => {
     fetchPostComments(id);
     // eslint-disable-next-line
   }, [id]);
+
+  // // using onsnapshot method for fast data retreiving
+  // useEffect(() => {
+  //   if (!id) return;
+  //   try {
+  //     const unsubscribeFetchComments = onSnapshot(
+  //       query(collection(db, "postComments"), where("postId", "==", id)),
+  //       async (data) => {
+  //         const response = data.docs.map((doc) => ({
+  //           id: doc.id,
+  //           postComments: doc.data(),
+  //         }));
+  //         console.log(response);
+  //         setPostComments(response);
+  //       }
+  //     );
+  //     return () => unsubscribeFetchComments();
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   // eslint-disable-next-line
+  // }, [id]);
 
   return (
     <div className="flex flex-col items-center pb-14 w-full h-full max-w-[447px]">
@@ -257,7 +283,13 @@ const Post = () => {
                   theme === "dark" ? "border-gray-400" : "border-gray-800"
                 }`}
               >
-                <input
+                <div className="flex space-x-1 items-center w-full">
+                  <img
+                    src={currentUserData && currentUserData?.img}
+                    className="h-6 w-6 rounded-full"
+                    alt=""
+                  />
+                  <input
                   type="text"
                   placeholder="Post a comment"
                   className={`outline-none  w-full bg-inherit p-2`}
@@ -271,6 +303,7 @@ const Post = () => {
                   }}
                   value={postComment.commentText}
                 />
+                </div>
                 <button
                   onClick={postCommentById}
                   className="p-2 rounded-md duration-200 cursor-pointer outline-none"

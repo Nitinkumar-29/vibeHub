@@ -84,7 +84,7 @@ const Explore = () => {
               onClickCapture={() => {}}
               type="text"
               ref={searchInputRef}
-              className={`bg-inherit w-[95%] p-1 outline-none rounded-md`}
+              className={`bg-inherit w-[95%] p-1 outline-none rounded-md focus:placeholder:text-zinc-300`}
               placeholder="Search @username, name.... with '/ '"
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -175,9 +175,11 @@ const Explore = () => {
                             </video>
                           ) : (
                             <img
-                              src={post?.fileURLs[0]}
+                              src={post?.fileURLs[0] || "/images/logo.png"}
                               alt="post media"
-                              className="h-36 w-40 object-cover rounded-sm"
+                              className={`h-36 w-40 object-cover rounded-sm transform duration-200 ${
+                                post?.fileURLs[0] ? "opacity-100" : "opacity-0"
+                              }`}
                             />
                           )}
                         </div>

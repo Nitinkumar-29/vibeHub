@@ -40,7 +40,7 @@ export const ChatProvider = ({ children }) => {
   const handleFetchAllChats = async () => {
     try {
       const chatsRef = query(
-        collection(db, "chats/"),
+        collection(db, "chats"),
         where("participants", "array-contains", currentUser),
         where("messageRequest", "==", false)
       ); // Reference to the chats collection
@@ -108,7 +108,7 @@ export const ChatProvider = ({ children }) => {
           participants: participantsData,
         });
       }
-
+      console.log(chats);
       setMessageRequestChats(chats); // Assume setMessageRequestChats is a state setter function to update the UI
     } catch (error) {
       console.error("Error fetching message request chats:", error);
@@ -152,7 +152,10 @@ export const ChatProvider = ({ children }) => {
     const userSnap = await getDoc(userRef);
     const userSnapShot = userSnap.exists() ? userSnap.data() : {};
     let messageRequest = false;
-    if (!userSnapShot?.followers?.includes(currentUser)) {
+    if (
+      !userSnapShot?.followers?.includes(currentUser) &&
+      userSnapShot?.accountType === "private"
+    ) {
       messageRequest = true;
     }
     if (!chatId) {
