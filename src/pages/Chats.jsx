@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { chat_formatTime } from "../utils/Chat_formatTime";
+import { formatTime } from "../utils/FormatTime";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
 import { auth, db } from "../firebase";
@@ -18,7 +18,6 @@ import { FaUser } from "react-icons/fa";
 import { GoIssueClosed } from "react-icons/go";
 import { CgClose, CgSpinner } from "react-icons/cg";
 import { AuthContext } from "../context/AuthContext";
-import { formatTime } from "../utils/FormatTime";
 
 const Chats = () => {
   const {
@@ -476,11 +475,7 @@ const Chats = () => {
                           return (
                             <div
                               key={chat.id}
-                              className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
-                                theme === "dark"
-                                  ? "hover:bg-zinc-900"
-                                  : "hover:bg-zinc-100"
-                              } duration-200`}
+                              className={` relative group flex w-full items-center justify-between mt-2 p-2 duration-200`}
                             >
                               {otherParticipant && (
                                 <div className="flex flex-col space-y-0 w-full max-w-[90%]">
@@ -500,7 +495,18 @@ const Chats = () => {
                                     <div className="flex flex-col justify-center -space-y-1">
                                       <div className="flex space-x-3">
                                         <span className="font-semibold">
-                                          {otherParticipant?.name}
+                                          {otherParticipant?.name &&
+                                            (window.innerWidth < 412 &&
+                                            otherParticipant.name.length > 10
+                                              ? `${
+                                                  otherParticipant.name[0].toUpperCase() +
+                                                  otherParticipant.name.slice(
+                                                    1,
+                                                    10
+                                                  )
+                                                }...`
+                                              : otherParticipant.name[0] +
+                                                otherParticipant.name.slice(1))}
                                         </span>
                                         {chat.timeStamp && (
                                           <div
@@ -656,12 +662,17 @@ const Chats = () => {
                                       <div className="flex space-x-3">
                                         <span className="font-semibold">
                                           {otherParticipant?.name &&
-                                          otherParticipant?.name.length > 15
-                                            ? `${otherParticipant?.name.slice(
-                                                0,
-                                                15
-                                              )}...`
-                                            : otherParticipant?.name}
+                                            (window.innerWidth < 412 &&
+                                            otherParticipant.name.length > 15
+                                              ? `${
+                                                  otherParticipant.name[0].toUpperCase() +
+                                                  otherParticipant.name.slice(
+                                                    1,
+                                                    15
+                                                  )
+                                                }...`
+                                              : otherParticipant.name[0] +
+                                                otherParticipant.name.slice(1))}
                                         </span>
                                         {chat.timeStamp && (
                                           <div
@@ -679,9 +690,7 @@ const Chats = () => {
                                               &nbsp;
                                             </span>
                                             <span className={``}>
-                                              {chat_formatTime(
-                                                chat?.lastUpdated
-                                              )}
+                                              {formatTime(chat?.lastUpdated)}
                                             </span>
                                           </div>
                                         )}
@@ -819,8 +828,8 @@ const Chats = () => {
                           );
                         })
                     ) : (
-                      <div className="flex flex-col h-full w-full items-center justify-center border-r mt-20">
-                        <CgSpinner size={25} className="animate-spin" />
+                      <div className="flex flex-col h-full w-full items-center justify-center mt-20">
+                        <CgSpinner size={45} className="animate-spin" />
                       </div>
                     )}
                   </div>
