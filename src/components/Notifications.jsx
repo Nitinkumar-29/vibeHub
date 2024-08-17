@@ -75,7 +75,7 @@ const Notifications = () => {
             <div className="flex items-center space-x-2">
               <span>Email at:</span>
               <span className="cursor-pointer text-blue-500 hover:underline">
-                vibeHub05@gmail.com
+                nimble2905@gmail.com
               </span>
             </div>
           </div>
