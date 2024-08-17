@@ -505,7 +505,7 @@ const Chats = () => {
                                                     10
                                                   )
                                                 }...`
-                                              : otherParticipant.name[0] +
+                                              : otherParticipant.name[0].toUpperCase() +
                                                 otherParticipant.name.slice(1))}
                                         </span>
                                         {chat.timeStamp && (
@@ -671,7 +671,7 @@ const Chats = () => {
                                                     15
                                                   )
                                                 }...`
-                                              : otherParticipant.name[0] +
+                                              : otherParticipant.name[0].toUpperCase() +
                                                 otherParticipant.name.slice(1))}
                                         </span>
                                         {chat.timeStamp && (
