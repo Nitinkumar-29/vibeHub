@@ -27,6 +27,7 @@ import { HighLightLinks } from "../utils/HighlightLinks";
 import { FiTrash } from "react-icons/fi";
 import { CgSpinner } from "react-icons/cg";
 import toast from "react-hot-toast";
+import { FaUser } from "react-icons/fa";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -325,11 +326,11 @@ const Chat = () => {
             to={`/users/${userId && userId}/profile`}
             className="flex items-center space-x-2"
           >
-            <img
+            {chatUserData?.img?<img
               src={chatUserData?.img}
               className="h-7 w-7 rounded-full object-cover "
               alt=""
-            />
+            />:<FaUser size={28} className="rounded-full"/>}
             <span>{chatUserData?.user_name}</span>
           </Link>
         </div>
@@ -340,7 +341,7 @@ const Chat = () => {
       {!loadingMessages ? (
         <div
           ref={messageContainerRef}
-          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-8" 
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-10 mb-8" 
           `}
         >
           {messages

@@ -18,6 +18,7 @@ import { FaUser } from "react-icons/fa";
 import { GoIssueClosed } from "react-icons/go";
 import { CgClose, CgSpinner } from "react-icons/cg";
 import { AuthContext } from "../context/AuthContext";
+import { formatTime } from "../utils/FormatTime";
 
 const Chats = () => {
   const {
@@ -462,386 +463,369 @@ const Chats = () => {
           </div>
           {!isSearchUsers && (
             <>
-              {allChats.length > 0 ? (
-                <div className="w-full">
-                  {activeTab === "requests" ? (
-                    <div className="flex flex-col space-y-2 w-full mt-2 border-t-[1px] border-zinc-900 px-2">
-                      {messageRequestChats && messageRequestChats.length > 0 ? (
-                        messageRequestChats
-                          ?.filter((chat) => chat.messageRequest === true)
-                          ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
-                          ?.map((chat) => {
-                            let otherParticipant = chat.participants.find(
-                              (participant) => participant.id !== currentUser
-                            );
-                            return (
-                              <div
-                                key={chat.id}
-                                className={` border-b-[1px] ${
-                                  theme === "dark"
-                                    ? "border-zinc-900"
-                                    : "border-zinc-200"
-                                } last:border-none relative group flex w-full items-center justify-between mt-2 p-2 rounded-t-md ${
-                                  theme === "dark"
-                                    ? "hover:bg-zinc-900"
-                                    : "hover:bg-zinc-100"
-                                } duration-200`}
-                              >
-                                {otherParticipant?.img && (
-                                  <div className="flex flex-col space-y-0 w-full max-w-[90%]">
-                                    <div className="flex items-center space-x-3">
+              <div className="w-full">
+                {activeTab === "requests" ? (
+                  <div className="flex flex-col space-y-2 w-full mt-2 border-t-[1px] border-zinc-900 px-2">
+                    {messageRequestChats && messageRequestChats.length > 0 ? (
+                      messageRequestChats
+                        ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
+                        ?.map((chat) => {
+                          let otherParticipant = chat.participants.find(
+                            (participant) => participant.id !== currentUser
+                          );
+                          return (
+                            <div
+                              key={chat.id}
+                              className={` relative group flex w-full items-center justify-between mt-2 p-2 rounded-md ${
+                                theme === "dark"
+                                  ? "hover:bg-zinc-900"
+                                  : "hover:bg-zinc-100"
+                              } duration-200`}
+                            >
+                              {otherParticipant && (
+                                <div className="flex flex-col space-y-0 w-full max-w-[90%]">
+                                  <div className="flex items-center space-x-3">
+                                    {otherParticipant?.img ? (
                                       <img
                                         src={otherParticipant?.img}
                                         className="h-12 w-12 object-cover rounded-full"
                                         alt=""
                                       />
-                                      <div className="flex flex-col justify-center -space-y-1">
-                                        <div className="flex space-x-3">
-                                          <span className="font-semibold">
-                                            {otherParticipant?.name &&
-                                            otherParticipant?.name.length > 15
-                                              ? `${otherParticipant?.name.slice(
-                                                  0,
-                                                  15
-                                                )}...`
-                                              : otherParticipant?.name}
-                                          </span>
-                                          {chat.timeStamp && (
-                                            <div
-                                              className={`${
-                                                theme === "dark"
-                                                  ? "text-gray-400"
-                                                  : "text-gray-400"
-                                              } text-sm mt-1`}
-                                            >
-                                              <span>
-                                                {currentUser ===
-                                                chat.lastMessage.senderId
-                                                  ? "sent"
-                                                  : "received"}
-                                                &nbsp;
-                                              </span>
-                                              <span className={``}>
-                                                {chat_formatTime(
-                                                  chat?.lastUpdated
-                                                )}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
+                                    ) : (
+                                      <FaUser
+                                        size={48}
+                                        className="rounded-full"
+                                      />
+                                    )}
+                                    <div className="flex flex-col justify-center -space-y-1">
+                                      <div className="flex space-x-3">
+                                        <span className="font-semibold">
+                                          {otherParticipant?.name}
+                                        </span>
+                                        {chat.timeStamp && (
+                                          <div
+                                            className={`${
+                                              theme === "dark"
+                                                ? "text-gray-400"
+                                                : "text-gray-400"
+                                            } text-sm mt-1`}
+                                          >
+                                            <span>
+                                              {currentUser ===
+                                              chat.lastMessage.senderId
+                                                ? "sent"
+                                                : "received"}
+                                              &nbsp;
+                                            </span>
+                                            <span className={``}>
+                                              {formatTime(chat?.lastUpdated)}
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
 
-                                        <div className="space-x-1">
-                                          {chat?.lastMessage?.message &&
-                                          chat?.lastMessage?.message.length >
-                                            50 ? (
-                                            chat?.lastMessage?.message
-                                              .slice(0, 48)
-                                              .trim("") + `...`
-                                          ) : chat?.lastMessage?.message ? (
-                                            <div>
-                                              {chat.lastMessageDeleted ? (
-                                                <span className="text-red-700 font-semibold">
-                                                  message deleted!
-                                                </span>
-                                              ) : (
-                                                <div>
-                                                  {chat?.messageReaction ? (
-                                                    <span className="text-sm">
-                                                      reacted {chat.reaction} to
-                                                      a message
-                                                    </span>
-                                                  ) : (
-                                                    <span
-                                                      className="font-sans"
-                                                      dangerouslySetInnerHTML={{
-                                                        __html: HighLightLinks(
-                                                          chat?.lastMessage
-                                                            ?.message
-                                                        ),
-                                                      }}
-                                                    />
-                                                  )}
-                                                </div>
-                                              )}
-                                            </div>
-                                          ) : chat?.lastMessage?.fileURLs &&
-                                            chat?.lastMessage?.fileURLs.length >
-                                              0 ? (
-                                            <div className="flex items-center space-x-1">
-                                              <IoAlbumsOutline />
-                                              <span>media</span>
-                                            </div>
-                                          ) : null}
-                                        </div>
+                                      <div className="space-x-1">
+                                        {chat?.lastMessage?.message &&
+                                        chat?.lastMessage?.message.length >
+                                          50 ? (
+                                          chat?.lastMessage?.message
+                                            .slice(0, 48)
+                                            .trim("") + `...`
+                                        ) : chat?.lastMessage?.message ? (
+                                          <div>
+                                            {chat.lastMessageDeleted ? (
+                                              <span className="text-red-700 font-semibold">
+                                                message deleted!
+                                              </span>
+                                            ) : (
+                                              <div>
+                                                {chat?.messageReaction ? (
+                                                  <span className="text-sm">
+                                                    reacted {chat.reaction} to a
+                                                    message
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    className="font-sans"
+                                                    dangerouslySetInnerHTML={{
+                                                      __html: HighLightLinks(
+                                                        chat?.lastMessage
+                                                          ?.message
+                                                      ),
+                                                    }}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : chat?.lastMessage?.fileURLs &&
+                                          chat?.lastMessage?.fileURLs.length >
+                                            0 ? (
+                                          <div className="flex items-center space-x-1">
+                                            <IoAlbumsOutline />
+                                            <span>media</span>
+                                          </div>
+                                        ) : null}
                                       </div>
                                     </div>
                                   </div>
-                                )}
-                                <div className="flex items-start space-x-2">
-                                  {
-                                    <IoCloseCircleOutline
-                                      color="red"
-                                      className="cursor-pointer"
-                                      onClick={() => deleteChat(chat.id)}
-                                      size={25}
-                                    />
-                                  }
-                                  {chat.lastMessage.receiverId ===
-                                    currentUser && (
-                                    <GoIssueClosed
-                                      size={23}
-                                      color="green"
-                                      className="cursor-pointer"
-                                      onClick={() =>
-                                        acceptMessageRequest(chat.id)
-                                      }
-                                    />
-                                  )}
                                 </div>
+                              )}
+                              <div className="flex items-start space-x-2">
+                                {
+                                  <IoCloseCircleOutline
+                                    color="red"
+                                    className="cursor-pointer"
+                                    onClick={() => deleteChat(chat.id)}
+                                    size={25}
+                                  />
+                                }
+                                {chat.lastMessage.receiverId ===
+                                  currentUser && (
+                                  <GoIssueClosed
+                                    size={23}
+                                    color="green"
+                                    className="cursor-pointer"
+                                    onClick={() =>
+                                      acceptMessageRequest(chat.id)
+                                    }
+                                  />
+                                )}
                               </div>
-                            );
-                          })
-                      ) : (
-                        <div className="flex flex-col h-full w-full items-center justify-center border-r mt-20">
-                          <span>No chat found</span>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col space-y-2 w-full mt-2 border-t-[1px] border-zinc-900 px-2">
-                      {allChats && allChats.length > 0 ? (
-                        allChats
-                          ?.filter(
-                            (chat) =>
-                              (chat?.participants.some(
-                                (participant) =>
-                                  participant.id !== currentUser &&
-                                  participant?.name
-                                    ?.toLowerCase()
-                                    .includes(query.trim().toLowerCase())
-                              ) ||
-                                chat?.lastMessage.message
-                                  .toLowerCase()
-                                  .includes(query.trim().toLowerCase())) &&
-                              (activeTab === "all"
-                                ? !chat.archiveBy?.includes(currentUser)
-                                : chat.archiveBy?.includes(currentUser)) &&
-                              !chat.messageRequest === true &&
-                              !currentUserData?.blockedChats?.includes(chat.id)
-                          )
-                          ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
-                          ?.map((chat) => {
-                            let otherParticipant = chat.participants.find(
-                              (participant) => participant.id !== currentUser
-                            );
-                            return (
-                              <div
-                                key={chat.id}
-                                className={` relative group flex w-full items-center justify-between mt-2 p-2 ${
-                                  theme === "dark"
-                                    ? "hover:bg-zinc-900"
-                                    : "hover:bg-zinc-100"
-                                } border-b-[1px] ${
-                                  theme === "dark"
-                                    ? "border-zinc-900"
-                                    : "border-zinc-200"
-                                } last:border-none rounded-t-md duration-200`}
-                              >
-                                {otherParticipant?.img && (
-                                  <Link
-                                    to={`/chat/${otherParticipant.id}/messages`}
-                                    className="flex flex-col space-y-0 w-full max-w-[90%]"
-                                  >
-                                    <div className="flex items-center space-x-3">
-                                      <img
-                                        src={otherParticipant?.img}
-                                        className="h-12 w-12 object-cover rounded-full"
-                                        alt=""
-                                      />
-                                      <div className="flex flex-col justify-center -space-y-1">
-                                        <div className="flex space-x-3">
-                                          <span className="font-semibold">
-                                            {otherParticipant?.name &&
-                                            otherParticipant?.name.length > 15
-                                              ? `${otherParticipant?.name.slice(
-                                                  0,
-                                                  15
-                                                )}...`
-                                              : otherParticipant?.name}
-                                          </span>
-                                          {chat.timeStamp && (
-                                            <div
-                                              className={`${
-                                                theme === "dark"
-                                                  ? "text-gray-400"
-                                                  : "text-gray-400"
-                                              } text-sm mt-1`}
-                                            >
-                                              <span>
-                                                {currentUser ===
-                                                chat.lastMessage.senderId
-                                                  ? "sent"
-                                                  : "received"}
-                                                &nbsp;
-                                              </span>
-                                              <span className={``}>
-                                                {chat_formatTime(
-                                                  chat?.lastUpdated
-                                                )}
-                                              </span>
-                                            </div>
-                                          )}
-                                        </div>
-
-                                        <div className="space-x-1">
-                                          {chat?.lastMessage?.message &&
-                                          chat?.lastMessage?.message.length >
-                                            50 ? (
-                                            chat?.lastMessage?.message
-                                              .slice(0, 48)
-                                              .trim("") + `...`
-                                          ) : chat?.lastMessage?.message ? (
-                                            <div>
-                                              {chat.lastMessageDeleted ? (
-                                                <span className="text-red-700 font-semibold">
-                                                  message deleted!
-                                                </span>
-                                              ) : (
-                                                <div>
-                                                  {chat?.messageReaction ? (
-                                                    <span className="text-sm">
-                                                      reacted {chat.reaction} to
-                                                      a message
-                                                    </span>
-                                                  ) : (
-                                                    <span
-                                                      className="font-sans"
-                                                      dangerouslySetInnerHTML={{
-                                                        __html: HighLightLinks(
-                                                          chat?.lastMessage
-                                                            ?.message
-                                                        ),
-                                                      }}
-                                                    />
-                                                  )}
-                                                </div>
+                            </div>
+                          );
+                        })
+                    ) : (
+                      <div className="flex flex-col h-full w-full items-center justify-center border-r mt-20">
+                        <span>No chat found</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2 w-full mt-2 border-t-[1px] border-zinc-900 px-2">
+                    {allChats && allChats.length > 0 ? (
+                      allChats
+                        ?.filter(
+                          (chat) =>
+                            (chat?.participants.some(
+                              (participant) =>
+                                participant.id !== currentUser &&
+                                participant?.name
+                                  ?.toLowerCase()
+                                  .includes(query.trim().toLowerCase())
+                            ) ||
+                              chat?.lastMessage.message
+                                .toLowerCase()
+                                .includes(query.trim().toLowerCase())) &&
+                            (activeTab === "all"
+                              ? !chat.archiveBy?.includes(currentUser)
+                              : chat.archiveBy?.includes(currentUser)) &&
+                            !chat.messageRequest === true &&
+                            !currentUserData?.blockedChats?.includes(chat.id)
+                        )
+                        ?.sort((a, b) => b.lastUpdated - a.lastUpdated)
+                        ?.map((chat) => {
+                          let otherParticipant = chat.participants.find(
+                            (participant) => participant.id !== currentUser
+                          );
+                          return (
+                            <div
+                              key={chat.id}
+                              className={` relative group flex w-full items-center justify-between mt-2 p-2 ${
+                                theme === "dark"
+                                  ? "hover:bg-zinc-900"
+                                  : "hover:bg-zinc-100"
+                              } border-b-[1px] ${
+                                theme === "dark"
+                                  ? "border-zinc-900"
+                                  : "border-zinc-200"
+                              } last:border-none rounded-t-md duration-200`}
+                            >
+                              {otherParticipant?.img && (
+                                <Link
+                                  to={`/chat/${otherParticipant.id}/messages`}
+                                  className="flex flex-col space-y-0 w-full max-w-[90%]"
+                                >
+                                  <div className="flex items-center space-x-3">
+                                    <img
+                                      src={otherParticipant?.img}
+                                      className="h-12 w-12 object-cover rounded-full"
+                                      alt=""
+                                    />
+                                    <div className="flex flex-col justify-center -space-y-1">
+                                      <div className="flex space-x-3">
+                                        <span className="font-semibold">
+                                          {otherParticipant?.name &&
+                                          otherParticipant?.name.length > 15
+                                            ? `${otherParticipant?.name.slice(
+                                                0,
+                                                15
+                                              )}...`
+                                            : otherParticipant?.name}
+                                        </span>
+                                        {chat.timeStamp && (
+                                          <div
+                                            className={`${
+                                              theme === "dark"
+                                                ? "text-gray-400"
+                                                : "text-gray-400"
+                                            } text-sm mt-1`}
+                                          >
+                                            <span>
+                                              {currentUser ===
+                                              chat.lastMessage.senderId
+                                                ? "sent"
+                                                : "received"}
+                                              &nbsp;
+                                            </span>
+                                            <span className={``}>
+                                              {chat_formatTime(
+                                                chat?.lastUpdated
                                               )}
-                                            </div>
-                                          ) : chat?.lastMessage?.fileURLs &&
-                                            chat?.lastMessage?.fileURLs.length >
-                                              0 ? (
-                                            <div className="flex items-center space-x-1">
-                                              <IoAlbumsOutline />
-                                              <span>media</span>
-                                            </div>
-                                          ) : null}
-                                        </div>
+                                            </span>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      <div className="space-x-1">
+                                        {chat?.lastMessage?.message &&
+                                        chat?.lastMessage?.message.length >
+                                          50 ? (
+                                          chat?.lastMessage?.message
+                                            .slice(0, 48)
+                                            .trim("") + `...`
+                                        ) : chat?.lastMessage?.message ? (
+                                          <div>
+                                            {chat.lastMessageDeleted ? (
+                                              <span className="text-red-700 font-semibold">
+                                                message deleted!
+                                              </span>
+                                            ) : (
+                                              <div>
+                                                {chat?.messageReaction ? (
+                                                  <span className="text-sm">
+                                                    reacted {chat.reaction} to a
+                                                    message
+                                                  </span>
+                                                ) : (
+                                                  <span
+                                                    className="font-sans"
+                                                    dangerouslySetInnerHTML={{
+                                                      __html: HighLightLinks(
+                                                        chat?.lastMessage
+                                                          ?.message
+                                                      ),
+                                                    }}
+                                                  />
+                                                )}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ) : chat?.lastMessage?.fileURLs &&
+                                          chat?.lastMessage?.fileURLs.length >
+                                            0 ? (
+                                          <div className="flex items-center space-x-1">
+                                            <IoAlbumsOutline />
+                                            <span>media</span>
+                                          </div>
+                                        ) : null}
                                       </div>
                                     </div>
-                                  </Link>
-                                )}
-                                <button
-                                  ref={chatMenuButtonRef}
-                                  className="opacity-0 group-hover:opacity-100 z-10"
-                                >
-                                  <span>
-                                    {chatMenu === true &&
-                                    chatMenuId === chat.id ? (
-                                      <IoCloseCircle
-                                        onClick={() => {
-                                          setChatMenu(false);
-                                        }}
-                                        size={25}
-                                      />
-                                    ) : (
-                                      <IoEllipsisVerticalSharp
-                                        onClick={() => {
-                                          setChatMenuId(chat.id);
-                                          setChatMenu(true);
-                                        }}
-                                        size={25}
-                                      />
-                                    )}
-                                  </span>
-                                </button>
-                                {chatMenu && chatMenuId === chat.id && (
-                                  <div
-                                    ref={chatMenuRef}
-                                    className="z-20 flex flex-col items-start space-y-1 bg-opacity-40 backdrop-blur-3xl bg-zinc-800 rounded-md p-4 absolute top-16 right-0"
-                                  >
-                                    {chat?.archiveBy?.includes(currentUser) ? (
-                                      <button
-                                        onClick={async () => {
-                                          await handleRemoveArchiveChat(
-                                            chat.id
-                                          );
-                                          setChatMenu(false);
-                                        }}
-                                        className="flex space-x-1 items-center p-2"
-                                      >
-                                        <MdUnarchive />
-                                        <span>Remove</span>
-                                      </button>
-                                    ) : (
-                                      <button
-                                        onClick={async () => {
-                                          await archiveChat(chat.id);
-                                          setChatMenu(false);
-                                        }}
-                                        className="flex space-x-1 items-center p-2"
-                                      >
-                                        <MdArchive />
-                                        <span>Archive</span>
-                                      </button>
-                                    )}
-
-                                    <button
+                                  </div>
+                                </Link>
+                              )}
+                              <button
+                                ref={chatMenuButtonRef}
+                                className="opacity-0 group-hover:opacity-100 z-10"
+                              >
+                                <span>
+                                  {chatMenu === true &&
+                                  chatMenuId === chat.id ? (
+                                    <IoCloseCircle
                                       onClick={() => {
-                                        deleteChat(chat.id);
+                                        setChatMenu(false);
+                                      }}
+                                      size={25}
+                                    />
+                                  ) : (
+                                    <IoEllipsisVerticalSharp
+                                      onClick={() => {
+                                        setChatMenuId(chat.id);
+                                        setChatMenu(true);
+                                      }}
+                                      size={25}
+                                    />
+                                  )}
+                                </span>
+                              </button>
+                              {chatMenu && chatMenuId === chat.id && (
+                                <div
+                                  ref={chatMenuRef}
+                                  className="z-20 flex flex-col items-start space-y-1 bg-opacity-40 backdrop-blur-3xl bg-zinc-800 rounded-md p-4 absolute top-16 right-0"
+                                >
+                                  {chat?.archiveBy?.includes(currentUser) ? (
+                                    <button
+                                      onClick={async () => {
+                                        await handleRemoveArchiveChat(chat.id);
                                         setChatMenu(false);
                                       }}
                                       className="flex space-x-1 items-center p-2"
                                     >
-                                      <BiTrashAlt />
-                                      <span>Delete</span>
+                                      <MdUnarchive />
+                                      <span>Remove</span>
                                     </button>
+                                  ) : (
                                     <button
-                                      onClick={() => {
-                                        handleBlock(
-                                          otherParticipant.id,
-                                          chat.id
-                                        );
+                                      onClick={async () => {
+                                        await archiveChat(chat.id);
                                         setChatMenu(false);
                                       }}
-                                      className="flex space-x-1 items-center p-2 text-red-700"
+                                      className="flex space-x-1 items-center p-2"
                                     >
-                                      <BiBlock />
-                                      <span>
-                                        {currentUserData?.blockedUsers?.includes(
-                                          otherParticipant.id
-                                        )
-                                          ? "UnBlock"
-                                          : "Block"}
-                                      </span>
+                                      <MdArchive />
+                                      <span>Archive</span>
                                     </button>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })
-                      ) : (
-                        <div className="flex flex-col h-full w-full items-center justify-center border-r mt-20">
-                          <CgSpinner size={25} className="animate-spin" />
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex justify-center items-center w-full h-40 text-zinc-600">
-                  <span>No chat found</span>
-                </div>
-              )}
+                                  )}
+
+                                  <button
+                                    onClick={() => {
+                                      deleteChat(chat.id);
+                                      setChatMenu(false);
+                                    }}
+                                    className="flex space-x-1 items-center p-2"
+                                  >
+                                    <BiTrashAlt />
+                                    <span>Delete</span>
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleBlock(otherParticipant.id, chat.id);
+                                      setChatMenu(false);
+                                    }}
+                                    className="flex space-x-1 items-center p-2 text-red-700"
+                                  >
+                                    <BiBlock />
+                                    <span>
+                                      {currentUserData?.blockedUsers?.includes(
+                                        otherParticipant.id
+                                      )
+                                        ? "UnBlock"
+                                        : "Block"}
+                                    </span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
+                    ) : (
+                      <div className="flex flex-col h-full w-full items-center justify-center border-r mt-20">
+                        <CgSpinner size={25} className="animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
