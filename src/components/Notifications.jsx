@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { GoIssueClosed } from "react-icons/go";
 import { IoCloseCircleOutline } from "react-icons/io5";
@@ -13,10 +13,31 @@ const Notifications = () => {
   const { setFollowRequestsData, followRequestsData, acceptFollowRequest } =
     useContext(AuthContext);
   const currentUser = localStorage.getItem("currentUser");
-  const [infoToggle, setInfoToggle] = useState(true);
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
-  
+
+  const [infoBoxOpen, setInfoBoxOpen] = useState(false);
+  const infoBoxRef = useRef(null);
+
+  // Handle outside click toggle
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is outside of the referenced element
+      if (
+        infoBoxOpen === true &&
+        infoBoxRef.current &&
+        !infoBoxRef.current.contains(event.target)
+      ) {
+        setInfoBoxOpen(false); // Set to false if clicked outside
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [infoBoxOpen]);
+
   // reject follow request
   const rejectRequest = async (id) => {
     toast.loading("processing...");
@@ -55,15 +76,17 @@ const Notifications = () => {
             <div className="text-lg font-semibold">Notifications</div>
           </div>
           <MdOutlineInfo
-            onClick={() => {
-              setInfoToggle(!infoToggle);
+            onClick={(event) => {
+              event.stopPropagation(); // Prevents the click from closing the info box
+              setInfoBoxOpen(!infoBoxOpen);
             }}
             className="cursor-pointer"
             size={25}
           />
           <div
+            ref={infoBoxRef}
             className={`${
-              infoToggle ? "hidden" : "flex"
+              infoBoxOpen === false ? "hidden" : "flex"
             } text-sm text-zinc-600 ${
               theme === "dark" ? "bg-zinc-900" : "bg-gray-200"
             } flex flex-wrap absolute top-12 max-w-[100%] border-[1px] border-zinc-600 rounded-md w-fit right-0 mx-auto min-h-20 p-2`}
@@ -80,10 +103,10 @@ const Notifications = () => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col w-full items-start mt-10 px-2">
+        <div className="flex flex-col w-full items-start mt-4 px-2">
           {followRequestsData.length !== 0 && (
-            <span className="font-semibold ">Follow Requests</span>
-          )}{" "}
+            <span className="font-semibold my-2">Follow Requests</span>
+          )}
           {followRequestsData.length > 0 ? (
             followRequestsData.map((data) => {
               return (
@@ -91,13 +114,13 @@ const Notifications = () => {
                   key={data.id}
                   className={`mt-2 flex items-center justify-start space-x-2 w-full `}
                 >
-                  <div className="flex space-x-2 items-center">
+                  <div className="flex space-x-2 justify-center items-center w-full">
                     <img
                       src={data?.img}
                       alt=""
-                      className="h-8 w-8 rounded-full"
+                      className="h-10 min-w-10 max-w-10 rounded-full"
                     />
-                    <div className="flex items-center space-x-1 flex-wrap justify-start">
+                    <div className="flex items-center space-x-1 flex-wrap  justify-start leading-5">
                       <span className="font-medium"> {data?.user_name}</span>
                       <span className="text-zinc-300">
                         requested to follow you
@@ -108,11 +131,11 @@ const Notifications = () => {
                     <IoCloseCircleOutline
                       className="cursor-pointer text-red-600"
                       onClick={() => rejectRequest(data.id)}
-                      size={23}
+                      size={30}
                     />
                     <GoIssueClosed
                       className="cursor-pointer text-green-600"
-                      size={20}
+                      size={27}
                       onClick={() => acceptFollowRequest(data.id)}
                     />
                   </div>
@@ -129,5 +152,4 @@ const Notifications = () => {
     </>
   );
 };
-
 export default Notifications;

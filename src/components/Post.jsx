@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
-import { BsHeartFill } from "react-icons/bs";
+import { BsEmojiSmile, BsHeartFill } from "react-icons/bs";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { BiCopy, BiLoader, BiPause, BiPlay } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
@@ -17,6 +17,8 @@ import { PostLink } from "../utils/PostedLinks";
 import { db } from "../firebase";
 import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { AuthContext } from "../context/AuthContext";
+import { MdOutlineEmojiEmotions } from "react-icons/md";
+import EmojiPicker from "emoji-picker-react";
 
 const Post = () => {
   const {
@@ -41,6 +43,7 @@ const Post = () => {
   const videoRef = useRef(null);
   const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
 
   const handlePlayPause = () => {
     videoRef.current.click();
@@ -283,43 +286,75 @@ const Post = () => {
                   theme === "dark" ? "border-gray-400" : "border-gray-800"
                 }`}
               >
-                <div className="flex space-x-1 items-center w-full">
+                <div className="relative flex space-x-1 items-center w-full">
                   <img
                     src={currentUserData && currentUserData?.img}
-                    className="h-6 w-6 rounded-full"
+                    className="h-8 w-8 rounded-full"
                     alt=""
                   />
                   <input
-                  type="text"
-                  placeholder="Post a comment"
-                  className={`outline-none  w-full bg-inherit p-2`}
-                  name="commentText"
-                  required
-                  onChange={(e) => {
-                    setPostComment({
-                      ...postComment,
-                      [e.target.name]: e.target.value,
-                    });
-                  }}
-                  value={postComment.commentText}
-                />
+                    type="text"
+                    placeholder="Post a comment"
+                    className={`outline-none w-full bg-inherit p-2`}
+                    name="commentText"
+                    required
+                    onChange={(e) => {
+                      setPostComment({
+                        ...postComment,
+                        [e.target.name]: e.target.value,
+                      });
+                    }}
+                    value={postComment.commentText}
+                  />
+                  <div
+                    className={`z-10 ${
+                      emojiPickerOpen === false ? "hidden" : "flex"
+                    } self-center absolute bottom-14 mx-auto w-5/6`}
+                  >
+                    <EmojiPicker
+                      reactionsDefaultOpen={emojiPickerOpen}
+                      allowExpandReactions={emojiPickerOpen}
+                      emojiStyle="google"
+                      onEmojiClick={(event) => {
+                        setEmojiPickerOpen(false);
+                        setPostComment((prev) => ({
+                          ...prev,
+                          commentText: prev.commentText + event.emoji,
+                        }));
+                        console.log(postComment.commentText, postComment);
+                      }}
+                      height={400}
+                    />
+                  </div>
                 </div>
-                <button
-                  onClick={postCommentById}
-                  className="p-2 rounded-md duration-200 cursor-pointer outline-none"
-                >
-                  {isPublished === true && <GoPaperAirplane size={20} />}
-                  {isPublished === false && (
-                    <BiLoader size={20} className="animate-spin" />
-                  )}
-                </button>
+
+                <div className="relative flex space-x-1 items-center">
+                  <BsEmojiSmile
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setEmojiPickerOpen(!emojiPickerOpen);
+                    }}
+                    size={20}
+                  />
+                  <button
+                    disabled={postComment.commentText.length === 0}
+                    onClick={postCommentById}
+                    className={`p-2 rounded-md duration-200 ${
+                      postComment.commentText.length === 0
+                        ? "cursor-not-allowed"
+                        : "cursor-pointer"
+                    } outline-none`}
+                  >
+                    {isPublished === true && <GoPaperAirplane size={25} />}
+                    {isPublished === false && (
+                      <BiLoader size={20} className="animate-spin" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col space-y-2 w-full">
                 {postComments.length > 0 && (
-                  <div>
-                    {" "}
-                    <span className="w-full text-lg px-4">Comments&nbsp;</span>
-                  </div>
+                  <span className="w-full text-lg px-4">Comments&nbsp;</span>
                 )}
                 {postComments
                   ?.sort((a, b) => b.timeStamp - a.timeStamp)
@@ -327,9 +362,9 @@ const Post = () => {
                     return (
                       <div
                         key={comment.id}
-                        className="flex flex-col items-center space-y-2 p-2 rounded-ms w-full"
+                        className={`flex flex-col items-center space-y-2 p-2 w-full border-b-[1px] border-zinc-600 last:border-b-0`}
                       >
-                        <div className="flex w-full items-start justify-between px-2">
+                        <div className="flex w-full items-center justify-between px-2">
                           {
                             <div className="flex w-full justify-between items-center">
                               <div className="flex items-center space-x-1">
@@ -392,14 +427,22 @@ const Post = () => {
                             (currentUser &&
                               currentUser === comment?.userId)) && (
                             <FiTrash2
-                              className="cursor-pointer"
+                              className={`cursor-pointer ${
+                                theme === "dark"
+                                  ? "text-zinc-300"
+                                  : "text-zinc-900"
+                              }`}
                               onClick={() =>
                                 handleDeleteComment(comment.id, id)
                               }
                             />
                           )}
                         </div>
-                        <div className="w-full tracking-tighter px-2">
+                        <div
+                          className={`w-full tracking-tighter px-2 ${
+                            theme === "dark" ? "text-zinc-400" : "text-zinc-900"
+                          }`}
+                        >
                           {comment.comment}
                         </div>
                         <div className="flex items-center w-full px-2 space-x-4">
