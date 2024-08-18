@@ -65,7 +65,6 @@ export const PostProvider = ({ children }) => {
       const postRef = doc(db, "posts", postId);
       const unsubscribePostData = onSnapshot(postRef, async (doc) => {
         const postDataWithId = doc.exists ? doc.data() : {};
-        console.log(postData);
         setPostData(postDataWithId);
       });
       return () => unsubscribePostData();
@@ -474,66 +473,6 @@ export const PostProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    if (!postId) return;
-    const postRef = doc(db, "posts", postId);
-    const unsubscribe = onSnapshot(postRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const postData = docSnap.data();
-
-        // Update 'homePagePosts'
-        const updatedHomePagePosts = homePagePosts.map((post) =>
-          post.id === postId ? { ...post, likes: postData.likes } : post
-        );
-        setHomePagePosts(updatedHomePagePosts);
-        // Update 'otherPublicPostsHomePage'
-        setOtherPublicPostsHomePage((prev) =>
-          prev?.map((post) =>
-            post?.id === postId ? { ...post, likes: postData.likes } : post
-          )
-        );
-        // Update 'userPosts'
-        setUserPosts((prevUserPosts) =>
-          prevUserPosts?.map((post) =>
-            post?.id === postId ? { ...post, likes: postData.likes } : post
-          )
-        );
-        // Update 'likedPosts'
-        if (postData.likes.includes(currentUser)) {
-          setLikedPosts((prevLikedPosts) => {
-            // If the post is already in likedPosts, update it
-            const postIndex = prevLikedPosts.findIndex(
-              (post) => post.id === postId
-            );
-            if (postIndex > -1) {
-              return prevLikedPosts.map((post) =>
-                post.id === postId ? { ...post, likes: postData.likes } : post
-              );
-            } else {
-              // If the post is not in likedPosts, add it
-              return [...prevLikedPosts, { ...postData, id: postId }];
-            }
-          });
-        } else {
-          // If the post is unliked, remove it from likedPosts
-          setLikedPosts((prevLikedPosts) =>
-            prevLikedPosts.filter((post) => post.id !== postId)
-          );
-        }
-      }
-    });
-
-    return () => unsubscribe(); // Clean up the subscription
-    // eslint-disable-next-line
-  }, [
-    postId,
-    homePagePosts,
-    setHomePagePosts,
-    setOtherPublicPostsHomePage,
-    setUserPosts,
-    setLikedPosts,
-  ]);
-
   // save post handle
   const handleSavePost = async (id) => {
     if (!id) return;
@@ -557,64 +496,100 @@ export const PostProvider = ({ children }) => {
     }
   };
 
+  // onsnapshot method for liked post and saved post  
   useEffect(() => {
     if (!postId) return;
+  
     const postRef = doc(db, "posts", postId);
+  
     const unsubscribe = onSnapshot(postRef, (docSnap) => {
       if (docSnap.exists()) {
         const postData = docSnap.data();
-
-        // Update homePagePosts
-        const updatedPosts = homePagePosts.map((post) =>
-          post.id === postId ? { ...post, saves: postData.saves } : post
+  
+        // Update 'homePagePosts'
+        const updatedHomePagePosts = homePagePosts.map((post) =>
+          post.id === postId
+            ? { ...post, likes: postData.likes, saves: postData.saves }
+            : post
         );
-        setHomePagePosts(updatedPosts);
-        // Update userSavedPosts
-        setUserPosts((prev) =>
-          prev?.map((post) =>
-            post?.id === postId ? { ...post, saves: postData.saves } : post
+        setHomePagePosts(updatedHomePagePosts);
+  
+        // Update 'userPosts'
+        setUserPosts((prevUserPosts) =>
+          prevUserPosts?.map((post) =>
+            post?.id === postId
+              ? { ...post, likes: postData.likes, saves: postData.saves }
+              : post
           )
         );
-        // Update userSavedPosts
+  
+        // Update 'otherPublicPostsHomePage'
+        setOtherPublicPostsHomePage((prev) =>
+          prev?.map((post) =>
+            post?.id === postId
+              ? { ...post, likes: postData.likes, saves: postData.saves }
+              : post
+          )
+        );
+  
+        // Update 'likedPosts'
+        if (postData.likes.includes(currentUser)) {
+          setLikedPosts((prevLikedPosts) => {
+            const postIndex = prevLikedPosts.findIndex(
+              (post) => post.id === postId
+            );
+            if (postIndex > -1) {
+              return prevLikedPosts.map((post) =>
+                post.id === postId
+                  ? { ...post, likes: postData.likes, saves: postData.saves }
+                  : post
+              );
+            } else {
+              return [...prevLikedPosts, { ...postData, id: postId }];
+            }
+          });
+        } else {
+          setLikedPosts((prevLikedPosts) =>
+            prevLikedPosts.filter((post) => post.id !== postId)
+          );
+        }
+  
+        // Update 'savedPosts'
         if (postData.saves.includes(currentUser)) {
           setSavedPosts((prevSavedPosts) => {
-            // If the post is already in userSavedPosts, update it
             const postIndex = prevSavedPosts.findIndex(
               (post) => post.id === postId
             );
             if (postIndex > -1) {
               return prevSavedPosts.map((post) =>
-                post.id === postId ? { ...post, saves: postData.saves } : post
+                post.id === postId
+                  ? { ...post, likes: postData.likes, saves: postData.saves }
+                  : post
               );
             } else {
-              // If the post is not in userSavedPosts, add it
               return [...prevSavedPosts, { ...postData, id: postId }];
             }
           });
         } else {
-          // If the post is unsaved, remove it from userSavedPosts
           setSavedPosts((prevSavedPosts) =>
             prevSavedPosts.filter((post) => post.id !== postId)
           );
         }
-        // Update otherImageSavePosts
-        setOtherPublicPostsHomePage((prev) =>
-          prev?.map((post) =>
-            post?.id === postId ? { ...post, saves: postData.saves } : post
-          )
-        );
       }
     });
-
-    return () => unsubscribe(); // Clean up the listener on unmount
+  
+    return () => unsubscribe();
     // eslint-disable-next-line
   }, [
     postId,
     homePagePosts,
     setHomePagePosts,
     setOtherPublicPostsHomePage,
+    setUserPosts,
+    setLikedPosts,
     setSavedPosts,
   ]);
+  
 
   const fetchHomePagePosts = async () => {
     setPostsLoading(true);
@@ -680,11 +655,7 @@ export const PostProvider = ({ children }) => {
       otherUsersPosts.sort((a, b) => b.timeStamp - a.timeStamp);
 
       // Combine the categories: current user's posts, followed users' posts, and other users' posts
-      const combinedPosts = [
-        // sortedPosts,
-        ...currentUserPosts,
-        ...followedUsersPosts,
-      ];
+      const combinedPosts = [...currentUserPosts, ...followedUsersPosts];
 
       setPostsLoading(false);
       setHomePagePosts(combinedPosts);
@@ -695,7 +666,6 @@ export const PostProvider = ({ children }) => {
         console.error("Quota exceeded. Please try again later.");
       }
       setError("Server down, Please try again later");
-
       setPostsLoading(false);
     }
   };
@@ -743,25 +713,31 @@ export const PostProvider = ({ children }) => {
   };
 
   const handleDeletePost = async (id) => {
-    const postRef = doc(db, "posts", id);
-    // const postSnap = await getDoc(postRef);
-    toast.loading("deleting post");
-    // Delete all files in the user's posts directory
-    const postStorageRef = ref(storage, id);
-    const postListResult = await listAll(postStorageRef);
+    if (!id) return;
+    try {
+      const postRef = doc(db, "posts", id);
+      // const postSnap = await getDoc(postRef);
+      toast.loading("deleting post");
+      // Delete all files in the user's posts directory
+      const postStorageRef = ref(storage, id);
+      const postListResult = await listAll(postStorageRef);
 
-    const postDeletePromises = postListResult.items.map((itemRef) => {
-      return deleteObject(itemRef);
-    });
-    await Promise.all(postDeletePromises);
-    await deleteDoc(postRef);
-    const postCommentsRef = doc(db, "postComments", id);
-    await deleteDoc(postCommentsRef);
-    toast.dismiss();
-    toast.success("Post deleted");
-    handleFetchUserPosts();
-    fetchHomePagePosts();
+      const postDeletePromises = postListResult.items.map((itemRef) => {
+        return deleteObject(itemRef);
+      });
+      await Promise.all(postDeletePromises);
+      await deleteDoc(postRef);
+      const postCommentsRef = doc(db, "postComments", id);
+      await deleteDoc(postCommentsRef);
+      toast.dismiss();
+      toast.success("Post deleted");
+      handleFetchUserPosts();
+      fetchHomePagePosts();
+    } catch (error) {
+      console.error(error);
+    }
   };
+
   return (
     <PostContext.Provider
       value={{

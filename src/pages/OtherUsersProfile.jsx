@@ -467,34 +467,39 @@ const OtherUsersProfile = () => {
               }}
             ></div>
           </div>
-          <div className="flex justify-between space-x-6 w-full">
-            <button
-              onClick={() => handleFollow(userId)}
-              className={` px-3 py-1 ${
-                theme === "dark" ? "border-zinc-600" : "border-zinc-950"
-              } border-[1px] rounded-md w-full text-center`}
-            >
-              {!data?.followers?.includes(currentUser) &&
-              !data?.followRequests?.includes(currentUser) ? (
-                <span className="text-blue-600">Follow</span>
-              ) : (
-                <span className="text-orange-600">
-                  {data?.followRequests?.includes(currentUser) &&
-                  data?.accountType === "private"
-                    ? "Requested"
-                    : "Following"}
-                </span>
-              )}
-            </button>
-            <Link
-              to={`/chat/${userId}/messages`}
-              className={`px-3 py-1 ${
-                theme === "dark" ? "border-zinc-600" : "border-zinc-950"
-              } border-[1px] rounded-md w-full text-center`}
-            >
-              Message
-            </Link>
-          </div>
+          {data.length !== 0 && (
+            <div className="flex justify-between space-x-6 w-full">
+              <button
+                disabled={data?.length === 0}
+                onClick={() => handleFollow(userId)}
+                className={` px-3 py-1 ${
+                  data?.length === 0 ? "cursor-not-allowed" : ""
+                } ${
+                  theme === "dark" ? "border-zinc-600" : "border-zinc-950"
+                } border-[1px] rounded-md w-full text-center`}
+              >
+                {!data?.followers?.includes(currentUser) &&
+                !data?.followRequests?.includes(currentUser) ? (
+                  <span className="text-blue-600">Follow</span>
+                ) : (
+                  <span className="text-orange-600">
+                    {data?.followRequests?.includes(currentUser) &&
+                    data?.accountType === "private"
+                      ? "Requested"
+                      : "Following"}
+                  </span>
+                )}
+              </button>
+              <Link
+                to={`/chat/${userId}/messages`}
+                className={`px-3 py-1 ${
+                  theme === "dark" ? "border-zinc-600" : "border-zinc-950"
+                } border-[1px] rounded-md w-full text-center`}
+              >
+                Message
+              </Link>
+            </div>
+          )}
         </div>
         {data?.accountType !== "private" ||
         data?.followers?.includes(currentUser) ? (
