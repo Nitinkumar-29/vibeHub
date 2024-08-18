@@ -42,7 +42,7 @@ const UserProfile = () => {
       className={`flex flex-col items-center space-y-6 h-full overflow-auto hideScrollbar w-full max-w-[430px]`}
     >
       <div
-        className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 bg-inherit ${
+        className={`z-20 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 bg-inherit ${
           theme === "dark"
             ? "bg-zinc-black text-zinc-100"
             : "bg-zinc-100 text-black"

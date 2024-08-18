@@ -359,14 +359,16 @@ const CreatePost = () => {
                         (mentionedUser) => mentionedUser.userId === user.id
                       )
                   ).length >= 1 && <span>Users</span>}
-                  <div className="space-y-3">
+                  <div className="space-y-1 w-full">
                     {allUsers
                       .filter(
                         (user) =>
                           user.id !== currentUser &&
                           !mentionedUsers.some(
                             (mentionedUser) => mentionedUser.userId === user.id
-                          )
+                          ) &&
+                          (currentUserData?.following.includes(user.id) ||
+                            user.accountType !== "private")
                       )
                       .map((user) => (
                         <div
@@ -374,7 +376,11 @@ const CreatePost = () => {
                           onClick={() =>
                             handleUserClick(user?.user_name, user.id)
                           }
-                          className="flex items-center duration-300 space-x-2 border-zinc-900 cursor-pointer hover:border-zinc-400 border-[1px] rounded-lg p-1"
+                          className={`flex items-center duration-300 space-x-2 cursor-pointer ${
+                            theme === "dark"
+                              ? "hover:bg-zinc-800"
+                              : "hover:bg-zinc-200"
+                          } rounded-lg p-2 w-full`}
                         >
                           {user?.img ? (
                             <img
@@ -414,7 +420,9 @@ const CreatePost = () => {
               </div>
 
               <span className="w-full text-zinc-500 pb-2">
-                {files.length===0?"Attached media will be displayed here":`Attached media ${files.length}`}
+                {files.length === 0
+                  ? "Attached media will be displayed here"
+                  : `Attached media ${files.length}`}
               </span>
 
               <div className="flex space-x-2 w-full max-h-[38vh] p-1 overflow-x-auto hideScrollbar">

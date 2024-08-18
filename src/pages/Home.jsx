@@ -1,7 +1,8 @@
-import PostContext from "../context/PostContext/PostContext";
-import "../styles/overflow_scroll.css";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import PostContext from "../context/PostContext/PostContext";
+import ThemeContext from "../context/Theme/ThemeContext";
+import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 import { Carousel } from "react-responsive-carousel";
 import { SlBubble, SlHeart, SlPaperPlane } from "react-icons/sl";
 import { BsDot, BsHeartFill } from "react-icons/bs";
@@ -11,13 +12,11 @@ import { PiBookmarkSimpleThin } from "react-icons/pi";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { BiDownload, BiPause, BiPlay } from "react-icons/bi";
 import { formatTime } from "../utils/FormatTime";
-import ThemeContext from "../context/Theme/ThemeContext";
 import { CgSpinner } from "react-icons/cg";
-import { HighLightLinks } from "../utils/HighlightLinks";
 import { IoNotificationsSharp } from "react-icons/io5";
-import toast from "react-hot-toast";
-import { AuthContext } from "../context/AuthContext";
 import { PostLink } from "../utils/PostedLinks";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import "../styles/overflow_scroll.css";
 
 const Home = () => {
   const {
