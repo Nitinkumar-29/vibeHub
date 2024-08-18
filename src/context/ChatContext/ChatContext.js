@@ -108,7 +108,6 @@ export const ChatProvider = ({ children }) => {
           participants: participantsData,
         });
       }
-      console.log(chats);
       setMessageRequestChats(chats); // Assume setMessageRequestChats is a state setter function to update the UI
     } catch (error) {
       console.error("Error fetching message request chats:", error);

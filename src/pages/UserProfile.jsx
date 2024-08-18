@@ -5,14 +5,13 @@ import PostContext from "../context/PostContext/PostContext";
 import ThemeContext from "../context/Theme/ThemeContext";
 import {
   IoArchive,
-  IoArchiveOutline,
   IoLockClosedOutline,
   IoLockOpenOutline,
   IoSaveSharp,
 } from "react-icons/io5";
 import { BsHeartFill, BsPencilFill } from "react-icons/bs";
 import { FiSettings } from "react-icons/fi";
-import { MdArrowBackIos, MdOutlineArchive } from "react-icons/md";
+import { MdArrowBackIos } from "react-icons/md";
 import { AuthContext } from "../context/AuthContext";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { FaUser } from "react-icons/fa";
@@ -43,9 +42,11 @@ const UserProfile = () => {
       className={`flex flex-col items-center space-y-6 h-full overflow-auto hideScrollbar w-full max-w-[430px]`}
     >
       <div
-        className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 ${
-          theme === "dark" ? "bg-black text-white" : "bg-white text-black"
-        }`}
+        className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 bg-inherit ${
+          theme === "dark"
+            ? "bg-zinc-black text-zinc-100"
+            : "bg-zinc-100 text-black"
+        } bg-opacity-50 backdrop-blur-3xl`}
       >
         <div className="flex space-x-2 items-center">
           <MdArrowBackIos
@@ -83,11 +84,15 @@ const UserProfile = () => {
         <div className="relative flex flex-col items-center justify-center h-fit space-y-1 w-full">
           <div className="flex items-start justify-between px-4 w-full">
             <div className="flex flex-col items-start space-y-1">
-              {currentUserData?.img?<img
-                src={currentUserData?.img}
-                className="h-16 w-16 object-cover rounded-full duration-300"
-                alt=""
-              />:<FaUser size={64} className="rounded-full"/>}
+              {currentUserData?.img ? (
+                <img
+                  src={currentUserData?.img}
+                  className="h-16 w-16 object-cover rounded-full duration-300"
+                  alt=""
+                />
+              ) : (
+                <FaUser size={64} className="rounded-full" />
+              )}
             </div>
             <div className="flex justify-between">
               <div className="flex flex-col items-center">

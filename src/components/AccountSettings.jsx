@@ -118,13 +118,9 @@ const AccountSettings = () => {
       const docRef = doc(db, "users", currentUser);
 
       const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-          setCurrentUserData(doc.data());
-        } else {
-          console.log("No such document!");
-        }
+        if (!doc.exists()) return;
+        setCurrentUserData(doc.data());
       });
-
       // Clean up the subscription on unmount
       return () => unsubscribe();
     }

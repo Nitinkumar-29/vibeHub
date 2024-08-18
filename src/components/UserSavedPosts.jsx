@@ -22,11 +22,9 @@ const UserSavedPosts = () => {
     videoRef.current.click(index);
     if (isPlaying === false) {
       videoRef.current.play(index);
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause(index);
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };

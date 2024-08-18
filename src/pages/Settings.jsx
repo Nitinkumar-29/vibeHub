@@ -8,20 +8,20 @@ const Settings = () => {
   const { theme } = useContext(ThemeContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(() => {
-    const savedTab = localStorage.getItem("activeTab");
+  const [settingsActiveTab, setSettingsActiveTab] = useState(() => {
+    const savedTab = localStorage.getItem("settingsActiveTab");
     return savedTab || "edit";
   });
 
   useEffect(() => {
     if (location.pathname === "/userProfile/settings/edit") {
-      setActiveTab("edit");
+      setSettingsActiveTab("edit");
     }
   }, [location.pathname]);
   
   useEffect(() => {
-    localStorage.setItem("activeTab", activeTab);
-  }, [activeTab]);
+    localStorage.setItem("settingsActiveTab", settingsActiveTab);
+  }, [settingsActiveTab]);
 
   return (
     <div className={`min-h-[91.5vh] bg-inherit w-full`}>
@@ -42,12 +42,12 @@ const Settings = () => {
             <Link
               to="/userProfile/settings/edit"
               onClick={() => {
-                setActiveTab("edit");
+                setSettingsActiveTab("edit");
               }}
               className={`${
                 theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
               } rounded-md px-4 py-1 space-x-2 w-full ${
-                activeTab === "edit"
+                settingsActiveTab === "edit"
                   ? "text-red-600"
                   : `${theme === "dark" ? "text-zinc-400" : "text-zinc-900"}`
               }`}
@@ -57,12 +57,12 @@ const Settings = () => {
             <Link
               to="/userProfile/settings/account"
               onClick={() => {
-                setActiveTab("account");
+                setSettingsActiveTab("account");
               }}
               className={`${
                 theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
               } rounded-md px-4 py-1 space-x-2 w-full ${
-                activeTab === "account"
+                settingsActiveTab === "account"
                   ? "text-red-600"
                   : `${theme === "dark" ? "text-zinc-400" : "text-zinc-900"}`
               }`}
@@ -72,12 +72,12 @@ const Settings = () => {
             <Link
               to="/userProfile/settings/accessibility"
               onClick={() => {
-                setActiveTab("more");
+                setSettingsActiveTab("more");
               }}
               className={`${
                 theme === "dark" ? "bg-zinc-800" : "bg-zinc-200"
               } rounded-md px-4 py-1 space-x-2 w-full ${
-                activeTab === "more"
+                settingsActiveTab === "more"
                   ? "text-red-600"
                   : `${theme === "dark" ? "text-zinc-400" : "text-zinc-900"}`
               }`}

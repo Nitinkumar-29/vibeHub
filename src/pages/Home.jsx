@@ -54,7 +54,6 @@ const Home = () => {
   }, [selectedMedia]);
 
   const handleDownload = async () => {
-    console.log("clicked");
     try {
       if (!selectedMedia || selectedMedia.length === 0) {
         throw new Error("No media files selected for download.");
@@ -116,10 +115,10 @@ const Home = () => {
   return (
     <>
       {!postsLoading ? (
-        <div className="flex flex-col justify-center items-center h-fit">
+        <div className="flex flex-col justify-center items-center h-fit bg-inherit">
           <div
             className={`z-20 fixed top-0 ${
-              theme === "dark" ? "bg-black" : "bg-white"
+              theme === "dark" ? "bg-black" : "bg-zinc-100"
             }  flex justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
           >
             <Link className="flex space-x-3 items-center text-2xl" to="/">
@@ -138,13 +137,13 @@ const Home = () => {
             <Link to={`user/${currentUser}/notifications`} className="relative">
               <IoNotificationsSharp size={25} />
               {followRequestsData.length !== 0 && (
-                <span className="text-red-600 absolute -top-1 left-4 font-medium">
-                  <BsDot size={20} />
+                <span className="text-red-600 absolute -top-2 left-3 font-medium">
+                  <BsDot size={25} />
                 </span>
               )}
             </Link>
           </div>
-          <div className="flex justify-center w-full h-full pt-16">
+          <div className="flex justify-center w-full h-full pt-16 bg-inherit">
             <div className="flex flex-col w-full h-fit space-y-4">
               {homePagePosts.length > 0 ? (
                 homePagePosts
@@ -197,7 +196,7 @@ const Home = () => {
                       <div className="w-full h-full ">
                         {post?.postCaption && (
                           <div
-                            className="whitespace-pre-wrap px-4 pb-2"
+                            className="whitespace-pre-wrap px-4 pb-2 leading-snug"
                             dangerouslySetInnerHTML={{
                               __html: PostLink(post?.postCaption),
                             }}
@@ -435,7 +434,7 @@ const Home = () => {
                         <div className="w-full h-full">
                           {post?.postCaption && (
                             <div
-                              className="whitespace-pre-wrap px-4 pb-2"
+                              className="whitespace-pre-wrap px-4 pb-2 leading-snug"
                               dangerouslySetInnerHTML={{
                                 __html: PostLink(post?.postCaption),
                               }}

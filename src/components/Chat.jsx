@@ -149,8 +149,6 @@ const Chat = () => {
           id: userId,
         };
         setChatUserData(userData);
-      } else {
-        console.log("No such document!");
       }
     } catch (error) {
       console.error(error);
@@ -309,11 +307,11 @@ const Chat = () => {
 
   return (
     <div className="h-full w-full flex flex-col">
-      <div className="flex justify-between w-full items-center p-4">
+      <div className="flex justify-between w-full items-center p-2">
         <div
-          className={`flex items-center space-x-2 ${
+          className={`flex items-center space-x-2 p-2 ${
             theme === "dark" ? "bg-black" : "bg-zinc-200"
-          } backdrop-blur-3xl bg-opacity-30 `}
+          } backdrop-blur-3xl bg-opacity-30 w-full`}
         >
           <MdArrowBackIos
             onClick={() => {
@@ -326,11 +324,15 @@ const Chat = () => {
             to={`/users/${userId && userId}/profile`}
             className="flex items-center space-x-2"
           >
-            {chatUserData?.img?<img
-              src={chatUserData?.img}
-              className="h-7 w-7 rounded-full object-cover "
-              alt=""
-            />:<FaUser size={28} className="rounded-full"/>}
+            {chatUserData?.img ? (
+              <img
+                src={chatUserData?.img}
+                className="h-7 w-7 rounded-full object-cover "
+                alt=""
+              />
+            ) : (
+              <FaUser size={28} className="rounded-full" />
+            )}
             <span>{chatUserData?.user_name}</span>
           </Link>
         </div>
@@ -367,7 +369,6 @@ const Chat = () => {
                           <button
                             onClick={() => {
                               deleteMessage(message.id);
-                              console.log(message.id);
                             }}
                             className={`absolute -left-8 px-2 hidden group-hover:inline-block duration-300 transition-transform`}
                           >
@@ -402,7 +403,6 @@ const Chat = () => {
                                     className="text-lg cursor-pointer"
                                     onClick={() => {
                                       removeReaction(message.id);
-                                      console.log(reaction, message.id);
                                     }}
                                     key={userId}
                                   >

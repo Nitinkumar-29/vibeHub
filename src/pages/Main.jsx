@@ -43,7 +43,7 @@ const Main = () => {
   return (
     <div
       className={`relative w-full max-w-[430px] h-scree ${
-        theme === "dark" ? "bg-black text-zinc-100" : "bg-white text-black"
+        theme === "dark" ? "bg-black text-zinc-100" : "bg-zinc-100 text-black"
       } backdrop-blur-3xl `}
     >
       <div
@@ -65,8 +65,10 @@ const Main = () => {
               ? "hidden"
               : "flex"
           } justify-between items-center p-4 w-full max-w-[430px] ${
-            theme === "dark" ? "bg-black" : "bg-white"
-          } bg-opacity-80 backdrop-blur-3xl border-gray-900 border-t-[.5px]`}
+            theme === "dark" ? "bg-black" : "bg-zinc-100"
+          } bg-opacity-50 backdrop-blur-3xl ${
+            theme === "dark" ? "border-gray-900" : "border-zinc-400"
+          } border-t-[.5px]`}
         >
           <Link className="flex flex-col items-center" to="/">
             <FaHome

@@ -9,7 +9,6 @@ import { Carousel } from "react-responsive-carousel";
 import { BiPause, BiPlay } from "react-icons/bi";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
-import { HighLightLinks } from "../utils/HighlightLinks";
 import { PostLink } from "../utils/PostedLinks";
 
 const UserLikedPosts = () => {
@@ -23,11 +22,9 @@ const UserLikedPosts = () => {
     videoRef.current.click(index);
     if (isPlaying === false) {
       videoRef.current.play(index);
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause(index);
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };

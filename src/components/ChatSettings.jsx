@@ -13,7 +13,6 @@ const Chat_settings = () => {
     // Ensure allChats and chatId are available before filtering
     if (allChats.length > 0 && chatId) {
       const chat = allChats.filter((chat) => chat?.id === chatId);
-      console.log(chat);
       setChatData(chat);
     }
     try {

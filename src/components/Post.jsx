@@ -44,16 +44,16 @@ const Post = () => {
   const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+  const [pickerPosition, setPickerPosition] = useState("top"); // Default to bottom
+  const commentInputRef = useRef(null);
 
   const handlePlayPause = () => {
     videoRef.current.click();
     if (isPlaying === false) {
       videoRef.current.play();
-      console.log(isPlaying);
       setIsPlaying(true);
     } else {
       videoRef.current.pause();
-      console.log(isPlaying);
       setIsPlaying(false);
     }
   };
@@ -76,27 +76,24 @@ const Post = () => {
     // eslint-disable-next-line
   }, [id]);
 
-  // // using onsnapshot method for fast data retreiving
-  // useEffect(() => {
-  //   if (!id) return;
-  //   try {
-  //     const unsubscribeFetchComments = onSnapshot(
-  //       query(collection(db, "postComments"), where("postId", "==", id)),
-  //       async (data) => {
-  //         const response = data.docs.map((doc) => ({
-  //           id: doc.id,
-  //           postComments: doc.data(),
-  //         }));
-  //         console.log(response);
-  //         setPostComments(response);
-  //       }
-  //     );
-  //     return () => unsubscribeFetchComments();
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  //   // eslint-disable-next-line
-  // }, [id]);
+  const handlePickerPosition = () => {
+    if (commentInputRef.current) {
+      const inputRect = commentInputRef.current.getBoundingClientRect();
+      const distanceFromTop = inputRect.top;
+      const distanceFromBottom = window.innerHeight - inputRect.bottom;
+
+      // Determine picker position based on distance
+      if (distanceFromBottom < 550 && distanceFromTop > 550) {
+        setPickerPosition("top");
+      } else {
+        setPickerPosition("bottom");
+      }
+    }
+  };
+
+  useEffect(() => {
+    handlePickerPosition();
+  }, [emojiPickerOpen]);
 
   return (
     <div className="flex flex-col items-center pb-14 w-full h-full max-w-[447px]">
@@ -155,9 +152,7 @@ const Post = () => {
                 {postData?.mentionedUsers?.map((user, index) => (
                   <Link
                     key={index}
-                    onClick={() => {
-                      console.log(user?.userId, user?.username);
-                    }}
+                    onClick={() => {}}
                     to={
                       currentUser && currentUser === user?.userId
                         ? `/userProfile/yourPosts`
@@ -280,22 +275,23 @@ const Post = () => {
             </div>
           )}
           {postData?.userId && (
-            <div className="flex flex-col items-center space-y-4 w-full rounded-sm pb-16">
+            <div className="flex flex-col items-center w-full rounded-sm pb-16">
               <div
-                className={`flex items-end w-[93%] space-x-1 my-5 mx-auto border-b-[1px] ${
+                className={`flex items-end w-[93%] space-x-1 my-5 mx-auto border-b-[1px] pb-1 ${
                   theme === "dark" ? "border-gray-400" : "border-gray-800"
                 }`}
               >
                 <div className="relative flex space-x-1 items-center w-full">
                   <img
-                    src={currentUserData && currentUserData?.img}
-                    className="h-8 w-8 rounded-full"
+                    src={currentUserData?.img}
+                    className="h-8 min-w-8 max-w-8 rounded-full"
                     alt=""
                   />
                   <input
+                    ref={commentInputRef}
                     type="text"
                     placeholder="Post a comment"
-                    className={`outline-none w-full bg-inherit p-2`}
+                    className="outline-none w-full bg-inherit p-2"
                     name="commentText"
                     required
                     onChange={(e) => {
@@ -306,26 +302,27 @@ const Post = () => {
                     }}
                     value={postComment.commentText}
                   />
-                  <div
-                    className={`z-10 ${
-                      emojiPickerOpen === false ? "hidden" : "flex"
-                    } self-center absolute bottom-14 mx-auto w-5/6`}
-                  >
-                    <EmojiPicker
-                      reactionsDefaultOpen={emojiPickerOpen}
-                      allowExpandReactions={emojiPickerOpen}
-                      emojiStyle="google"
-                      onEmojiClick={(event) => {
-                        setEmojiPickerOpen(false);
-                        setPostComment((prev) => ({
-                          ...prev,
-                          commentText: prev.commentText + event.emoji,
-                        }));
-                        console.log(postComment.commentText, postComment);
-                      }}
-                      height={400}
-                    />
-                  </div>
+                  {emojiPickerOpen && (
+                    <div
+                      className={`z-10 flex self-center absolute mx-auto w-full ${
+                        pickerPosition === "top" ? "bottom-14" : "top-14"
+                      }`}
+                    >
+                      <EmojiPicker
+                        reactionsDefaultOpen={emojiPickerOpen}
+                        allowExpandReactions={emojiPickerOpen}
+                        emojiStyle="google"
+                        onEmojiClick={(event) => {
+                          setEmojiPickerOpen(false);
+                          setPostComment((prev) => ({
+                            ...prev,
+                            commentText: prev.commentText + event.emoji,
+                          }));
+                        }}
+                        height={550}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="relative flex space-x-1 items-center">
@@ -352,138 +349,153 @@ const Post = () => {
                   </button>
                 </div>
               </div>
-              <div className="flex flex-col space-y-2 w-full">
-                {postComments.length > 0 && (
-                  <span className="w-full text-lg px-4">Comments&nbsp;</span>
+              <div className="flex flex-col w-full items-center">
+                {postComments?.length > 0 && (
+                  <span className="w-full text-lg px-4 mb-2">
+                    Comments&nbsp;
+                  </span>
                 )}
-                {postComments
-                  ?.sort((a, b) => b.timeStamp - a.timeStamp)
-                  ?.map((comment) => {
-                    return (
-                      <div
-                        key={comment.id}
-                        className={`flex flex-col items-center space-y-2 p-2 w-full border-b-[1px] border-zinc-600 last:border-b-0`}
-                      >
-                        <div className="flex w-full items-center justify-between px-2">
-                          {
-                            <div className="flex w-full justify-between items-center">
-                              <div className="flex items-center space-x-1">
-                                {comment?.user?.img ? (
-                                  <img
-                                    src={comment?.user?.img}
-                                    className="h-8 w-8 rounded-full border-[1px]"
-                                    alt=""
-                                  />
-                                ) : (
-                                  <FaUser className="h-8 w-8 border-[1px] rounded-full border-blue-800" />
-                                )}
-                                {postData.userId === comment.userId ? (
-                                  <Link
-                                    onClick={() => {
-                                      window.scrollTo(0, 0);
-                                    }}
-                                    to={
-                                      currentUser &&
-                                      currentUser === comment.userId
-                                        ? `/userProfile/yourPosts`
-                                        : `/users/${comment?.userId}/profile`
-                                    }
-                                    className="flex flex-col items-start -space-y-1 px-2"
-                                  >
-                                    <div className="">
-                                      <span>{comment?.user?.name}</span>
-                                      <span className="text-zinc-500">
-                                        &nbsp;(author)
-                                      </span>
-                                    </div>
-                                    <span className="text-sm text-zinc-600">
-                                      @{comment?.user?.user_name}
-                                    </span>{" "}
-                                  </Link>
-                                ) : (
-                                  <Link
-                                    onClick={() => {
-                                      window.scrollTo(0, 0);
-                                    }}
-                                    to={
-                                      currentUser &&
-                                      currentUser === comment.userId
-                                        ? `/userProfile/yourPosts`
-                                        : `/users/${comment?.userId}/profile`
-                                    }
-                                    className="flex space-x-1"
-                                  >
-                                    <span>{comment?.user?.name}</span>
-
-                                    <span className="text-zinc-600">
-                                      @{comment?.user?.user_name}
-                                    </span>
-                                  </Link>
-                                )}
-                              </div>
-                            </div>
-                          }
-                          {((currentUser && currentUser === postData.userId) ||
-                            (currentUser &&
-                              currentUser === comment?.userId)) && (
-                            <FiTrash2
-                              className={`cursor-pointer ${
-                                theme === "dark"
-                                  ? "text-zinc-300"
-                                  : "text-zinc-900"
-                              }`}
-                              onClick={() =>
-                                handleDeleteComment(comment.id, id)
-                              }
-                            />
-                          )}
-                        </div>
+                {postComments?.length > 0 ? (
+                  postComments
+                    ?.sort((a, b) => b.timeStamp - a.timeStamp)
+                    ?.map((comment) => {
+                      return (
                         <div
-                          className={`w-full tracking-tighter px-2 ${
-                            theme === "dark" ? "text-zinc-400" : "text-zinc-900"
-                          }`}
+                          key={comment.id}
+                          className={`flex flex-col items-center space-y-0 p-2 w-full border-b-[1px] border-zinc-600 last:border-b-0`}
                         >
-                          {comment.comment}
-                        </div>
-                        <div className="flex items-center w-full px-2 space-x-4">
-                          <div className="flex items-center space-x-1">
-                            <div
-                              className="flex space-x-1 items-center"
-                              onClick={() => handleLikeComment(comment.id, id)}
-                            >
-                              {comment?.likes?.includes?.(currentUser) ? (
-                                <BsHeartFill
-                                  className="text-red-600 cursor-pointer"
-                                  size={18}
-                                />
-                              ) : (
-                                <SlHeart className="cursor-pointer" size={18} />
-                              )}
-                              <span>{comment?.likesCount}</span>
-                            </div>
-                            <span className="text-sm">
-                              {!comment.likesCount === 0 && comment.likesCount}
-                            </span>
+                          <div className="flex w-full items-center justify-between px-2">
+                            {
+                              <div className="flex w-full justify-between items-center">
+                                <div className="flex items-center space-x-1">
+                                  {comment?.user?.img ? (
+                                    <img
+                                      src={comment?.user?.img}
+                                      className="h-8 w-8 rounded-full border-[1px]"
+                                      alt=""
+                                    />
+                                  ) : (
+                                    <FaUser className="h-8 w-8 border-[1px] rounded-full border-blue-800" />
+                                  )}
+                                  {postData.userId === comment.userId ? (
+                                    <Link
+                                      onClick={() => {
+                                        window.scrollTo(0, 0);
+                                      }}
+                                      to={
+                                        currentUser &&
+                                        currentUser === comment.userId
+                                          ? `/userProfile/yourPosts`
+                                          : `/users/${comment?.userId}/profile`
+                                      }
+                                      className="flex flex-col items-start -space-y-1 px-2"
+                                    >
+                                      <div className="">
+                                        <span>{comment?.user?.name}</span>
+                                        <span className="text-zinc-500">
+                                          &nbsp;(author)
+                                        </span>
+                                      </div>
+                                      <span className="text-sm text-zinc-600">
+                                        @{comment?.user?.user_name}
+                                      </span>{" "}
+                                    </Link>
+                                  ) : (
+                                    <Link
+                                      onClick={() => {
+                                        window.scrollTo(0, 0);
+                                      }}
+                                      to={
+                                        currentUser &&
+                                        currentUser === comment.userId
+                                          ? `/userProfile/yourPosts`
+                                          : `/users/${comment?.userId}/profile`
+                                      }
+                                      className="flex space-x-1"
+                                    >
+                                      <span>{comment?.user?.name}</span>
+
+                                      <span className="text-zinc-600">
+                                        @{comment?.user?.user_name}
+                                      </span>
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            }
+                            {((currentUser &&
+                              currentUser === postData.userId) ||
+                              (currentUser &&
+                                currentUser === comment?.userId)) && (
+                              <FiTrash2
+                                className={`cursor-pointer ${
+                                  theme === "dark"
+                                    ? "text-zinc-300"
+                                    : "text-zinc-900"
+                                }`}
+                                onClick={() =>
+                                  handleDeleteComment(comment.id, id)
+                                }
+                              />
+                            )}
                           </div>
-                          {/* <SlBubble size={18} /> */}
-                        </div>
-                        {comment.timeStamp && (
                           <div
-                            className={`text-sm w-full px-2 ${
+                            className={`w-full tracking-tighter px-2 ${
                               theme === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-800"
+                                ? "text-zinc-400"
+                                : "text-zinc-900"
                             }`}
                           >
-                            {comment.comment &&
-                              formatTime(
-                                comment.timeStamp && comment.timeStamp
-                              )}
+                            {comment.comment}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          <div className="flex items-center w-full px-2 space-x-4">
+                            <div className="flex items-center space-x-1">
+                              <div
+                                className="flex space-x-1 items-center"
+                                onClick={() =>
+                                  handleLikeComment(comment.id, id)
+                                }
+                              >
+                                {comment?.likes?.includes?.(currentUser) ? (
+                                  <BsHeartFill
+                                    className="text-red-600 cursor-pointer"
+                                    size={18}
+                                  />
+                                ) : (
+                                  <SlHeart
+                                    className="cursor-pointer"
+                                    size={18}
+                                  />
+                                )}
+                                <span>{comment?.likesCount}</span>
+                              </div>
+                              <span className="text-sm">
+                                {!comment.likesCount === 0 &&
+                                  comment.likesCount}
+                              </span>
+                            </div>
+                            {/* <SlBubble size={18} /> */}
+                          </div>
+                          {comment.timeStamp && (
+                            <div
+                              className={`text-sm w-full px-2 leading-3 ${
+                                theme === "dark"
+                                  ? "text-gray-400"
+                                  : "text-gray-800"
+                              }`}
+                            >
+                              {comment.comment &&
+                                formatTime(
+                                  comment.timeStamp && comment.timeStamp
+                                )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                ) : (
+                  <span>0 comments? Be the first one to comment</span>
+                )}
               </div>
             </div>
           )}

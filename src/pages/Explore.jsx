@@ -77,14 +77,18 @@ const Explore = () => {
           <div
             ref={componentRef}
             className={`${
-              theme === "dark" ? "bg-zinc-900" : "bg-zinc-100"
+              theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
             } flex justify-between items-center w-[95%] rounded-md max-w-[430px] my-4 p-2 mx-2`}
           >
             <input
               onClickCapture={() => {}}
               type="text"
               ref={searchInputRef}
-              className={`bg-inherit w-[95%] p-1 outline-none rounded-md focus:placeholder:text-zinc-300`}
+              className={`bg-inherit w-[95%] p-1 outline-none rounded-md ${
+                theme === "dark"
+                  ? "focus:placeholder:text-zinc-300"
+                  : "focus:placeholder:text-zinc-900"
+              }`}
               placeholder="Search @username, name.... with '/ '"
               onChange={(e) => {
                 setQuery(e.target.value);
@@ -102,7 +106,14 @@ const Explore = () => {
           </div>
           {query.trim(" ").length > 0 && (
             <div className="flex flex-col px-4 space-y-3">
-              <span>Users</span>
+              {query.trim().length > 0 &&
+                allUsers.filter((user) =>
+                  keys?.some((key) =>
+                    user[key]
+                      ?.toLowerCase()
+                      ?.includes(query.trim().toLowerCase())
+                  )
+                ).length > 0 ? <span>Users</span>:<span>No user found with search query "{query}"</span>}
               {query.length > 0 &&
                 allUsers
                   ?.filter((user) =>

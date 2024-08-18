@@ -304,8 +304,6 @@ const OtherUsersProfile = () => {
         if (otherUserId) {
           handleOtherUserPostsData(otherUserId);
         }
-      } else {
-        console.log("Post does not exist");
       }
     } catch (error) {
       console.error("Error saving post:", error);
@@ -371,8 +369,8 @@ const OtherUsersProfile = () => {
       <div className="flex flex-col items-center w-full">
         <div
           className={`z-10 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 ${
-            theme === "dark" ? "bg-black text-white" : "bg-white text-black"
-          }`}
+            theme === "dark" ? "bg-black text-zinc-100" : "bg-zinc-100 text-black"
+          } bg-opacity-50 backdrop-blur-3xl`}
         >
           <div className="flex space-x-2 items-center">
             <MdArrowBackIos
@@ -834,240 +832,247 @@ const OtherUsersProfile = () => {
                         >
                           {taggedPosts && taggedPosts?.length > 0 ? (
                             <div className="w-full h-full space-y-6">
-                              {taggedPosts?.map((taggedPost) => {
-                                return (
-                                  <div key={taggedPost.id} className={`w-full`}>
-                                    <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-4">
-                                      {data?.img ? (
-                                        <img
-                                          src={taggedPost.user?.img}
-                                          className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
-                                          alt=""
-                                        />
-                                      ) : (
-                                        <FaUser size={48} />
-                                      )}
-                                      <div className="flex w-full justify-between items-center space-x-1">
-                                        <Link
-                                          onClick={() => {
-                                            window.scrollTo(0, 0);
-                                          }}
-                                          to={
-                                            currentUser === taggedPost?.userId
-                                              ? `/userProfile/yourPosts`
-                                              : `/users/${taggedPost?.userId}/profile`
-                                          }
-                                          className="flex flex-col -space-y-1 font-medium"
-                                        >
-                                          <span>{taggedPost?.user?.name}</span>
-                                          <span className="text-sm text-zinc-600">
-                                            {" "}
-                                            @{taggedPost?.user?.user_name}
-                                          </span>
-                                        </Link>
-                                      </div>
-                                    </div>
-                                    {taggedPost?.postCaption && (
-                                      <div
-                                        className="whitespace-pre-wrap px-4 pb-2"
-                                        dangerouslySetInnerHTML={{
-                                          __html: PostLink(
-                                            taggedPost?.postCaption
-                                          ),
-                                        }}
-                                      ></div>
-                                    )}
-                                    <div className="px-2 mb-1 flex flex-wrap">
-                                      {taggedPost?.mentionedUsers?.map(
-                                        (user, index) => {
-                                          return (
-                                            <Link
-                                              key={index}
-                                              className="text-zinc-500 px-2"
-                                              onClick={() => {
-                                                window.scrollTo(0, 0);
-                                              }}
-                                              to={
-                                                currentUser === user?.userId
-                                                  ? `/userProfile/yourPosts`
-                                                  : `/users/${user?.userId}/profile`
-                                              }
-                                            >
-                                              {taggedPost.userId ===
-                                              user?.userId ? (
-                                                <div className="flex items-center">
-                                                  @{user?.username || user}{" "}
-                                                  <span className="text-sm">
-                                                    &nbsp;(author)
-                                                  </span>
-                                                </div>
-                                              ) : (
-                                                <span>
-                                                  @
-                                                  {user?.username ||
-                                                    user?.username}
-                                                </span>
-                                              )}
-                                            </Link>
-                                          );
-                                        }
-                                      )}
-                                    </div>
-                                    <div className="flex w-full">
-                                      <Carousel
-                                        className="carousel"
-                                        showThumbs={false}
-                                        autoPlay={false}
-                                        infiniteLoop={true}
-                                        showStatus={false}
-                                        emulateTouch={true}
-                                        useKeyboardArrows={true}
-                                        swipeable={true}
-                                        showArrows={true}
-                                        showIndicators={
-                                          taggedPost &&
-                                          taggedPost?.fileURLs.length > 1
-                                            ? true
-                                            : false
-                                        }
-                                      >
-                                        {taggedPost?.fileURLs?.map(
-                                          (fileURL, index) => (
-                                            <div
-                                              key={index}
-                                              className="relative  mx-[.25px]"
-                                            >
-                                              {fileURL.includes(".mp4") ? (
-                                                <video
-                                                  onClick={() => {
-                                                    handlePlayPause(index);
-                                                  }}
-                                                  onEnded={handleEnded}
-                                                  ref={videoRef}
-                                                  autoFocus={true}
-                                                  className="h-[80%] w-full object-contain rounded-sm "
-                                                >
-                                                  <source
-                                                    src={fileURL}
-                                                    type="video/mp4"
-                                                  />
-                                                </video>
-                                              ) : (
-                                                <img
-                                                  src={fileURL}
-                                                  alt="post media"
-                                                  className="h-fit w-fit object-contain rounded-sm"
-                                                />
-                                              )}
-
-                                              {fileURL.includes(".mp4") && (
-                                                <button
-                                                  onClick={() =>
-                                                    handlePlayPause()
-                                                  }
-                                                  className="z-20 absolute top-[50%]"
-                                                >
-                                                  {isPlaying ? (
-                                                    <BiPause
-                                                      className="z-20"
-                                                      size={40}
-                                                    />
-                                                  ) : (
-                                                    <BiPlay
-                                                      className="z-20"
-                                                      size={40}
-                                                    />
-                                                  )}
-                                                </button>
-                                              )}
-                                            </div>
-                                          )
+                              {taggedPosts
+                                ?.sort((a, b) => b.timeStamp - a.timeStamp)
+                                ?.map((taggedPost) => {
+                                  return (
+                                    <div
+                                      key={taggedPost.id}
+                                      className={`w-full`}
+                                    >
+                                      <div className="h-16 flex items-center rounded-sm space-x-4 w-full justify-start px-4">
+                                        {data?.img ? (
+                                          <img
+                                            src={taggedPost.user?.img}
+                                            className="w-[3rem] h-[3rem] object-cover border-[1px] full border-zinc-900 duration-200 rounded-full"
+                                            alt=""
+                                          />
+                                        ) : (
+                                          <FaUser size={48} />
                                         )}
-                                      </Carousel>
-                                    </div>
-                                    <div className="flex items-center justify-between h-10 pt-2 px-4">
-                                      <div className="flex items-center space-x-6">
+                                        <div className="flex w-full justify-between items-center space-x-1">
+                                          <Link
+                                            onClick={() => {
+                                              window.scrollTo(0, 0);
+                                            }}
+                                            to={
+                                              currentUser === taggedPost?.userId
+                                                ? `/userProfile/yourPosts`
+                                                : `/users/${taggedPost?.userId}/profile`
+                                            }
+                                            className="flex flex-col -space-y-1 font-medium"
+                                          >
+                                            <span>
+                                              {taggedPost?.user?.name}
+                                            </span>
+                                            <span className="text-sm text-zinc-600">
+                                              {" "}
+                                              @{taggedPost?.user?.user_name}
+                                            </span>
+                                          </Link>
+                                        </div>
+                                      </div>
+                                      {taggedPost?.postCaption && (
+                                        <div
+                                          className="whitespace-pre-wrap px-4 pb-2"
+                                          dangerouslySetInnerHTML={{
+                                            __html: PostLink(
+                                              taggedPost?.postCaption
+                                            ),
+                                          }}
+                                        ></div>
+                                      )}
+                                      <div className="px-2 mb-1 flex flex-wrap">
+                                        {taggedPost?.mentionedUsers?.map(
+                                          (user, index) => {
+                                            return (
+                                              <Link
+                                                key={index}
+                                                className="text-zinc-500 px-2"
+                                                onClick={() => {
+                                                  window.scrollTo(0, 0);
+                                                }}
+                                                to={
+                                                  currentUser === user?.userId
+                                                    ? `/userProfile/yourPosts`
+                                                    : `/users/${user?.userId}/profile`
+                                                }
+                                              >
+                                                {taggedPost.userId ===
+                                                user?.userId ? (
+                                                  <div className="flex items-center">
+                                                    @{user?.username || user}{" "}
+                                                    <span className="text-sm">
+                                                      &nbsp;(author)
+                                                    </span>
+                                                  </div>
+                                                ) : (
+                                                  <span>
+                                                    @
+                                                    {user?.username ||
+                                                      user?.username}
+                                                  </span>
+                                                )}
+                                              </Link>
+                                            );
+                                          }
+                                        )}
+                                      </div>
+                                      <div className="flex w-full">
+                                        <Carousel
+                                          className="carousel"
+                                          showThumbs={false}
+                                          autoPlay={false}
+                                          infiniteLoop={true}
+                                          showStatus={false}
+                                          emulateTouch={true}
+                                          useKeyboardArrows={true}
+                                          swipeable={true}
+                                          showArrows={true}
+                                          showIndicators={
+                                            taggedPost &&
+                                            taggedPost?.fileURLs.length > 1
+                                              ? true
+                                              : false
+                                          }
+                                        >
+                                          {taggedPost?.fileURLs?.map(
+                                            (fileURL, index) => (
+                                              <div
+                                                key={index}
+                                                className="relative  mx-[.25px]"
+                                              >
+                                                {fileURL.includes(".mp4") ? (
+                                                  <video
+                                                    onClick={() => {
+                                                      handlePlayPause(index);
+                                                    }}
+                                                    onEnded={handleEnded}
+                                                    ref={videoRef}
+                                                    autoFocus={true}
+                                                    className="h-[80%] w-full object-contain rounded-sm "
+                                                  >
+                                                    <source
+                                                      src={fileURL}
+                                                      type="video/mp4"
+                                                    />
+                                                  </video>
+                                                ) : (
+                                                  <img
+                                                    src={fileURL}
+                                                    alt="post media"
+                                                    className="h-fit w-fit object-contain rounded-sm"
+                                                  />
+                                                )}
+
+                                                {fileURL.includes(".mp4") && (
+                                                  <button
+                                                    onClick={() =>
+                                                      handlePlayPause()
+                                                    }
+                                                    className="z-20 absolute top-[50%]"
+                                                  >
+                                                    {isPlaying ? (
+                                                      <BiPause
+                                                        className="z-20"
+                                                        size={40}
+                                                      />
+                                                    ) : (
+                                                      <BiPlay
+                                                        className="z-20"
+                                                        size={40}
+                                                      />
+                                                    )}
+                                                  </button>
+                                                )}
+                                              </div>
+                                            )
+                                          )}
+                                        </Carousel>
+                                      </div>
+                                      <div className="flex items-center justify-between h-10 pt-2 px-4">
+                                        <div className="flex items-center space-x-6">
+                                          <button
+                                            className="flex items-center cursor-pointer"
+                                            onClick={() =>
+                                              handleLikePost(
+                                                taggedPost?.id,
+                                                currentUser
+                                              )
+                                            }
+                                          >
+                                            {taggedPost?.likes?.includes(
+                                              currentUser
+                                            ) ? (
+                                              <BsHeartFill
+                                                size={20}
+                                                className="text-red-600"
+                                              />
+                                            ) : (
+                                              <SlHeart size={20} />
+                                            )}
+                                          </button>
+                                          <Link
+                                            to={`/posts/${taggedPost?.id}`}
+                                            onClick={() => {
+                                              window.scrollTo(0, 0);
+                                            }}
+                                          >
+                                            <div className="flex items-center space-x-1">
+                                              <SlBubble size={20} />
+                                            </div>
+                                          </Link>
+                                          <SlPaperPlane size={20} />
+                                        </div>
                                         <button
-                                          className="flex items-center cursor-pointer"
+                                          className=""
                                           onClick={() =>
-                                            handleLikePost(
+                                            handleSavePost(
                                               taggedPost?.id,
                                               currentUser
                                             )
                                           }
                                         >
-                                          {taggedPost?.likes?.includes(
+                                          {taggedPost?.saves?.includes(
                                             currentUser
                                           ) ? (
-                                            <BsHeartFill
-                                              size={20}
-                                              className="text-red-600"
+                                            <RxBookmarkFilled
+                                              className="text-pink-600"
+                                              size={28}
                                             />
                                           ) : (
-                                            <SlHeart size={20} />
+                                            <PiBookmarkSimpleThin size={28} />
                                           )}
                                         </button>
-                                        <Link
-                                          to={`/posts/${taggedPost?.id}`}
-                                          onClick={() => {
-                                            window.scrollTo(0, 0);
-                                          }}
-                                        >
-                                          <div className="flex items-center space-x-1">
-                                            <SlBubble size={20} />
-                                          </div>
-                                        </Link>
-                                        <SlPaperPlane size={20} />
                                       </div>
-                                      <button
-                                        className=""
-                                        onClick={() =>
-                                          handleSavePost(
-                                            taggedPost?.id,
-                                            currentUser
-                                          )
-                                        }
-                                      >
-                                        {taggedPost?.saves?.includes(
-                                          currentUser
-                                        ) ? (
-                                          <RxBookmarkFilled
-                                            className="text-pink-600"
-                                            size={28}
-                                          />
-                                        ) : (
-                                          <PiBookmarkSimpleThin size={28} />
+                                      <div className="flex flex-col px-4">
+                                        {/* {post?.likes?.length !== 0 && ( */}
+                                        {taggedPost?.likes?.length !== 0 && (
+                                          <span className="w-full">
+                                            {taggedPost?.likes?.length !== 0 &&
+                                              taggedPost?.likes?.length}
+                                            &nbsp;
+                                            {taggedPost?.likes?.length === 1
+                                              ? "like"
+                                              : "likes"}
+                                          </span>
                                         )}
-                                      </button>
-                                    </div>
-                                    <div className="flex flex-col px-4">
-                                      {/* {post?.likes?.length !== 0 && ( */}
-                                      {taggedPost?.likes?.length !== 0 && (
-                                        <span className="w-full">
-                                          {taggedPost?.likes?.length !== 0 &&
-                                            taggedPost?.likes?.length}
-                                          &nbsp;
-                                          {taggedPost?.likes?.length === 1
-                                            ? "like"
-                                            : "likes"}
+                                        {/* )} */}
+                                        <span className="w-full text-sm text-zinc-400">
+                                          {taggedPost?.timeStamp
+                                            ? formatTime(
+                                                taggedPost?.timeStamp,
+                                                "PPpp",
+                                                {
+                                                  addSuffix: true,
+                                                }
+                                              )
+                                            : "not provided"}
                                         </span>
-                                      )}
-                                      {/* )} */}
-                                      <span className="w-full text-sm text-zinc-400">
-                                        {taggedPost?.timeStamp
-                                          ? formatTime(
-                                              taggedPost?.timeStamp,
-                                              "PPpp",
-                                              {
-                                                addSuffix: true,
-                                              }
-                                            )
-                                          : "not provided"}
-                                      </span>
+                                      </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
                             </div>
                           ) : (
                             "No data available"

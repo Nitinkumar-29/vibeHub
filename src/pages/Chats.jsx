@@ -117,7 +117,6 @@ const Chats = () => {
     }
   };
 
-  // active tab
   useEffect(() => {
     const chats = allChats.filter(
       (chat) => !chat.archiveBy || !chat.archiveBy.includes(currentUser)
@@ -125,25 +124,43 @@ const Chats = () => {
     const archivedChats = allChats.filter(
       (chat) => chat.archiveBy && chat.archiveBy.includes(currentUser)
     );
-    if (chats.length === 0) {
-      setActiveTab("archived");
-    } else {
-      if (activeTab === "archived" && archivedChats.length === 0) {
+    const requestChats = allChats.filter(
+      (chat) => chat.isRequest // Assuming there's a flag for requests
+    );
+    // If there are no chats in the active tab, set it to "archived" or "requests"
+    if (chats.length === 0 && activeTab === "all") {
+      if (archivedChats.length > 0) {
+        setActiveTab("archived");
+      } else if (requestChats.length > 0) {
+        setActiveTab("requests");
+      }
+    }
+    // Handle when the current active tab has no chats left
+    if (activeTab === "archived" && archivedChats.length === 0) {
+      if (chats.length > 0) {
         setActiveTab("all");
+      } else if (requestChats.length > 0) {
+        setActiveTab("requests");
+      }
+    } else if (activeTab === "requests" && requestChats.length === 0) {
+      if (chats.length > 0) {
+        setActiveTab("all");
+      } else if (archivedChats.length > 0) {
+        setActiveTab("archived");
       }
     }
     // eslint-disable-next-line
-  }, [auth.currentUser, allChats]);
+  }, [currentUser, allChats]);
 
   useEffect(() => {
     currentUser && handleFetchUserData();
     // eslint-disable-next-line
-  }, [auth.currentUser]);
+  }, [currentUser]);
 
   useEffect(() => {
-    handleFetchAllChats();
+    currentUser && handleFetchAllChats();
     // eslint-disable-next-line
-  }, [auth.currentUser]);
+  }, [currentUser]);
 
   useEffect(() => {
     handleFetchUsersData();
@@ -182,7 +199,7 @@ const Chats = () => {
   useEffect(() => {
     fetchMessageRequestChats();
     // eslint-disable-next-line
-  }, [auth.currentUser]);
+  }, [currentUser]);
   return (
     <>
       {!error ? (
@@ -242,8 +259,8 @@ const Chats = () => {
                   onChange={(e) => {
                     setUserQuery(e.target.value);
                   }}
-                  className={`w-full p-2 rounded-md ${
-                    theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  className={`w-full p-2 rounded-md focus:outline-none ${
+                    theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
                   }`}
                 />
                 {new Set(
@@ -304,7 +321,7 @@ const Chats = () => {
                             )}
                             <div className="flex space-x-1 items-center">
                               <span className="text-lg">{user?.name}</span>
-                              <span className={`text-gray-600`}>
+                              <span className={`text-zinc-600`}>
                                 @{user?.user_name}
                               </span>
                             </div>
@@ -327,7 +344,7 @@ const Chats = () => {
               <div
                 // style={{boxShadow:"0px 0px 2px 2px #4b5563"}}
                 className={`relative flex items-center mt-4 w-[95%] px-2 rounded-md ${
-                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
                 }`}
               >
                 <input
@@ -338,7 +355,7 @@ const Chats = () => {
                   onChange={(e) => {
                     setQuery(e.target.value);
                   }}
-                  className={`p-2 bg-transparent  w-full focus:outline-none focus:placeholder:text-gray-300`}
+                  className={`p-2 bg-transparent  w-full focus:outline-none focus:placeholder:text-zinc-500`}
                 />
 
                 {query.length > 0 && (
@@ -475,7 +492,11 @@ const Chats = () => {
                           return (
                             <div
                               key={chat.id}
-                              className={` relative group flex w-full items-center justify-between mt-2 p-2 duration-200`}
+                              className={` relative group flex w-full items-center justify-between mt-2 p-2 duration-200 border-b-[1px] ${
+                                theme === "dark"
+                                  ? "border-zinc-900"
+                                  : "border-zinc-200"
+                              } last:border-none`}
                             >
                               {otherParticipant && (
                                 <div className="flex flex-col space-y-0 w-full max-w-[90%]">
@@ -640,7 +661,7 @@ const Chats = () => {
                               className={` relative group flex w-full items-center justify-between mt-2 p-2 ${
                                 theme === "dark"
                                   ? "hover:bg-zinc-900"
-                                  : "hover:bg-zinc-100"
+                                  : "hover:bg-zinc-200"
                               } border-b-[1px] ${
                                 theme === "dark"
                                   ? "border-zinc-900"

@@ -32,7 +32,7 @@ const CreatePost = () => {
   const [mentionedUsers, setMentionedUsers] = useState([]);
   const { theme } = useContext(ThemeContext);
   const currentUser = localStorage.getItem("currentUser");
-
+  const mentionDisplayUsersRef = useRef(null);
   const [displayUsersdata, setDisplayUsersData] = useState("hidden");
 
   const toggleMentionsDisplayUsers = () => {
@@ -204,7 +204,7 @@ const CreatePost = () => {
             <div className="flex flex-col items-center w-full h-fit p-2">
               <div
                 className={`p-2 my-1 ${
-                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
                 } rounded-md w-full`}
               >
                 <textarea
@@ -220,16 +220,16 @@ const CreatePost = () => {
               </div>
               {mentionedUsers.length > 0 ? (
                 <div
-                  className={`flex flex-wrap space-x-1 h-32 duration-150 p-2 ${
-                    theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  className={`flex space-x-1 max-h-28 overflow-x-auto hideScrollbar duration-150 px-2 py-1 ${
+                    theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
                   } w-full rounded-md`}
                 >
                   {mentionedUsers.map((user, index) => (
                     <div
                       key={index}
                       className={`flex space-x-1 ${
-                        theme === "dark" ? "bg-gray-950" : "bg-gray-300"
-                      } rounded-full p-2 h-fit items-center justify-center`}
+                        theme === "dark" ? "bg-gray-950" : "bg-zinc-300"
+                      } rounded-full p-2 h-fit items-center justify-center m-1`}
                     >
                       <Link
                         to={`/users/${user.userId}/profile`}
@@ -251,10 +251,10 @@ const CreatePost = () => {
                 </div>
               ) : (
                 <span
-                  className={`h-32 text-zinc-600 rounded-md ${
+                  className={`h-fit text-zinc-600 rounded-md ${
                     theme === "dark"
                       ? "bg-zinc-900 text-gray-600"
-                      : "bg-gray-100"
+                      : "bg-zinc-200"
                   } w-full p-2`}
                 >
                   All mentions will be displayed here
@@ -270,7 +270,7 @@ const CreatePost = () => {
               />
               <div
                 className={`relative border-[1px] border-zinc-800 flex flex-col items-center space-y-1 justify-between my-1 p-2 rounded-md ${
-                  theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
+                  theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
                 } w-full`}
               >
                 <div className="flex items-center w-full justify-between">
@@ -314,12 +314,13 @@ const CreatePost = () => {
                   </button>
                 </div>
                 <div
+                  ref={mentionDisplayUsersRef}
                   className={`${displayUsersdata} z-10 absolute top-12 ${
-                    theme === "dark" ? "bg-zinc-900" : "bg-gray-100"
-                  } rounded-md h-56 overflow-y-auto hideScrollbar w-full flex-col items-start space-y-3 p-2`}
+                    theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
+                  } rounded-md max-h-56 overflow-y-auto hideScrollbar w-full flex-col items-start space-y-3 p-2`}
                 >
                   <CgClose
-                    className="absolute top-2 border-[1px] rounded-full right-2 cursor-pointer"
+                    className="absolute  top-2 border-[1px] rounded-full right-2 cursor-pointer"
                     onClick={toggleMentionsDisplayUsers}
                     size={20}
                   ></CgClose>
@@ -413,14 +414,14 @@ const CreatePost = () => {
               </div>
 
               <span className="w-full text-zinc-500 pb-2">
-                Please try to post media in 4:3 ratio
+                {files.length===0?"Attached media will be displayed here":`Attached media ${files.length}`}
               </span>
 
-              <div className="grid col-start-auto grid-cols-2 gap-3 w-full">
+              <div className="flex space-x-2 w-full max-h-[38vh] p-1 overflow-x-auto hideScrollbar">
                 {files?.map((file, index) => (
                   <div key={index} className="relative w-full">
                     {file.type.startsWith("image/") && (
-                      <div className="w-[11.1rem] h-[9rem] relative">
+                      <div className={`w-80 h-60 relative`}>
                         <img
                           onMouseDown={BiZoomIn}
                           src={URL.createObjectURL(file)}
@@ -429,18 +430,15 @@ const CreatePost = () => {
                         />
                         <span
                           onClick={() => removeFile(index)}
-                          className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
+                          className="cursor-pointer absolute top-1 right-1 p-2 bg-gray-800 text-white rounded-full"
                         >
                           <AiOutlineClose size={16} />
                         </span>
                       </div>
                     )}
                     {file.type.startsWith("video/") && (
-                      <div className="relative w-[11.8rem] h-[9.1rem]">
-                        <video
-                          controls
-                          className="w-full h-full object-contain rounded-md"
-                        >
+                      <div className="relative w-80 h-60">
+                        <video className="w-full h-full object-cover rounded-md">
                           <source
                             src={URL.createObjectURL(file)}
                             type={file.type}
@@ -449,9 +447,9 @@ const CreatePost = () => {
                         <button
                           type="button"
                           onClick={() => removeFile(index)}
-                          className="absolute -top-2 right-2 p-1 bg-gray-800 text-white rounded-full"
+                          className="absolute top-1 right-1 p-2 bg-gray-800 text-white rounded-full"
                         >
-                          <AiOutlineClose size={20} />
+                          <AiOutlineClose size={16} />
                         </button>
                       </div>
                     )}

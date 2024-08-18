@@ -79,7 +79,6 @@ const EditUserProfile = () => {
           async () => {
             try {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              console.log("download url: ", downloadURL);
               setNewImageURL(downloadURL);
               setIsUpdating(false);
               setFile("");

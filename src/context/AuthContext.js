@@ -106,7 +106,6 @@ export const AuthContextProvider = ({ children }) => {
     try {
       const result = await getRedirectResult(auth);
       if (result?.user) {
-        console.log("Redirect result user:", result.user);
         await handleUser(result.user);
       }
     } catch (error) {
@@ -141,8 +140,6 @@ export const AuthContextProvider = ({ children }) => {
         accountType: "private",
         user_name: generateUser_name,
       });
-    } else {
-      console.log("User document already exists:", user.uid);
     }
 
     // Navigate to home page after successful sign-in
@@ -198,27 +195,17 @@ export const AuthContextProvider = ({ children }) => {
   };
 
   const fetchFollowRequests = async () => {
-    if (!currentUser) {
-      console.log("Invalid user ID");
-      return [];
-    }
-
+    if (!currentUser) return;
     try {
       const userRef = doc(db, "users", currentUser);
       const userSnap = await getDoc(userRef);
 
-      if (!userSnap.exists()) {
-        console.log("User does not exist");
-        return [];
-      }
+      if (!userSnap.exists()) return;
 
       const userData = userSnap.data();
       const requests = userData?.followRequests || [];
 
-      if (requests.length === 0) {
-        console.log("No follow requests to fetch.");
-        return [];
-      }
+      if (requests.length === 0) return;
 
       // Batch the requests into chunks of 10
       const batchedRequests = [];
@@ -306,7 +293,7 @@ export const AuthContextProvider = ({ children }) => {
       if (chatDocs.length > 0) {
         const chatDoc = chatDocs[0];
         const chatId = chatDoc.id;
-        const chatRef = doc(db, "chats", chatId); 
+        const chatRef = doc(db, "chats", chatId);
         await updateDoc(chatRef, {
           messageRequest: false,
         });
