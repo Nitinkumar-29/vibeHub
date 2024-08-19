@@ -10,11 +10,16 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { chat_formatTime } from "../utils/Chat_formatTime";
 import ChatContext from "../context/ChatContext/ChatContext";
-import { BiInfoCircle, BiLoader, BiPause } from "react-icons/bi";
+import { BiLoader } from "react-icons/bi";
 import "../styles/overflow_scroll.css";
-import { IoPause, IoPlay, IoSend } from "react-icons/io5";
+import {
+  IoCloseCircle,
+  IoCloseCircleOutline,
+  IoPause,
+  IoPlay,
+  IoSend,
+} from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
 import { TiAttachmentOutline } from "react-icons/ti";
 import {
@@ -25,9 +30,10 @@ import {
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { FiTrash } from "react-icons/fi";
-import { CgSpinner } from "react-icons/cg";
+import { CgClose, CgSpinner } from "react-icons/cg";
 import toast from "react-hot-toast";
 import { FaUser } from "react-icons/fa";
+import { formatTime } from "../utils/FormatTime";
 
 const Chat = () => {
   const { userId } = useParams();
@@ -61,6 +67,8 @@ const Chat = () => {
   const [selectedMedia, setselectedMedia] = useState(null);
   const [showReactionMenu, setShowReactionMenu] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
+  const modalRef = useRef(null);
+  const downloadButtonRef = useRef(null);
 
   //  message reaction picker
   const handleReaction = (id) => {
@@ -81,12 +89,11 @@ const Chat = () => {
   };
 
   const handleClickOutside = (event) => {
-    const modalImage = document.getElementById("modal-media");
-    const download = document.getElementById("modal-background");
     if (
-      modalImage &&
-      !modalImage.contains(event.target) &&
-      event.target === download
+      modalRef.current &&
+      modalRef.current.contains(event.target) &&
+      downloadButtonRef.current &&
+      !downloadButtonRef.current.contains(event.target)
     ) {
       handleCloseModal();
     }
@@ -100,7 +107,21 @@ const Chat = () => {
 
   const handleCloseModal = () => {
     setselectedMedia(null);
+    setSelectedMessageId(null);
   };
+
+  // Add event listeners for Escape key and clicks outside the modal
+  useEffect(() => {
+    document.addEventListener("keydown", handleEscapeKey);
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // Clean up event listeners on component unmount
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+    // eslint-disable-next-line
+  }, []);
 
   const handleDownload = async (event) => {
     event.stopPropagation();
@@ -130,6 +151,8 @@ const Chat = () => {
       handleCloseModal();
       toast.dismiss();
       toast.success("Media downloaded");
+      setSelectedMessageId(null);
+      setselectedMedia(null);
     } catch (error) {
       console.error("Error downloading the image:", error.message);
       if (error.code === "resource-exhausted") {
@@ -284,17 +307,6 @@ const Chat = () => {
   }, [userId]);
 
   useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscapeKey);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
-    // eslint-disable-next-line
-  }, []);
-
-  useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
 
@@ -414,48 +426,98 @@ const Chat = () => {
                           )}
                           {message.fileURLs && (
                             <div
-                              className={`flex flex-wrap w-fit ${
+                              className={`${
+                                message.fileURLs.length > 3
+                                  ? "grid grid-cols-2"
+                                  : "flex flex-wrap"
+                              } w-fit ${
                                 message.senderId === currentUser
                                   ? "justify-end"
                                   : "justify-start"
                               }`}
                             >
                               {message.fileURLs &&
-                                message.fileURLs.map((fileURL, index) => (
-                                  <div key={index} className="m-1">
-                                    {fileURL?.includes(".mp4") ? (
-                                      <div>
-                                        {fileURL?.length > 0 ? (
-                                          <video
-                                            onClick={() => {
+                                message.fileURLs
+                                  .slice(0, 4)
+                                  .map((fileURL, index) => (
+                                    <div
+                                      key={index}
+                                      className={`m-1 ${
+                                        index === 3 &&
+                                        message.fileURLs.length > 4
+                                          ? "relative"
+                                          : ""
+                                      }`}
+                                    >
+                                      {fileURL?.includes(".mp4") ? (
+                                        <div>
+                                          {fileURL?.length > 0 ? (
+                                            <video
+                                              onClick={() => {
+                                                if (
+                                                  message.fileURLs.length < 5
+                                                ) {
+                                                  setselectedMedia(fileURL);
+                                                  setSelectedMessageId(
+                                                    message.id
+                                                  );
+                                                } else {
+                                                  setSelectedMessageId(
+                                                    message.id
+                                                  );
+                                                }
+                                              }}
+                                              onEnded={handleEnded}
+                                              ref={videoRef}
+                                              autoFocus={true}
+                                              className={`${
+                                                message.fileURLs.length > 3
+                                                  ? "h-32 w-32 object-cover"
+                                                  : "max-h-60 max-w-60 w-full object-contain"
+                                              } rounded-md`}
+                                            >
+                                              <source
+                                                src={fileURL}
+                                                type="video/mp4"
+                                              />
+                                            </video>
+                                          ) : (
+                                            "loading"
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <img
+                                          src={fileURL}
+                                          alt={`file-${index}`}
+                                          onClick={() => {
+                                            if (message.fileURLs.length < 5) {
                                               setselectedMedia(fileURL);
-                                            }}
-                                            onEnded={handleEnded}
-                                            ref={videoRef}
-                                            autoFocus={true}
-                                            className="max-h-60 max-w-60 self-end w-full object-contain rounded-md "
+                                              setSelectedMessageId(message.id);
+                                            } else {
+                                              setSelectedMessageId(message.id);
+                                            }
+                                          }}
+                                          className={`cursor-pointer ${
+                                            message.fileURLs.length > 3
+                                              ? "h-32 w-32 object-cover"
+                                              : "max-w-60 max-h-60 object-cover"
+                                          } rounded-md`}
+                                        />
+                                      )}
+                                      {index === 3 &&
+                                        message.fileURLs.length > 4 && (
+                                          <span
+                                            className={`bg-opacity-30 backdrop-blur-sm absolute inset-0 z-10 flex items-center justify-center text-5xl ${
+                                              theme === "dark"
+                                                ? "bg-zinc-950"
+                                                : "bg-zinc-200"
+                                            } rounded-md`}
                                           >
-                                            <source
-                                              src={fileURL}
-                                              type="video/mp4"
-                                            />
-                                          </video>
-                                        ) : (
-                                          "loading"
+                                            +{message.fileURLs.length - 4}
+                                          </span>
                                         )}
-                                      </div>
-                                    ) : (
-                                      <img
-                                        src={fileURL}
-                                        alt={`file-${index}`}
-                                        onClick={() => {
-                                          setselectedMedia(fileURL);
-                                        }}
-                                        className="cursor-pointer max-w-60 self-end max-h-60 rounded-md object-cover"
-                                      />
-                                    )}
-                                  </div>
-                                ))}
+                                    </div>
+                                  ))}
                             </div>
                           )}
                           <div
@@ -546,74 +608,131 @@ const Chat = () => {
                           theme === "dark" ? "text-gray-400" : "text-gray-400"
                         }`}
                       >
-                        {chat_formatTime(message?.timeStamp)}
+                        {formatTime(message?.timeStamp)}
                       </span>
                     </div>
                   </div>
                 </div>
               );
             })}
-
           {/* Modal */}
-          {selectedMedia && (
+          {selectedMessageId && (
             <div
-              onClick={handleClickOutside}
-              id="modal-background"
-              className={`z-20 fixed inset-0 bg-opacity-40 flex items-center justify-center self-center w-full mx-auto h-[90%] backdrop-blur-md rounded-md p-4`}
+              // onClick={handleClickOutside}
+              ref={modalRef}
+              className={`z-20 fixed inset-0 bg-opacity-40 flex flex-col items-center justify-center w-full h-[95%] backdrop-blur-md rounded-md p-4`}
             >
-              <div className="relative ">
-                <div className="flex self-start relative w-fit">
-                  {selectedMedia.includes(".mp4") ? (
-                    <div className="relative">
-                      <video
-                        onClick={() => {
-                          handlePlayPause();
-                        }}
-                        id="modal-media"
-                        onEnded={handleEnded}
-                        ref={videoRef}
-                        autoFocus={true}
-                        className="h-[540px] w-full object-contain rounded-md "
-                      >
-                        <source src={selectedMedia} type="video/mp4" />
-                      </video>
-                      {!isPlaying ? (
-                        <IoPlay
-                          onClick={() => {
-                            handlePlayPause();
-                          }}
-                          size={25}
-                          className="absolute top-[50%] left-[50%] cursor-pointer"
-                        />
-                      ) : (
-                        <IoPause
-                          onClick={() => {
-                            handlePlayPause();
-                          }}
-                          size={25}
-                          className="absolute top-[50%] left-[50%] cursor-pointer"
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    <img
-                      src={selectedMedia}
-                      alt="preview"
-                      id="modal-media"
-                      className="w-full h-fit max-h-[30rem] object-cover rounded-md"
-                    />
-                  )}
-                </div>
-                {selectedMedia.length > 0 && (
-                  <button
-                    id="download"
-                    onClick={handleDownload}
-                    className={`absolute bottom-1 right-1 ${
-                      theme === "dark" ? "bg-gray-800" : "bg-gray-200"
-                    }  p-2 rounded`}
+              <div
+                className="relative w-full h-full"
+                onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling up to #modal-background
+              >
+                {messages.find((message) => message.id === selectedMessageId)
+                  ?.fileURLs?.length < 5 ? (
+                  <div className="flex items-center justify-center w-full h-full">
+                    {selectedMedia && (
+                      <div className="relative">
+                        <button onClick={handleCloseModal} className="absolute -top-8 right-0">
+                          <IoCloseCircleOutline size={30} />
+                        </button>
+
+                        {selectedMedia.includes(".mp4") ? (
+                          <div className="relative">
+                            <video
+                              onClick={handlePlayPause}
+                              id="modal-media"
+                              onEnded={handleEnded}
+                              ref={videoRef}
+                              autoFocus={true}
+                              className="max-h-[70vh] max-w-[70vw] object-contain rounded-md"
+                            >
+                              <source src={selectedMedia} type="video/mp4" />
+                            </video>
+                            {!isPlaying ? (
+                              <IoPlay
+                                onClick={handlePlayPause}
+                                size={25}
+                                className="absolute top-[50%] left-[50%] cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                              />
+                            ) : (
+                              <IoPause
+                                onClick={handlePlayPause}
+                                size={25}
+                                className="absolute top-[50%] left-[50%] cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <img
+                            src={selectedMedia}
+                            alt="preview"
+                            id="modal-media"
+                            className="max-h-[90vh] max-w-[90vw] object-cover rounded-md"
+                          />
+                        )}
+                        {selectedMedia && (
+                          <button
+                            id="download"
+                            onClick={handleDownload}
+                            className={`absolute bottom-1 right-1 ${
+                              theme === "dark" ? "bg-gray-800" : "bg-gray-200"
+                            } p-2 rounded`}
+                          >
+                            <AiOutlineDownload size={25} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className="flex flex-col space-y-2 items-center justify-start w-full h-full max-w-[98%] px-2 overflow-y-auto hideScrollbar py-4
+                  relative"
                   >
-                    <AiOutlineDownload size={25} />
-                  </button>
+                    <button onClick={handleCloseModal} className="fixed top-3 right-3">
+                      <IoCloseCircleOutline size={30} />
+                    </button>
+                    {messages
+                      .find((message) => message.id === selectedMessageId)
+                      ?.fileURLs?.map((fileURL, index) => (
+                        <div key={index}>
+                          {fileURL.includes(".mp4") ? (
+                            <div className="relative w-80 h-full">
+                              <video
+                                onClick={() => handlePlayPause()}
+                                onEnded={handleEnded}
+                                ref={videoRef}
+                                autoFocus={true}
+                                className="h-full w-full object-cover cursor-pointer border-[1px] rounded-md border-zinc-600"
+                              >
+                                <source src={fileURL} type="video/mp4" />
+                              </video>
+                              {!isPlaying ? (
+                                <IoPlay
+                                  onClick={handlePlayPause}
+                                  size={25}
+                                  className="absolute top-[50%] left-[50%] cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                                />
+                              ) : (
+                                <IoPause
+                                  onClick={handlePlayPause}
+                                  size={25}
+                                  className="absolute top-[50%] left-[50%] cursor-pointer transform -translate-x-1/2 -translate-y-1/2"
+                                />
+                              )}
+                            </div>
+                          ) : (
+                            <div className="w-80 h-56 border-[1px] rounded-md border-zinc-600">
+                              <img
+                                src={fileURL}
+                                alt={`file-${index}`}
+                                onClick={() => setselectedMedia(fileURL)}
+                                className="cursor-pointer h-full w-full object-cover rounded-md"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
                 )}
               </div>
             </div>
@@ -624,133 +743,139 @@ const Chat = () => {
           <CgSpinner className="animate-spin " size={40} />
         </div>
       )}
-      <div
-        className={`z-20 absolute flex items-center bottom-0 py-3 ${
-          theme === "dark" ? "bg-black text-white" : "bg-white text-black"
-        } w-full px-2`}
-      >
+      {/* input */}
+      {!selectedMessageId && (
         <div
-          className={`relative flex items-center ${
-            theme === "dark"
-              ? "bg-zinc-900 text-white"
-              : "bg-gray-200 text-black"
-          } rounded-3xl space-x-2 w-full justify-center h-12`}
+          className={`z-20 absolute flex items-center bottom-0 py-3 ${
+            theme === "dark" ? "bg-black text-white" : "bg-white text-black"
+          } w-full px-2`}
         >
-          {files.length > 0 && (
+          <div
+            className={`relative flex items-center ${
+              theme === "dark"
+                ? "bg-zinc-900 text-white"
+                : "bg-gray-200 text-black"
+            } rounded-3xl space-x-2 w-full justify-center h-12`}
+          >
+            {files.length > 0 && (
+              <div
+                className={`flex space-x-3 absolute left-0 bottom-20 p-4 rounded-md w-fit max-h-[60vh] overflow-x-auto hideScrollbar max-w-full ${
+                  theme === "dark"
+                    ? "bg-gray-800 backdrop-blur-3xl bg-opacity-40"
+                    : "bg-gray-200"
+                }`}
+              >
+                {files?.map((file, index) => (
+                  <div key={index}>
+                    {file.type.startsWith("image/") && (
+                      <div className=" w-80 h-56 relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt="preview"
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                        <span
+                          onClick={() => removeFile(index)}
+                          className="cursor-pointer absolute top-1 right-1 p-2 bg-gray-800 text-white rounded-full"
+                        >
+                          <AiOutlineClose size={16} />
+                        </span>
+                      </div>
+                    )}
+                    {file.type.startsWith("video/") && (
+                      <div className="relative w-80 h-56">
+                        <video
+                          controls
+                          className="w-full h-full object-cover rounded-md"
+                        >
+                          <source
+                            src={URL.createObjectURL(file)}
+                            type={file.type}
+                          />
+                        </video>
+                        <button
+                          ref={downloadButtonRef}
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="absolute top-1 right-1 p-1 bg-gray-800 text-white rounded-full"
+                        >
+                          <AiOutlineClose size={20} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
             <div
-              className={`flex space-x-3 absolute left-0 bottom-20 p-4 rounded-md w-fit max-h-[60vh] overflow-x-auto hideScrollbar max-w-full ${
+              className={`${
+                messageEmojiPicker === false ? "hidden" : "flex"
+              } self-center absolute bottom-14 mx-auto w-5/6`}
+            >
+              <EmojiPicker
+                reactionsDefaultOpen={messageEmojiPicker}
+                emojiStyle="google"
+                onEmojiClick={(event) => {
+                  setMessageEmojiPicker(false);
+                  setMessageText(messageText + event.emoji);
+                }}
+              />
+            </div>
+            <textarea
+              ref={messageInputRef}
+              type="text"
+              placeholder="Message... ctrl + /"
+              value={messageText}
+              rows={1}
+              onChange={(e) => setMessageText(e.target.value)}
+              className={`w-[90%] h-full place-content-center resize-none hideScrollbar appearance-none bg-inherit rounded-3xl px-3 focus:outline-none`}
+            />
+            <MdEmojiEmotions
+              className="cursor-pointer"
+              onClick={() => {
+                setMessageEmojiPicker(!messageEmojiPicker);
+              }}
+              size={25}
+            />
+            <input
+              ref={fileRef}
+              hidden
+              type="file"
+              multiple
+              accept="image/*, video/*"
+              onChange={handleFileChange}
+            />
+            <TiAttachmentOutline
+              onClick={() => {
+                fileRef.current.click();
+              }}
+              className="cursor-pointer"
+              size={25}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={
+                messageText.trim("")?.length === 0 && files?.length === 0
+              }
+              className={`flex items-center py-2 rounded-md ${
                 theme === "dark"
-                  ? "bg-gray-800 backdrop-blur-3xl bg-opacity-40"
-                  : "bg-gray-200"
+                  ? "border-gray-400 text-white"
+                  : "border-gray-900 text-black"
+              } ${
+                messageText.trim("")?.length === 0 && files?.length === 0
+                  ? "cursor-not-allowed opacity-50"
+                  : "cursor-pointer opacity-100"
               }`}
             >
-              {files?.map((file, index) => (
-                <div key={index} className={` w-fi`}>
-                  {file.type.startsWith("image/") && (
-                    <div className=" w-80 h-56 relative">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt="preview"
-                        className="w-full h-full object-cover rounded-md"
-                      />
-                      <span
-                        onClick={() => removeFile(index)}
-                        className="cursor-pointer absolute top-1 right-1 p-2 bg-gray-800 text-white rounded-full"
-                      >
-                        <AiOutlineClose size={16} />
-                      </span>
-                    </div>
-                  )}
-                  {file.type.startsWith("video/") && (
-                    <div className="relative w-80 h-56">
-                      <video
-                        controls
-                        className="w-full h-full object-cover rounded-md"
-                      >
-                        <source
-                          src={URL.createObjectURL(file)}
-                          type={file.type}
-                        />
-                      </video>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="absolute top-1 right-1 p-1 bg-gray-800 text-white rounded-full"
-                      >
-                        <AiOutlineClose size={20} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          <div
-            className={`${
-              messageEmojiPicker === false ? "hidden" : "flex"
-            } self-center absolute bottom-14 mx-auto w-5/6`}
-          >
-            <EmojiPicker
-              reactionsDefaultOpen={messageEmojiPicker}
-              emojiStyle="google"
-              onEmojiClick={(event) => {
-                setMessageEmojiPicker(false);
-                setMessageText(messageText + event.emoji);
-              }}
-            />
+              {messageSent ? (
+                <IoSend className="mx-3" size={23} />
+              ) : (
+                <BiLoader className="animate-spin mx-3" size={23} />
+              )}
+            </button>
           </div>
-          <textarea
-            ref={messageInputRef}
-            type="text"
-            placeholder="Message... ctrl + /"
-            value={messageText}
-            rows={1}
-            onChange={(e) => setMessageText(e.target.value)}
-            className={`w-[90%] h-full place-content-center resize-none hideScrollbar appearance-none bg-inherit rounded-3xl px-3 focus:outline-none`}
-          />
-          <MdEmojiEmotions
-            className="cursor-pointer"
-            onClick={() => {
-              setMessageEmojiPicker(!messageEmojiPicker);
-            }}
-            size={25}
-          />
-          <input
-            ref={fileRef}
-            hidden
-            type="file"
-            multiple
-            accept="image/*, video/*"
-            onChange={handleFileChange}
-          />
-          <TiAttachmentOutline
-            onClick={() => {
-              fileRef.current.click();
-            }}
-            className="cursor-pointer"
-            size={25}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={messageText.trim("")?.length === 0 && files?.length === 0}
-            className={`flex items-center py-2 rounded-md ${
-              theme === "dark"
-                ? "border-gray-400 text-white"
-                : "border-gray-900 text-black"
-            } ${
-              messageText.trim("")?.length === 0 && files?.length === 0
-                ? "cursor-not-allowed opacity-50"
-                : "cursor-pointer opacity-100"
-            }`}
-          >
-            {messageSent ? (
-              <IoSend className="mx-3" size={23} />
-            ) : (
-              <BiLoader className="animate-spin mx-3" size={23} />
-            )}
-          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };
