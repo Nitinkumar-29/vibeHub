@@ -44,7 +44,7 @@ const Post = () => {
   const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-  const [pickerPosition, setPickerPosition] = useState("top"); // Default to bottom
+  const [pickerPosition, setPickerPosition] = useState("bottom"); // Default to bottom
   const commentInputRef = useRef(null);
 
   const handlePlayPause = () => {
@@ -83,7 +83,7 @@ const Post = () => {
       const distanceFromBottom = window.innerHeight - inputRect.bottom;
 
       // Determine picker position based on distance
-      if (distanceFromBottom < 550 && distanceFromTop > 550) {
+      if (distanceFromBottom < 400 && distanceFromTop > 400) {
         setPickerPosition("top");
       } else {
         setPickerPosition("bottom");
@@ -149,20 +149,22 @@ const Post = () => {
                     }}
                   ></div>
                 )}
-                {postData?.mentionedUsers?.map((user, index) => (
-                  <Link
-                    key={index}
-                    onClick={() => {}}
-                    to={
-                      currentUser && currentUser === user?.userId
-                        ? `/userProfile/yourPosts`
-                        : `/users/${user?.userId}/profile`
-                    }
-                    className="text-zinc-500 px-4"
-                  >
-                    @{user?.username}
-                  </Link>
-                ))}
+                <div className="flex flex-wrap px-4">
+                  {postData?.mentionedUsers?.map((user, index) => (
+                    <Link
+                      key={index}
+                      onClick={() => {}}
+                      to={
+                        currentUser && currentUser === user?.userId
+                          ? `/userProfile/yourPosts`
+                          : `/users/${user?.userId}/profile`
+                      }
+                      className="text-zinc-500 px-1"
+                    >
+                      @{user?.username}
+                    </Link>
+                  ))}
+                </div>
               </div>
               <Carousel
                 className="carousel px-4"
@@ -312,6 +314,8 @@ const Post = () => {
                         reactionsDefaultOpen={emojiPickerOpen}
                         allowExpandReactions={emojiPickerOpen}
                         emojiStyle="google"
+                        searchDisabled
+                        suggestedEmojisMode={false}
                         onEmojiClick={(event) => {
                           setEmojiPickerOpen(false);
                           setPostComment((prev) => ({
@@ -319,7 +323,7 @@ const Post = () => {
                             commentText: prev.commentText + event.emoji,
                           }));
                         }}
-                        height={550}
+                        height={300}
                       />
                     </div>
                   )}
@@ -351,8 +355,15 @@ const Post = () => {
               </div>
               <div className="flex flex-col w-full items-center">
                 {postComments?.length > 0 && (
-                  <span className="w-full text-lg px-4 mb-2">
-                    Comments&nbsp;
+                  <span
+                    className={`w-full text-lg px-4 mb-2 ${
+                      theme === "dark" ? "text-zinc-300" : "text-zinc-900"
+                    }`}
+                  >
+                    {postComments.length !== 0 && postComments.length}&nbsp;
+                    {postComments.length !== 0 && postComment.length === 1
+                      ? "Comment"
+                      : "Comments"}{" "}
                   </span>
                 )}
                 {postComments?.length > 0 ? (
@@ -362,7 +373,7 @@ const Post = () => {
                       return (
                         <div
                           key={comment.id}
-                          className={`flex flex-col items-center space-y-0 p-2 w-full border-b-[1px] border-zinc-600 last:border-b-0`}
+                          className={`flex flex-col items-center space-y-2 p-2 w-full border-b-[1px] border-zinc-600 last:border-b-0`}
                         >
                           <div className="flex w-full items-center justify-between px-2">
                             {
@@ -494,7 +505,13 @@ const Post = () => {
                       );
                     })
                 ) : (
-                  <span>0 comments? Be the first one to comment</span>
+                  <span
+                    className={`${
+                      theme === "dark" ? "text-zinc-500" : "text-zinc-900"
+                    }`}
+                  >
+                    0 comments? Be the first one to comment
+                  </span>
                 )}
               </div>
             </div>
