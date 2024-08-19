@@ -638,36 +638,34 @@ const Chat = () => {
         >
           {files.length > 0 && (
             <div
-              className={`grid ${
-                files.length === 1 ? "grid-cols-1" : "grid-cols-2"
-              } gap-2 absolute left-0 bottom-20 p-4 rounded-md w-fit max-h-[60vh] overflow-y-auto hideScrollbar ${
+              className={`flex space-x-3 absolute left-0 bottom-20 p-4 rounded-md w-fit max-h-[60vh] overflow-x-auto hideScrollbar max-w-full ${
                 theme === "dark"
                   ? "bg-gray-800 backdrop-blur-3xl bg-opacity-40"
                   : "bg-gray-200"
               }`}
             >
               {files?.map((file, index) => (
-                <div key={index} className={` w-fit`}>
+                <div key={index} className={` w-fi`}>
                   {file.type.startsWith("image/") && (
-                    <div className="flex self-start relative w-fit">
+                    <div className=" w-80 h-56 relative">
                       <img
                         src={URL.createObjectURL(file)}
                         alt="preview"
-                        className="w-40 h-40 object-cover rounded-md"
+                        className="w-full h-full object-cover rounded-md"
                       />
                       <span
                         onClick={() => removeFile(index)}
-                        className="cursor-pointer absolute -top-1 -right-1 p-2 bg-gray-800 text-white rounded-full"
+                        className="cursor-pointer absolute top-1 right-1 p-2 bg-gray-800 text-white rounded-full"
                       >
                         <AiOutlineClose size={16} />
                       </span>
                     </div>
                   )}
                   {file.type.startsWith("video/") && (
-                    <div className="relative w-[11.8rem] h-[9.1rem]">
+                    <div className="relative w-80 h-56">
                       <video
                         controls
-                        className="w-full h-full object-contain rounded-md"
+                        className="w-full h-full object-cover rounded-md"
                       >
                         <source
                           src={URL.createObjectURL(file)}
@@ -677,7 +675,7 @@ const Chat = () => {
                       <button
                         type="button"
                         onClick={() => removeFile(index)}
-                        className="absolute -top-2 right-2 p-1 bg-gray-800 text-white rounded-full"
+                        className="absolute top-1 right-1 p-1 bg-gray-800 text-white rounded-full"
                       >
                         <AiOutlineClose size={20} />
                       </button>

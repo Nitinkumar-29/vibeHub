@@ -43,7 +43,7 @@ const Main = () => {
   return (
     <div
       className={`relative w-full max-w-[430px] h-scree ${
-        theme === "dark" ? "bg-black text-zinc-100" : "bg-zinc-100 text-black"
+        theme === "dark" ? "bg-black text-zinc-300" : "bg-zinc-100 text-black"
       } backdrop-blur-3xl `}
     >
       <div

@@ -151,7 +151,7 @@ const Home = () => {
                   .map((post, index) => (
                     <div
                       key={index}
-                      className="w-full pb-3 border-b-[1px] border-zinc-700 last:border-b-0"
+                      className="w-full pb-3 border-b-[1px] border-zinc-500 last:border-b-0"
                     >
                       <div className="h-fit flex items-center rounded-sm space-x-4 w-full justify-start px-4 py-1">
                         {post?.userData?.img ? (

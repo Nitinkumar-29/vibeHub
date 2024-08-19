@@ -6,19 +6,16 @@ import { BsEmojiSmile, BsHeartFill } from "react-icons/bs";
 import { RxBookmarkFilled } from "react-icons/rx";
 import { BiCopy, BiLoader, BiPause, BiPlay } from "react-icons/bi";
 import { FiTrash2 } from "react-icons/fi";
-import PostContext from "../context/PostContext/PostContext";
 import { Link, useParams } from "react-router-dom";
 import { PiBookmarkSimpleThin } from "react-icons/pi";
+import { PostLink } from "../utils/PostedLinks";
 import { GoPaperAirplane } from "react-icons/go";
-import ThemeContext from "../context/Theme/ThemeContext";
 import { formatTime } from "../utils/FormatTime";
 import { CgSpinner } from "react-icons/cg";
-import { PostLink } from "../utils/PostedLinks";
-import { db } from "../firebase";
-import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
-import { AuthContext } from "../context/AuthContext";
-import { MdOutlineEmojiEmotions } from "react-icons/md";
 import EmojiPicker from "emoji-picker-react";
+import PostContext from "../context/PostContext/PostContext";
+import { AuthContext } from "../context/AuthContext";
+import ThemeContext from "../context/Theme/ThemeContext";
 
 const Post = () => {
   const {
@@ -27,7 +24,6 @@ const Post = () => {
     postComment,
     setPostComment,
     postComments,
-    setPostComments,
     isPublished,
     handleDeleteComment,
     handleLikeComment,
@@ -145,7 +141,7 @@ const Post = () => {
                   <div
                     className="whitespace-pre-wrap px-4 pb-2"
                     dangerouslySetInnerHTML={{
-                      __html: PostLink(postData?.postCaption),
+                      __html: PostLink(postData?.postCaption.trim()),
                     }}
                   ></div>
                 )}

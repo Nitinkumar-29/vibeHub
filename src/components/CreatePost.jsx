@@ -151,7 +151,7 @@ const CreatePost = () => {
 
     try {
       setIsPublished(false);
-      const postPublished = await addDoc(collection(db, "posts"), {
+      await addDoc(collection(db, "posts"), {
         postCaption: postCaption,
         fileURLs: fileURLs,
         userId: currentUser,
@@ -161,7 +161,6 @@ const CreatePost = () => {
         saves: [],
         likes: [],
       });
-      console.log(postPublished);
       setIsPublished(true);
       toast.dismiss();
       toast.success("Post published");

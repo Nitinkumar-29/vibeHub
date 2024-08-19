@@ -94,22 +94,24 @@ const UserSavedPosts = () => {
                       }}
                     ></p>
                   )}
-                  {savedPost?.mentionedUsers?.map((user, index) => (
-                    <Link
-                      key={index}
-                      onClick={() => {
-                        window.scrollTo(0, 0);
-                      }}
-                      to={
-                        currentUser === user?.userId
-                          ? `/userProfile/yourPosts`
-                          : `/users/${user?.userId}/profile`
-                      }
-                      className="text-zinc-500 px-4 pb-2"
-                    >
-                      @{user?.username}
-                    </Link>
-                  ))}
+                  <div className="flex flex-wrap px-3">
+                    {savedPost?.mentionedUsers?.map((user, index) => (
+                      <Link
+                        key={index}
+                        onClick={() => {
+                          window.scrollTo(0, 0);
+                        }}
+                        to={
+                          currentUser === user?.userId
+                            ? `/userProfile/yourPosts`
+                            : `/users/${user?.userId}/profile`
+                        }
+                        className="text-zinc-500 px-1 pb-2 leading-5"
+                      >
+                        @{user?.username}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
                 <Carousel
                   className="carousel px-4"
