@@ -67,6 +67,7 @@ const Chat = () => {
   const [selectedMedia, setselectedMedia] = useState(null);
   const [showReactionMenu, setShowReactionMenu] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
+  const [modalMessageId, setModalMessageId] = useState(null);
   const modalRef = useRef(null);
   const downloadButtonRef = useRef(null);
 
@@ -492,9 +493,9 @@ const Chat = () => {
                                           onClick={() => {
                                             if (message.fileURLs.length < 5) {
                                               setselectedMedia(fileURL);
-                                              setSelectedMessageId(message.id);
+                                              setModalMessageId(message.id);
                                             } else {
-                                              setSelectedMessageId(message.id);
+                                              setModalMessageId(message.id);
                                             }
                                           }}
                                           className={`cursor-pointer ${
@@ -504,7 +505,8 @@ const Chat = () => {
                                           } rounded-md`}
                                         />
                                       )}
-                                      {index === 3 &&
+                                      {message.fileURLs.length !== 0 &&
+                                        index === 3 &&
                                         message.fileURLs.length > 4 && (
                                           <span
                                             className={`bg-opacity-30 backdrop-blur-sm absolute inset-0 z-10 flex items-center justify-center text-5xl ${
@@ -616,7 +618,7 @@ const Chat = () => {
               );
             })}
           {/* Modal */}
-          {selectedMessageId && (
+          {modalMessageId && (
             <div
               // onClick={handleClickOutside}
               ref={modalRef}
@@ -626,12 +628,15 @@ const Chat = () => {
                 className="relative w-full h-full"
                 onClick={(e) => e.stopPropagation()} // Prevent click events from bubbling up to #modal-background
               >
-                {messages.find((message) => message.id === selectedMessageId)
+                {messages.find((message) => message.id === modalMessageId)
                   ?.fileURLs?.length < 5 ? (
                   <div className="flex items-center justify-center w-full h-full">
                     {selectedMedia && (
                       <div className="relative">
-                        <button onClick={handleCloseModal} className="absolute -top-8 right-0">
+                        <button
+                          onClick={handleCloseModal}
+                          className="absolute -top-8 right-0"
+                        >
                           <IoCloseCircleOutline size={30} />
                         </button>
 
@@ -688,11 +693,14 @@ const Chat = () => {
                     className="flex flex-col space-y-2 items-center justify-start w-full h-full max-w-[98%] px-2 overflow-y-auto hideScrollbar py-4
                   relative"
                   >
-                    <button onClick={handleCloseModal} className="fixed top-3 right-3">
+                    <button
+                      onClick={handleCloseModal}
+                      className="fixed top-3 right-3"
+                    >
                       <IoCloseCircleOutline size={30} />
                     </button>
                     {messages
-                      .find((message) => message.id === selectedMessageId)
+                      .find((message) => message.id === modalMessageId)
                       ?.fileURLs?.map((fileURL, index) => (
                         <div key={index}>
                           {fileURL.includes(".mp4") ? (

@@ -65,6 +65,7 @@ export const ChatProvider = ({ children }) => {
         });
       }
       setAllChats(chats);
+      console.log(chats.length);
     } catch (error) {
       console.error("Error fetching chats:", error);
       if (error.code === "resource-exhausted") {
@@ -73,6 +74,49 @@ export const ChatProvider = ({ children }) => {
       }
     }
   };
+
+  // using snapshot method to update chats as soon as updates are made
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const chatsRef = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", currentUser),
+      where("messageRequest", "==", false)
+    );
+
+    const unsubscribeFetchAllChats = onSnapshot(
+      chatsRef,
+      async (chatsSnapshot) => {
+        const allChatsData = await Promise.all(
+          chatsSnapshot.docs.map(async (chatDoc) => {
+            // Renamed `doc` to `chatDoc`
+            const chatData = chatDoc.data();
+            const participantsData = await Promise.all(
+              chatData.participants.map(async (participantId) => {
+                const userRef = doc(db, "users", participantId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                  return { id: participantId, ...userSnap.data() };
+                }
+                return null;
+              })
+            );
+            return {
+              id: chatDoc.id, // Access the `id` using `chatDoc.id`
+              ...chatData,
+              participants: participantsData.filter(Boolean), // Filter out nulls
+            };
+          })
+        );
+        setAllChats(allChatsData);
+      }
+    );
+
+    return () => {
+      unsubscribeFetchAllChats(); // Correctly returning the unsubscribe function
+    };
+  }, [currentUser]);
 
   // fetch message Request Chats
   const fetchMessageRequestChats = async () => {
@@ -117,6 +161,66 @@ export const ChatProvider = ({ children }) => {
       }
     }
   };
+
+  // updating requests
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchMessageRequestChats = () => {
+      try {
+        // Reference to the chats collection with the necessary query
+        const chatsRef = collection(db, "chats");
+        const chatQuery = query(
+          chatsRef,
+          where("participants", "array-contains", currentUser),
+          where("messageRequest", "==", true) // Check if messageRequest is true
+        );
+
+        // Set up the snapshot listener to update state in real-time
+        const unsubscribe = onSnapshot(chatQuery, async (chatsSnap) => {
+          const chats = [];
+
+          for (const chatDoc of chatsSnap.docs) {
+            const chatData = chatDoc.data();
+            const participantsData = await Promise.all(
+              chatData.participants.map(async (participantId) => {
+                const userRef = doc(db, "users", participantId);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                  return { id: participantId, ...userSnap.data() };
+                }
+                return null;
+              })
+            );
+
+            chats.push({
+              id: chatDoc.id,
+              ...chatData,
+              participants: participantsData.filter(Boolean), // Filter out nulls
+            });
+          }
+
+          setMessageRequestChats(chats); // Update state with the fetched data
+        });
+
+        // Return the unsubscribe function to stop listening to updates when the component unmounts
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error fetching message request chats:", error);
+        if (error.code === "resource-exhausted") {
+          console.error("Quota exceeded. Please try again later.");
+          setError("Server down, Please try again later");
+        }
+      }
+    };
+
+    // Call the function to start the snapshot listener
+    const unsubscribe = fetchMessageRequestChats();
+
+    return () => {
+      if (unsubscribe) unsubscribe(); // Unsubscribe when the component unmounts
+    };
+  }, [currentUser]);
 
   // accept message request
   const acceptMessageRequest = async (chatId) => {
