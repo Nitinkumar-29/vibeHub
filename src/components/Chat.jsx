@@ -752,7 +752,7 @@ const Chat = () => {
         </div>
       )}
       {/* input */}
-      {!selectedMessageId && (
+      {!modalMessageId && (
         <div
           className={`z-20 absolute flex items-center bottom-0 py-3 ${
             theme === "dark" ? "bg-black text-white" : "bg-white text-black"
