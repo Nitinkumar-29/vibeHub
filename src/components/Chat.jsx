@@ -460,13 +460,9 @@ const Chat = () => {
                                                   message.fileURLs.length < 5
                                                 ) {
                                                   setselectedMedia(fileURL);
-                                                  setModalMessageId(
-                                                    message.id
-                                                  );
+                                                  setModalMessageId(message.id);
                                                 } else {
-                                                  setModalMessageId(
-                                                    message.id
-                                                  );
+                                                  setModalMessageId(message.id);
                                                 }
                                               }}
                                               onEnded={handleEnded}

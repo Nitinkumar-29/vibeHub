@@ -133,7 +133,7 @@ const Home = () => {
                 Vibehub
               </span>
             </Link>
-            <Link to={`user/${currentUser}/notifications`} className="relative">
+            <Link to={`notifications`} className="relative">
               <IoNotificationsSharp size={25} />
               {followRequestsData.length !== 0 && (
                 <span className="text-red-600 absolute -top-2 left-3 font-medium">

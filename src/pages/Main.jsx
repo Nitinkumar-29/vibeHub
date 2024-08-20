@@ -3,6 +3,7 @@ import { FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import {
   Link,
   Outlet,
+  redirect,
   useLocation,
   useNavigate,
   useParams,
@@ -34,12 +35,6 @@ const Main = () => {
     // eslint-disable-next-line
   }, [location.pathname === "/userProfile"]);
 
-  useEffect(() => {
-    if (!currentUser) {
-      navigate("/login");
-    }
-    // eslint-disable-next-line
-  }, []);
   return (
     <div
       className={`relative w-full max-w-[430px] h-scree ${

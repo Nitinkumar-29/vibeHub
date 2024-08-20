@@ -22,11 +22,12 @@ import {
   signInWithPopup,
   signInWithRedirect,
 } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const AuthContextProvider = ({ children }) => {
   let [followRequestsData, setFollowRequestsData] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const location = useLocation();
   const [loginCredentials, setLoginCredentials] = useState({
     email: "",
     password: "",
@@ -388,6 +389,16 @@ export const AuthContextProvider = ({ children }) => {
       console.error("Error updating followers:", error);
     }
   };
+
+  useEffect(() => {
+    const currentUser = localStorage.getItem("currentUser");
+    // If the user is not logged in, navigate to login
+    if (!currentUser) {
+      navigate("/login");
+    } else if (location?.pathname === "/login") {
+      navigate("/");
+    }
+  }, [navigate, location, currentUser]);
 
   return (
     <AuthContext.Provider

@@ -31,6 +31,7 @@ import ArchivedPosts from "./components/ArchivedPosts";
 import { Analytics } from "@vercel/analytics/react";
 
 function App() {
+  
   return (
     <>
       <Router>
@@ -71,7 +72,7 @@ function App() {
                       />
                     </Route>
                     <Route
-                      path="/user/:userId?/notifications"
+                      path="/notifications"
                       element={<Notifications />}
                     />
                     <Route
