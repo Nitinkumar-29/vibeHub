@@ -68,9 +68,14 @@ const Main = () => {
             theme === "dark" ? "bg-black" : "bg-zinc-100"
           } bg-opacity-50 backdrop-blur-3xl ${
             theme === "dark" ? "border-gray-900" : "border-zinc-400"
-          } border-t-[.5px]`}
+          } border-t-[.5px] text-zinc-400`}
         >
-          <Link className="flex flex-col items-center" to="/">
+          <Link
+            className={`flex flex-col items-center ${
+              location.pathname === "/" ? "text-zinc-100" : ""
+            }`}
+            to="/"
+          >
             <FaHome
               onClick={() => {
                 if (location.pathname === "/") {
@@ -81,6 +86,9 @@ const Main = () => {
             />
           </Link>
           <Link
+            className={`flex flex-col items-center ${
+              location.pathname === "/explore" ? "text-zinc-100" : ""
+            }`}
             to="/explore"
             onClick={() => {
               window.scrollTo(0, 0);
@@ -89,6 +97,9 @@ const Main = () => {
             <MdOutlineExplore size={28} />
           </Link>
           <Link
+            className={`flex flex-col items-center ${
+              location.pathname === "/createPost" ? "text-zinc-100" : ""
+            }`}
             to="/createPost"
             onClick={() => {
               window.scrollTo(0, 0);
@@ -97,7 +108,9 @@ const Main = () => {
             <FaPlusCircle size={25} />
           </Link>
           <Link
-            className="relative"
+            className={`relative flex flex-col items-center ${
+              location.pathname.startsWith("/user") ? "text-zinc-100" : ""
+            }`}
             to={`/user/${currentUser}/chats`}
             onClick={() => {
               window.scrollTo(0, 0);
@@ -111,6 +124,11 @@ const Main = () => {
             )}
           </Link>
           <Link
+            className={`flex flex-col items-center ${
+              location.pathname === "/userProfile/yourPosts"
+                ? "text-zinc-100"
+                : ""
+            }`}
             to="/userProfile/yourPosts"
             onClick={() => {
               window.scrollTo(0, 0);

@@ -446,9 +446,6 @@ export const ChatProvider = ({ children }) => {
       });
 
       setMessageSent(true);
-      toast.success("Message sent!", {
-        position: "top-right",
-      });
       setFiles([]);
       // Clear the message input after sending
       setMessageText("");

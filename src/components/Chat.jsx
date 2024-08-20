@@ -108,7 +108,7 @@ const Chat = () => {
 
   const handleCloseModal = () => {
     setselectedMedia(null);
-    setSelectedMessageId(null);
+    setModalMessageId(null);
   };
 
   // Add event listeners for Escape key and clicks outside the modal
@@ -361,7 +361,8 @@ const Chat = () => {
         >
           {messages
             ?.sort((a, b) => a?.timeStamp - b?.timeStamp)
-            ?.map((message) => {
+            ?.map((message, index) => {
+              const isLastMessage = (index = messages.length - 1);
               return (
                 <div
                   className={`group flex items-center space-y-1 w-fit max-w-[80%] h-fit mx-2 mt-2 ${
@@ -459,11 +460,11 @@ const Chat = () => {
                                                   message.fileURLs.length < 5
                                                 ) {
                                                   setselectedMedia(fileURL);
-                                                  setSelectedMessageId(
+                                                  setModalMessageId(
                                                     message.id
                                                   );
                                                 } else {
-                                                  setSelectedMessageId(
+                                                  setModalMessageId(
                                                     message.id
                                                   );
                                                 }
@@ -594,25 +595,27 @@ const Chat = () => {
                         )}
                     </div>
 
-                    <div
-                      className={`flex flex-col space-y-1 ${
-                        currentUser === message.senderId
-                          ? "self-end"
-                          : "self-start"
-                      }`}
-                    >
-                      <span
-                        className={` ${
+                    {isLastMessage && (
+                      <div
+                        className={`flex-col space-y-1 ${
                           currentUser === message.senderId
                             ? "self-end"
                             : "self-start"
-                        } text-xs ${
-                          theme === "dark" ? "text-gray-400" : "text-gray-400"
                         }`}
                       >
-                        {formatTime(message?.timeStamp)}
-                      </span>
-                    </div>
+                        <span
+                          className={` ${
+                            currentUser === message.senderId
+                              ? "self-end"
+                              : "self-start"
+                          } text-xs ${
+                            theme === "dark" ? "text-gray-400" : "text-gray-400"
+                          }`}
+                        >
+                          {formatTime(message?.timeStamp)}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
