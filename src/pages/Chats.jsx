@@ -630,7 +630,7 @@ const Chats = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col space-y-2 w-full mt-2 border-t-[1px] border-zinc-900 px-2">
-                    {allChats && allChats.length > 0 ? (
+                    {allChats && allChats.length > 0 && !null ? (
                       allChats
                         ?.filter(
                           (chat) =>
@@ -850,7 +850,11 @@ const Chats = () => {
                         })
                     ) : (
                       <div className="flex flex-col h-full w-full items-center justify-center mt-20">
-                        <CgSpinner size={45} className="animate-spin" />
+                        {allChats.length > 0 && !null ? (
+                          <CgSpinner size={45} className="animate-spin" />
+                        ) : (
+                          <span className="text-zinc-600">0 Chats</span>
+                        )}
                       </div>
                     )}
                   </div>
