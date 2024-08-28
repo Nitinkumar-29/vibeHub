@@ -636,7 +636,7 @@ const OtherUsersProfile = () => {
                               >
                                 <div key={post.id}>
                                   {post.fileURLs[0].includes(".mp4") ? (
-                                    <video className="h-40 w-40 object-cover rounded-sm">
+                                    <video className="h-40 w-40 lg:h-52 lg:w-full object-cover rounded-sm">
                                       <source
                                         src={post.fileURLs[0]}
                                         type="video/mp4"
@@ -646,7 +646,7 @@ const OtherUsersProfile = () => {
                                     <img
                                       src={post.fileURLs[0]}
                                       alt=""
-                                      className="h-40 w-40 object-cover rounded-sm"
+                                      className="h-40 w-40 lg:h-52 lg:w-full object-cover rounded-sm"
                                     />
                                   )}
                                 </div>

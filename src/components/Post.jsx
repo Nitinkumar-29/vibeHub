@@ -92,7 +92,7 @@ const Post = () => {
   }, [emojiPickerOpen]);
 
   return (
-    <div className="flex flex-col items-center pb-14 w-full h-full max-w-[447px]">
+    <div className="flex flex-col items-center pb-14 w-full h-full">
       {postData ? (
         <div className="flex flex-col items-center py-2 w-full">
           {postData?.userId && (

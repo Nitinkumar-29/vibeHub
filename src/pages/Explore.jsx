@@ -78,7 +78,7 @@ const Explore = () => {
             ref={componentRef}
             className={`${
               theme === "dark" ? "bg-zinc-900" : "bg-zinc-200"
-            } flex justify-between items-center w-[95%] rounded-md max-w-[430px] my-4 p-2 mx-2`}
+            } flex justify-between items-center w-[95%] rounded-md my-4 p-2 mx-2 md:mx-auto`}
           >
             <input
               onClickCapture={() => {}}
@@ -107,13 +107,15 @@ const Explore = () => {
           {query.trim(" ").length > 0 && (
             <div className="flex flex-col px-4 space-y-3">
               {query.trim().length > 0 &&
-                allUsers.filter((user) =>
-                  keys?.some((key) =>
-                    user[key]
-                      ?.toLowerCase()
-                      ?.includes(query.trim().toLowerCase())
-                  )
-                ).length > 0 ? <span>Users</span>:<span>No user found with search query "{query}"</span>}
+              allUsers.filter((user) =>
+                keys?.some((key) =>
+                  user[key]?.toLowerCase()?.includes(query.trim().toLowerCase())
+                )
+              ).length > 0 ? (
+                <span>Users</span>
+              ) : (
+                <span>No user found with search query "{query}"</span>
+              )}
               {query.length > 0 &&
                 allUsers
                   ?.filter((user) =>
@@ -181,14 +183,14 @@ const Explore = () => {
                       {post?.fileURLs && post?.fileURLs.length > 0 && (
                         <div key={post.id}>
                           {post?.fileURLs[0].includes(".mp4") ? (
-                            <video className="h-40 w-40 object-cover rounded-[1px]">
+                            <video className="h-40 w-40 md:w-full md:h-52 object-cover rounded-[1px]">
                               <source src={post.fileURLs[0]} type="video/mp4" />
                             </video>
                           ) : (
                             <img
                               src={post?.fileURLs[0] || "/images/logo.png"}
                               alt="post media"
-                              className={`h-36 w-40 object-cover rounded-sm transform duration-200 ${
+                              className={`h-40 w-40 md:h-52 md:w-full object-cover rounded-sm transform duration-200 ${
                                 post?.fileURLs[0] ? "opacity-100" : "opacity-0"
                               }`}
                             />

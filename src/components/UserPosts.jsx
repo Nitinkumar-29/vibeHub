@@ -81,7 +81,7 @@ const UserPosts = () => {
 
   return (
     <>
-      <div className="pb-5 space-y-3 w-full max-w-[430px]">
+      <div className="pb-5 space-y-3 w-full">
         {userPosts?.length > 0 ? (
           userPosts
             ?.filter((post) => !post.archived === true)

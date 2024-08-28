@@ -42,29 +42,25 @@ const SignUp = () => {
     }
   };
 
-  useEffect(() => {
-    const handleUploadFile = () => {
-      const name = new Date().getTime() + "_" + file.name;
-      const storageRef = ref(storage, name); // Create a reference with the desired file path
-      const uploadTask = uploadBytesResumable(storageRef, file);
+  const handleUploadFile = () => {
+    const name = new Date().getTime() + "_" + file.name;
+    const storageRef = ref(storage, name); // Create a reference with the desired file path
+    const uploadTask = uploadBytesResumable(storageRef, file);
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-        (error) => {
-          console.log(error);
-          // setError(error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setData((prev) => ({ ...prev, img: downloadURL }));
-          });
-        }
-      );
-    };
-    if (file) handleUploadFile();
-  }, [file]);
-
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
+      (error) => {
+        console.log(error);
+        // setError(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setData((prev) => ({ ...prev, img: downloadURL }));
+        });
+      }
+    );
+  };
   const onChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
@@ -84,14 +80,15 @@ const SignUp = () => {
       return;
     }
     try {
-      setLoading(true); 
+      setLoading(true);
       // Perform email verification
       const result = await EmailVerification(data.email);
 
       if (result.status === "invalid") {
         setError("Invalid email");
-        return
+        return;
       }
+      handleUploadFile();
       // Create user with email and password
       const response = await createUserWithEmailAndPassword(
         auth,
@@ -128,100 +125,129 @@ const SignUp = () => {
   return (
     <>
       <div
-        className={`flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${
-          theme === "dark" ? "bg-zinc-950 text-zinc-200" : "bg-white text-black"
-        } bg-inherit space-y-3`}
+        className={`flex items-center justify-center w-screen h-full ${
+          theme === "dark" ? "bg-black text-zinc-100" : "bg-white text-black"
+        }`}
       >
-        <h1 className="text-2xl font-medium my-6">Sign Up Now</h1>
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center space-y-4"
+        <div
+          className={`relative flex flex-col items-center justify-center min-h-screen w-screen max-w-[430px] ${
+            theme === "dark" ? "bg-black text-zinc-100" : "bg-white text-black"
+          } space-y-3`}
         >
-          <div className="flex justify-center w-72">
-            {!file ? (
-              <div>
-                <FaUserPlus onClick={handleImageOnChange} size={45} />
-                <input
-                  name="image"
-                  className="hidden"
-                  ref={imageRef}
-                  type="file"
-                  onChange={(e) => setFile(e.target.files[0])} // Corrected this line
-                />
-              </div>
-            ) : (
-              <img className="h-16 w-16 rounded-full" src={data.img} alt="" />
-            )}
+          <div className="flex items-center font-semibold h-12 fixed my-4 space-x-2 top-10">
+            <span className="bg-gradient-to-tr from-red-500 via-blue-500 to-orange-500 text-3xl bg-clip-text text-transparent">
+              Welcome to VibeHub
+            </span>
+            <img
+              src={`/images/logo.png`}
+              className="h-8 w-8 rounded-md"
+              alt=""
+            />
           </div>
-          <input
-            className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
-            type="text"
-            name="name"
-            id="name"
-            required
-            placeholder="Name"
-            value={data.name}
-            onChange={onChange}
-          />
-          <input
-            className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
-            type="email"
-            name="email"
-            id="email"
-            required
-            placeholder="Email"
-            value={data.email}
-            onChange={onChange}
-          />
-          <div className="flex justify-between items-center border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit">
+
+          <h1 className="text-xl font-medium my-10 pb-10">Sign Up Now</h1>
+
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col justify-center space-y-4"
+          >
+            <div className="flex justify-center w-72">
+              {!file ? (
+                <div>
+                  <FaUserPlus onClick={handleImageOnChange} size={45} />
+                  <input
+                    name="image"
+                    className="hidden"
+                    ref={imageRef}
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                  />
+                </div>
+              ) : (
+                <img
+                  className="h-20 w-20 rounded-full object-cover"
+                  src={data.img}
+                  alt=""
+                />
+              )}
+            </div>
+
             <input
-              className="bg-inherit focus:placeholder:text-gray-300 focus:outline-none"
-              type={passwordType}
-              name="password"
-              id="password"
+              className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
+              type="text"
+              name="name"
+              id="name"
               required
-              placeholder="Password"
-              value={data.password}
+              placeholder="Name"
+              value={data.name}
               onChange={onChange}
             />
-            <span
-              className="mx-2 cursor-pointer"
-              onClick={handleTogglePasswordType}
-            >
-              {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
-            </span>
-          </div>
-          {loading === false && (
-            <span className="text-red-600 text-sm my-1">{error}</span>
-          )}
-          <button
-            disabled={
-              data.password.length === 0 ||
-              data.email.length === 0 ||
-              data.name.length === 0
-            }
-            className={` ${
-              data.password.length === 0 ||
-              data.email.length === 0 ||
-              data.name.length === 0
-                ? "cursor-not-allowed text-zinc-400"
-                : "cursor-pointer text-white"
-            } border-[1px] border-zinc-600 flex justify-center rounded-md w-72 p-2`}
-            type="submit"
-          >
-            {loading ? (
-              <AiOutlineLoading3Quarters className="animate-spin my-1" />
-            ) : (
-              "Submit"
+
+            <input
+              className="border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit focus:outline-none"
+              type="email"
+              name="email"
+              id="email"
+              required
+              placeholder="Email"
+              value={data.email}
+              onChange={onChange}
+            />
+
+            <div className="flex justify-between items-center border-[1px] border-zinc-600 rounded-md w-72 p-2 bg-inherit">
+              <input
+                className="bg-inherit focus:placeholder:text-gray-300 focus:outline-none"
+                type={passwordType}
+                name="password"
+                id="password"
+                required
+                placeholder="Password"
+                minLength={8}
+                value={data.password}
+                onChange={onChange}
+              />
+              <span
+                className="mx-2 cursor-pointer"
+                onClick={handleTogglePasswordType}
+              >
+                {passwordType === "password" ? <BsEye /> : <BsEyeSlash />}
+              </span>
+            </div>
+
+            {loading === false && (
+              <span className="text-red-600 text-sm my-1">{error}</span>
             )}
-          </button>
-          <span>
-            Already Registered? &nbsp;
-            <Link className="text-blue-500 font-medium" to="/login">
-              Log In
-            </Link>
-          </span>
-        </form>
+
+            <button
+              disabled={
+                data.password.length === 0 ||
+                data.email.length === 0 ||
+                data.name.length === 0
+              }
+              className={`${
+                data.password.length === 0 ||
+                data.email.length === 0 ||
+                data.name.length === 0
+                  ? "cursor-not-allowed text-zinc-400"
+                  : "cursor-pointer text-white"
+              } border-[1px] border-zinc-600 flex justify-center rounded-md w-72 p-2`}
+              type="submit"
+            >
+              {loading ? (
+                <AiOutlineLoading3Quarters className="animate-spin my-1" />
+              ) : (
+                "Submit"
+              )}
+            </button>
+
+            <span>
+              Already Registered? &nbsp;
+              <Link className="text-blue-500 font-medium" to="/login">
+                Log In
+              </Link>
+            </span>
+          </form>
+        </div>
       </div>
     </>
   );

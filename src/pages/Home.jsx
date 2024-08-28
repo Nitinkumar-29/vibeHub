@@ -118,7 +118,7 @@ const Home = () => {
           <div
             className={`z-20 fixed top-0 ${
               theme === "dark" ? "bg-black" : "bg-zinc-100"
-            }  flex justify-between items-center bg-opacity-60 px-4 py-2 w-full max-w-[430px] backdrop-blur-3xl`}
+            }  flex xs:hidden justify-between items-center bg-opacity-60 px-4 py-2 w-full backdrop-blur-3xl`}
           >
             <Link className="flex space-x-3 items-center text-2xl" to="/">
               <img
@@ -142,7 +142,7 @@ const Home = () => {
               )}
             </Link>
           </div>
-          <div className="flex justify-center w-full h-full pt-16 bg-inherit">
+          <div className="flex justify-center w-full h-full pt-16 xs:pt-0 bg-inherit">
             <div className="flex flex-col w-full h-fit space-y-4">
               {homePagePosts.length > 0 ? (
                 homePagePosts

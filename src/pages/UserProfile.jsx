@@ -39,7 +39,7 @@ const UserProfile = () => {
 
   return (
     <div
-      className={`flex flex-col items-center space-y-6 h-full overflow-auto hideScrollbar w-full max-w-[430px]`}
+      className={`flex flex-col items-center space-y-6 h-full overflow-auto hideScrollbar w-full`}
     >
       <div
         className={`z-20 sticky top-0 right-0 flex items-center py-2 justify-between w-full px-4 bg-inherit ${

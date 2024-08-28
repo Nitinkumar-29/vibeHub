@@ -356,7 +356,7 @@ const Chat = () => {
       {!loadingMessages ? (
         <div
           ref={messageContainerRef}
-          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-fit max-h-[85vh] scroll-smooth pt-12 pb-10 mb-8" 
+          className={`relative flex flex-col space-y-2 w-full overflow-y-auto hideScrollbar h-full max-h-[85vh] scroll-smooth pt-12 pb-10 mb-8" 
           `}
         >
           {messages
@@ -619,9 +619,8 @@ const Chat = () => {
           {/* Modal */}
           {modalMessageId && (
             <div
-              // onClick={handleClickOutside}
               ref={modalRef}
-              className={`z-20 fixed inset-0 bg-opacity-40 flex flex-col items-center justify-center w-full h-[95%] backdrop-blur-md rounded-md p-4`}
+              className={`z-20 fixed inset-0 bg-opacity-40 flex flex-col items-center justify-center w-full  mx-auto h-[95%] lg:h-full backdrop-blur-md rounded-md p-4`}
             >
               <div
                 className="relative w-full h-full"
@@ -670,7 +669,7 @@ const Chat = () => {
                             src={selectedMedia}
                             alt="preview"
                             id="modal-media"
-                            className="max-h-[90vh] max-w-[90vw] object-cover rounded-md"
+                            className="max-h-[90vh] max-w-[90vw] lg:max-h-[60vh] md:w-fit md:h-fit object-cover rounded-md"
                           />
                         )}
                         {selectedMedia && (
@@ -689,8 +688,8 @@ const Chat = () => {
                   </div>
                 ) : (
                   <div
-                    className="flex flex-col space-y-2 items-center justify-start w-full h-full max-w-[98%] px-2 overflow-y-auto hideScrollbar py-4
-                  relative"
+                    className="flex flex-col space-y-2 items-center justify-start w-full h-full max-w-[98%] lg:max-w-[50%] px-2 overflow-y-auto hideScrollbar py-4
+                  relative mx-auto"
                   >
                     <button
                       onClick={handleCloseModal}
@@ -753,7 +752,8 @@ const Chat = () => {
       {/* input */}
       {!modalMessageId && (
         <div
-          className={`z-20 absolute flex items-center bottom-0 py-3 ${
+        // need to update z index
+          className={`z-10 absolute xs:static flex items-center bottom-0 py-3 ${
             theme === "dark" ? "bg-black text-white" : "bg-white text-black"
           } w-full px-2`}
         >

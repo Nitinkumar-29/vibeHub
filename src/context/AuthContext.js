@@ -398,7 +398,8 @@ export const AuthContextProvider = ({ children }) => {
     } else if (location?.pathname === "/login") {
       navigate("/");
     }
-  }, [navigate, location, currentUser]);
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <AuthContext.Provider

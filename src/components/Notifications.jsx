@@ -105,16 +105,16 @@ const Notifications = () => {
         </div>
         <div className="flex flex-col w-full items-start mt-4 px-2">
           {followRequestsData.length !== 0 && (
-            <span className="font-semibold my-2">Follow Requests</span>
+            <span className="font-semibold my-2 text-zinc-300">Follow Requests</span>
           )}
           {followRequestsData.length > 0 ? (
             followRequestsData.map((data) => {
               return (
                 <div
                   key={data.id}
-                  className={`mt-2 flex items-center justify-start space-x-2 w-full `}
+                  className={`mt-2 flex items-center justify-start space-x-2 w-full`}
                 >
-                  <div className="flex space-x-2 justify-center items-center w-full">
+                  <div className="flex space-x-2 justify-center items-center w-fit">
                     <img
                       src={data?.img}
                       alt=""
