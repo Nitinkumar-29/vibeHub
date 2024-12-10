@@ -3,7 +3,7 @@ import ChatContext from "../context/ChatContext/ChatContext";
 import { formatTime } from "../utils/FormatTime";
 import { Link, useNavigate } from "react-router-dom";
 import ThemeContext from "../context/Theme/ThemeContext";
-import { auth, db } from "../firebase";
+import { db } from "../firebase";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import {
@@ -32,6 +32,7 @@ const Chats = () => {
     fetchMessageRequestChats,
     acceptMessageRequest,
   } = useContext(ChatContext);
+  
   const [currentUserData, setCurrentUserData] = useState();
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext);
@@ -200,6 +201,7 @@ const Chats = () => {
     fetchMessageRequestChats();
     // eslint-disable-next-line
   }, [currentUser]);
+
   return (
     <>
       {!error ? (

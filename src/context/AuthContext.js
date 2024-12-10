@@ -26,6 +26,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export const AuthContextProvider = ({ children }) => {
   let [followRequestsData, setFollowRequestsData] = useState([]);
+  const navigate = useNavigate();
   const [allUsers, setAllUsers] = useState([]);
   const location = useLocation();
   const [loginCredentials, setLoginCredentials] = useState({
@@ -34,7 +35,6 @@ export const AuthContextProvider = ({ children }) => {
   });
   const [currentUserData, setCurrentUserData] = useState({});
   const currentUser = localStorage.getItem("currentUser");
-  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
