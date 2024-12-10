@@ -6,20 +6,15 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import toast from "react-hot-toast";
+import "../styles/overflow_scroll.css";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { db } from "../firebase";
 import ThemeContext from "../context/Theme/ThemeContext";
 import ChatContext from "../context/ChatContext/ChatContext";
 import { BiLoader } from "react-icons/bi";
-import "../styles/overflow_scroll.css";
-import {
-  IoCloseCircle,
-  IoCloseCircleOutline,
-  IoPause,
-  IoPlay,
-  IoSend,
-} from "react-icons/io5";
+import { IoCloseCircleOutline, IoPause, IoPlay, IoSend } from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
 import { TiAttachmentOutline } from "react-icons/ti";
 import {
@@ -30,8 +25,7 @@ import {
 import { AiOutlineClose, AiOutlineDownload } from "react-icons/ai";
 import { HighLightLinks } from "../utils/HighlightLinks";
 import { FiTrash } from "react-icons/fi";
-import { CgClose, CgSpinner } from "react-icons/cg";
-import toast from "react-hot-toast";
+import { CgSpinner } from "react-icons/cg";
 import { FaUser } from "react-icons/fa";
 import { formatTime } from "../utils/FormatTime";
 
@@ -61,7 +55,6 @@ const Chat = () => {
     deleteMessage,
     addReaction,
     removeReaction,
-    activeChatId,
   } = useContext(ChatContext);
   const messageInputRef = useRef(null);
   const [selectedMedia, setselectedMedia] = useState(null);
@@ -752,7 +745,7 @@ const Chat = () => {
       {/* input */}
       {!modalMessageId && (
         <div
-        // need to update z index
+          // need to update z index
           className={`z-10 absolute xs:static flex items-center bottom-0 py-3 ${
             theme === "dark" ? "bg-black text-white" : "bg-white text-black"
           } w-full px-2`}

@@ -26,9 +26,9 @@ const FollwersList = () => {
     const docSnapShot = docSnap.exists ? docSnap.data() : [];
 
     // follower list
-    const followers = docSnapShot.followers;
+    const followers = docSnapShot.followers || [];
     const followersData = await Promise.all(
-      followers.map(async (follower) => {
+      followers?.map(async (follower) => {
         const followerDoc = await getDoc(doc(db, "users", follower));
         const followerData = followerDoc.exists ? followerDoc.data() : [];
 

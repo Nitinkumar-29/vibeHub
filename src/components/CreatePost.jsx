@@ -366,7 +366,7 @@ const CreatePost = () => {
                           !mentionedUsers.some(
                             (mentionedUser) => mentionedUser.userId === user.id
                           ) &&
-                          (currentUserData?.following.includes(user.id) ||
+                          (currentUserData?.following?.includes(user.id) ||
                             user.accountType !== "private")
                       )
                       .map((user) => (

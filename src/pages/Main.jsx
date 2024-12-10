@@ -3,7 +3,6 @@ import { FaBell, FaHome, FaPlusCircle, FaUser } from "react-icons/fa";
 import {
   Link,
   Outlet,
-  redirect,
   useLocation,
   useNavigate,
   useParams,
@@ -21,7 +20,6 @@ const Main = () => {
   const { theme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const { userId } = useParams();
-  const currentUser = localStorage.getItem("currentUser");
   const { currentUserData } = useContext(AuthContext);
   const { messageRequestChats } = useContext(ChatContext);
 
