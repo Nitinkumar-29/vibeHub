@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Checkbox } from "antd";
 import {
   collection,
   deleteDoc,
@@ -126,6 +127,20 @@ const AccountSettings = () => {
     }
   }, [currentUser]);
 
+  const onEmailChange=async()=>{
+    const docRef = doc(db,"users",currentUser)
+    if(currentUserData.emailUpdates===true){
+      await updateDoc(docRef,{
+        emailUpdates:false
+      })
+    }else{
+      await updateDoc(docRef,{
+        emailUpdates:true
+      })
+    }
+    return currentUserData.emailUpdates
+  }
+
   // Fetch data on component mount and when currentUser changes
   useEffect(() => {
     if (currentUser) {
@@ -135,6 +150,10 @@ const AccountSettings = () => {
   }, [currentUser]);
   return (
     <div className="flex flex-col items-center w-full justify-between">
+      <div className="flex justify-self-start w-full px-2 gap-4">
+        <Checkbox onChange={onEmailChange}/>
+        <span>Receive activity updates on email</span>
+      </div>
       <div className="flex items-center w-full justify-between p-2">
         <div className="flex items-center space-x-1">
           <span>Privacy</span>
