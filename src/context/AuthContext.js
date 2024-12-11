@@ -23,6 +23,7 @@ import {
   signInWithRedirect,
 } from "firebase/auth";
 import { useLocation, useNavigate } from "react-router-dom";
+import { sendFollowRequestEmail } from "../utils/sendEmail";
 
 export const AuthContextProvider = ({ children }) => {
   let [followRequestsData, setFollowRequestsData] = useState([]);
@@ -365,6 +366,10 @@ export const AuthContextProvider = ({ children }) => {
                   followRequests: arrayUnion(currentUser),
                 }),
               ]);
+              if(targetUserSnapShot?.emailUpdates&&targetUserSnapShot.emailUpdates===true){
+                debugger
+                await sendFollowRequestEmail({to_email:targetUserSnapShot.email,to_name:targetUserSnapShot.name,from_name:currentUserData.name})
+              }
             } else {
               await Promise.all([
                 updateDoc(targetUserRef, {
