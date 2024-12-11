@@ -367,7 +367,6 @@ export const AuthContextProvider = ({ children }) => {
                 }),
               ]);
               if(targetUserSnapShot?.emailUpdates&&targetUserSnapShot.emailUpdates===true){
-                debugger
                 await sendFollowRequestEmail({to_email:targetUserSnapShot.email,to_name:targetUserSnapShot.name,from_name:currentUserData.name})
               }
             } else {
