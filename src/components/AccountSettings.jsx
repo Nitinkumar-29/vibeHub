@@ -138,7 +138,6 @@ const AccountSettings = () => {
         emailUpdates:true
       })
     }
-    return currentUserData.emailUpdates
   }
 
   // Fetch data on component mount and when currentUser changes
@@ -150,10 +149,10 @@ const AccountSettings = () => {
   }, [currentUser]);
   return (
     <div className="flex flex-col items-center w-full justify-between">
-      <div className="flex justify-self-start w-full px-2 gap-4">
-        <Checkbox onChange={onEmailChange}/>
+      {/* <div className="flex justify-self-start w-full px-2 gap-4">
+        <Checkbox onChange={onEmailChange} defaultChecked={currentUserData.emailUpdates}/>
         <span>Receive activity updates on email</span>
-      </div>
+      </div> */}
       <div className="flex items-center w-full justify-between p-2">
         <div className="flex items-center space-x-1">
           <span>Privacy</span>
