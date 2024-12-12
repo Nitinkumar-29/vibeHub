@@ -65,7 +65,6 @@ export const ChatProvider = ({ children }) => {
         });
       }
       setAllChats(chats);
-      console.log(chats.length);
     } catch (error) {
       console.error("Error fetching chats:", error);
       if (error.code === "resource-exhausted") {
