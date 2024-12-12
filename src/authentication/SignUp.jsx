@@ -100,6 +100,7 @@ const SignUp = () => {
         ...data,
         followers: data.followers || [],
         following: data.following || [],
+        emailUpdates:true,
         user_name: generateUser_name,
         timeStamp: serverTimestamp(),
         accountType: "private",
