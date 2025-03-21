@@ -214,6 +214,7 @@ const CreatePost = () => {
                   name="postCaption"
                   onChange={onChange}
                   required
+                  maxLength={500} // limits the number of characters in the post caption to 500
                   value={newPostData.postCaption || ""}
                 />
               </div>
@@ -297,13 +298,17 @@ const CreatePost = () => {
                   <button
                     type="button"
                     className={`p-1 rounded-md duration-200  ${
-                      files.length !== 0 || newPostData.postCaption.length > 0
+                      files.length !== 0 ||
+                      (newPostData.postCaption.length > 0 &&
+                        newPostData.postCaption.length <= 500)
                         ? "cursor-pointer"
                         : "opacity-50 cursor-not-allowed"
                     }`}
                     onClick={handlePublishPost}
                     disabled={
-                      files.length === 0 && newPostData.postCaption.length === 0
+                      (files.length !== 0 &&
+                        newPostData.postCaption.length === 0) ||
+                      newPostData.postCaption.length > 500
                     }
                   >
                     {isPublished === null && "Publish"}
